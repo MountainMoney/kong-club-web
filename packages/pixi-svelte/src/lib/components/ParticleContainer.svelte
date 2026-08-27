@@ -10,11 +10,12 @@
 </script>
 
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { propsSyncEffect } from '../utils.svelte';
 	import { getContextParent, setContextParticleParent } from '../context.svelte';
 
 	const props: Props = $props();
-	const parentContext = getContextParent();
+	const parentContext = getContext('@@pixi_parent') as ReturnType<typeof getContextParent>;
 	const particleContainer = new PIXI.ParticleContainer();
 
 	propsSyncEffect({ props, target: particleContainer, ignore: ['children'] });

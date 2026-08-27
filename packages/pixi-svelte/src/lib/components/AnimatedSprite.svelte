@@ -11,12 +11,13 @@
 </script>
 
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { propsSyncEffect } from '../utils.svelte';
 	import { getContextParent } from '../context.svelte';
 
 	const props: Props = $props();
 
-	const parentContext = getContextParent();
+	const parentContext = getContext('@@pixi_parent') as ReturnType<typeof getContextParent>;
 	const animatedSprite = new PIXI.AnimatedSprite(props.textures ?? []);
 
 	propsSyncEffect({ props, target: animatedSprite, ignore: ['play'] });

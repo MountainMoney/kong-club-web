@@ -9,13 +9,14 @@
 </script>
 
 <script lang="ts">
+	import { getContext } from 'svelte';
 	import { onMount } from 'svelte';
 
 	import { propsSyncEffect } from '../utils.svelte';
 	import { getContextParent } from '../context.svelte';
 
 	const props: Props = $props();
-	const parentContext = getContextParent();
+	const parentContext = getContext('@@pixi_parent') as ReturnType<typeof getContextParent>;
 	const bitmapText = new PIXI.BitmapText({ text: props.text, style: props.style });
 
 	propsSyncEffect({ props, target: bitmapText, ignore: ['onresize'] });
