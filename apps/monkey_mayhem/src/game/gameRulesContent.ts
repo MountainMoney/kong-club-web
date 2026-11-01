@@ -14,7 +14,7 @@ const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
 	base: { default: 'Base game', social: 'Base game' },
 	base_ante: { default: 'Extra Chance', social: 'Extra Chance' },
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
-	peak_spin: { default: 'SUMMIT Spin', social: 'SUMMIT Play' },
+	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
 	bonus_hear: { default: 'Hear No Evil', social: 'Hear No Evil' },
 	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },
@@ -114,12 +114,12 @@ Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`,
 
 const buildPeakSpinSection = (): GameRuleData =>
 	ruleSection(
-		'SUMMIT SPIN',
+		'TRIFECTA SPIN',
 		isSocialMode()
-			? `Toggle SUMMIT from the bonus menu (1000× play amount per play). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
+			? `Toggle TRIFECTA from the bonus menu (1000× play amount per play). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
 
 Gold coin prizes land on every lit tile when the bar fills all the way.`
-			: `Toggle SUMMIT from the bonus menu (1000× bet per spin). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
+			: `Toggle TRIFECTA from the bonus menu (1000× bet per spin). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
 
 Gold coin prizes land on every lit tile when the bar fills all the way.`,
 	);

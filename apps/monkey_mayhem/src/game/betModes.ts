@@ -51,8 +51,8 @@ export const FEATURE_SPIN_BET_MODE_KEY = 'feature_spin';
 export const PEAK_SPIN_BET_MODE_KEY = 'peak_spin';
 export const GAMBLE_BET_MODE_KEY = 'bonus_gamble';
 /** Player-facing name. Math / RGS key stays `peak_spin`. */
-export const SUMMIT_SPIN_LABEL = 'SUMMIT';
-export const SUMMIT_SPIN_TITLE = 'SUMMIT SPIN';
+export const SUMMIT_SPIN_LABEL = 'TRIFECTA';
+export const SUMMIT_SPIN_TITLE = 'TRIFECTA SPIN';
 
 /** Progress bar steps — keep in sync with math `progress_thresholds`. */
 export const PROGRESS_THRESHOLD_BASE = 5;

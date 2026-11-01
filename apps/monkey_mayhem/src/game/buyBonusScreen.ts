@@ -100,7 +100,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'peak_spin',
-		title: 'SUMMIT SPIN',
+		title: 'TRIFECTA SPIN',
 		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'summitSpin' },

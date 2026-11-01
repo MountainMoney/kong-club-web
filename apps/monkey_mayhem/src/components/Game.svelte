@@ -258,7 +258,7 @@
 		aria-hidden="true"
 	>
 		<span class="corner-credits-left">MONKEY MAYHEM</span>
-		<span class="corner-credits-right">SUMMIT STUDIOS</span>
+		<span class="corner-credits-right">TRIFECTA</span>
 	</div>
 {/if}
 </div>

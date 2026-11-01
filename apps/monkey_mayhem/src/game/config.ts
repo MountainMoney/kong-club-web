@@ -1,7 +1,7 @@
 import { buildClusterPaytable, SMALL_CLUSTER_TIERS } from './clusterPaytable';
 
 export default {
-	providerName: 'Summit Slots',
+	providerName: 'Trifecta',
 	gameName: 'Monkey Mayhem',
 	gameID: 'monkey-mayhem',
 	rtp: 0.9601,

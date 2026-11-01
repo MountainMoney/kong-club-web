@@ -203,9 +203,9 @@ const PAYTABLE_COPY = {
 	},
 	peakSpin: {
 		default:
-			'SUMMIT Spin (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
+			'TRIFECTA Spin (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
 		social:
-			'SUMMIT Play (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
+			'TRIFECTA Play (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
 	},
 	collectorPower: {
 		default:
@@ -227,7 +227,7 @@ const PAYTABLE_MODE_LABELS = {
 	base: 'Base game',
 	base_ante: 'Extra Chance',
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
-	peak_spin: { default: 'SUMMIT Spin', social: 'SUMMIT Play' },
+	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
 	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },

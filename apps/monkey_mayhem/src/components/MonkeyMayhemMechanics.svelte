@@ -336,7 +336,7 @@
 	};
 
 	const showPeakSpinArmed = (opts?: { instant?: boolean }) => {
-		modeLabel = 'SUMMIT SPIN';
+		modeLabel = 'TRIFECTA SPIN';
 		progress = {
 			value: 0,
 			threshold: PROGRESS_THRESHOLD_PEAK,
@@ -345,7 +345,7 @@
 	};
 
 	const drainPeakBarOnSpinClick = () => {
-		modeLabel = 'SUMMIT SPIN';
+		modeLabel = 'TRIFECTA SPIN';
 		fillSeq += 1;
 		filling = false;
 		summitDumpRed = false;
@@ -358,7 +358,7 @@
 	};
 
 	const playPeakBarTease = async (hit: boolean) => {
-		modeLabel = 'SUMMIT SPIN';
+		modeLabel = 'TRIFECTA SPIN';
 		summitDumpRed = false;
 		const threshold = PROGRESS_THRESHOLD_PEAK;
 		if (fillTween.current > 0.01) {
@@ -457,7 +457,7 @@
 				event.payload.mode === 'peak_spin' ||
 				isPeakSpinBetMode(stateBet.activeBetModeKey)
 			) {
-				modeLabel = 'SUMMIT SPIN';
+				modeLabel = 'TRIFECTA SPIN';
 			}
 
 			if (isFeatureSpinBetMode(stateBet.activeBetModeKey) && event.payload.value <= 0) {
@@ -471,7 +471,7 @@
 			}
 
 			if (isPeakSpinBetMode(stateBet.activeBetModeKey)) {
-				modeLabel = 'SUMMIT SPIN';
+				modeLabel = 'TRIFECTA SPIN';
 				return;
 			}
 
@@ -519,7 +519,7 @@
 		monkeyModeState: (event) => {
 			const state = event.payload.state;
 			if (state === 'feature_spin') modeLabel = 'FEATURE SPIN';
-			else if (state === 'peak_spin') modeLabel = 'SUMMIT SPIN';
+			else if (state === 'peak_spin') modeLabel = 'TRIFECTA SPIN';
 			else if (state.includes('madness')) showMadnessArmed();
 			else if (state.includes('hear')) {
 				madnessArmed = false;

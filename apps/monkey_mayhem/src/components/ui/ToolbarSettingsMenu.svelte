@@ -96,7 +96,7 @@
 	const netPositionRowIndex = $derived(complianceRowOffset + (showSessionTimerRow ? 1 : 0));
 	const bonusLabel = $derived(
 		props.bonusPeakSpinActive
-			? 'DISABLE SUMMIT SPIN'
+			? 'DISABLE TRIFECTA SPIN'
 			: props.bonusFeatureSpinActive
 				? 'DISABLE FEATURE SPIN'
 				: props.bonusAnteActive

@@ -340,7 +340,7 @@ export const previewForceFeatureSpinBook = () =>
 
 export const previewForcePeakSpinBook = () =>
 	runFxLabPreview(
-		'Force SUMMIT book',
+		'Force TRIFECTA book',
 		async () => {
 			const index = await findFirstBookWithEvent('peak_spin', 'boardActivation');
 			await forceBookAndSpin('peak_spin', index, 'peak_spin');

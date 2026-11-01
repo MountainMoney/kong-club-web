@@ -873,7 +873,7 @@
 						Feature book
 					</button>
 					<button type="button" disabled={busy} onclick={() => previewForcePeakSpinBook()}>
-						SUMMIT book
+						TRIFECTA book
 					</button>
 					<button type="button" disabled={busy} onclick={() => previewForceBonusSeeSpin()}>
 						See bonus
