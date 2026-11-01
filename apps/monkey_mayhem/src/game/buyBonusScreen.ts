@@ -79,6 +79,30 @@ export type BuyBonusCardDef = {
 	buttonColor: string;
 };
 
+/**
+ * Weighted standard deviation of payout, in base-bet multiples, from the
+ * 250k-sim publish LUTs (math-sdk stake_sim_report.json, std_payout_x).
+ * Bands: Low < 50, Medium < 200, High < 1000, Very High >= 1000.
+ */
+const MEASURED_PAYOUT_STD: Record<string, number> = {
+	base_ante: 37.23,
+	feature_spin: 135.0,
+	peak_spin: 1463.12,
+	bonus_see: 398.66,
+	bonus_hear: 546.97,
+	bonus_gamble: 4468.38,
+};
+
+export const volatilityLabelFromStd = (std: number): string => {
+	if (std < 50) return 'Volatility: Low';
+	if (std < 200) return 'Volatility: Medium';
+	if (std < 1000) return 'Volatility: High';
+	return 'Volatility: Very High';
+};
+
+const volatilityForMode = (mode: string): string =>
+	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode] ?? 0);
+
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
@@ -86,7 +110,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: `Double bonus chance for ${extraChanceCostLabel()} base bet (~1 in 200 spins).`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'extraChance' },
-		volatility: 'Volatility: High',
+		volatility: volatilityForMode(ANTE_BET_MODE_KEY),
 		buttonColor: '#D96411',
 	},
 	{
@@ -95,7 +119,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: `Each spin costs ${config.betModes.feature_spin.cost}× bet with the Progress Bar filled. Every spin lands a 5+ cluster, then the coin game after tumbles stop.`,
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'featureSpin' },
-		volatility: 'Volatility: Medium',
+		volatility: volatilityForMode('feature_spin'),
 		buttonColor: '#D96411',
 	},
 	{
@@ -104,7 +128,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'summitSpin' },
-		volatility: 'Volatility: Very High',
+		volatility: volatilityForMode('peak_spin'),
 		buttonColor: '#D96411',
 	},
 	{
@@ -113,7 +137,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: 'Buy the See No Evil bonus for 100× bet. 3 scatters. The board clears, then 10 free spins.',
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 3 },
-		volatility: 'Volatility: Medium',
+		volatility: volatilityForMode('bonus_see'),
 		buttonColor: '#6BA8F5',
 	},
 	{
@@ -122,7 +146,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: 'Buy the Hear No Evil bonus for 200× bet. 4 scatters. The board stays, then 10 free spins.',
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 4 },
-		volatility: 'Volatility: High',
+		volatility: volatilityForMode('bonus_hear'),
 		buttonColor: '#6BA8F5',
 	},
 	{
@@ -131,7 +155,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
-		volatility: 'Volatility: Very High',
+		volatility: volatilityForMode('bonus_gamble'),
 		buttonColor: '#50BE50',
 	},
 ];
