@@ -349,8 +349,7 @@ export function initMonkeyMayhemBetModes() {
 				title: `Gamble (${config.betModes.bonus_gamble.cost}×)`,
 				button: 'Activate',
 				parent: 'base',
-				description:
-					'Each spin costs 100× bet. 50% dead spin, 40% Hear No Evil, 10% Monkey Madness.',
+				description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% Hear No Evil, 10% Monkey Madness.`,
 			}),
 		]);
 		stateMeta.betModeMeta = meta;

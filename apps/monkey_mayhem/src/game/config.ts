@@ -14,8 +14,7 @@ export default {
 		peak_spin: { cost: 1000.0, feature: true, buyBonus: false, rtp: 0.9601, max_win: 25000.0 },
 		bonus_see: { cost: 100.0, feature: true, buyBonus: true, rtp: 0.9601, max_win: 25000.0 },
 		bonus_hear: { cost: 200.0, feature: true, buyBonus: true, rtp: 0.9601, max_win: 25000.0 },
-		/** Working placeholder until the RTP pass — not a locked price. */
-		bonus_gamble: { cost: 100.0, feature: true, buyBonus: false, rtp: 0.9601, max_win: 25000.0 },
+		bonus_gamble: { cost: 1567.0, feature: true, buyBonus: false, rtp: 0.9601, max_win: 25000.0 },
 	},
 	symbols: {
 		MW: { paytable: null, special_properties: ['wild'] },
