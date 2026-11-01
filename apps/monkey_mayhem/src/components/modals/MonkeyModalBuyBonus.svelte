@@ -8,7 +8,7 @@
 		BUY_BONUS_PREFETCH_MODES,
 	} from '../../game/stateMathBooksLoading.svelte';
 	import { prefetchMathBooksMode } from '../../game/localMathBooks';
-	import FootballBuyBonusScreen from './FootballBuyBonusScreen.svelte';
+	import MonkeyBuyBonusScreen from './MonkeyBuyBonusScreen.svelte';
 
 	onMount(() => {
 		if (!PUBLIC_LOCAL_DEV) return;
@@ -21,5 +21,5 @@
 </script>
 
 {#if stateModal.modal?.name === 'buyBonus'}
-	<FootballBuyBonusScreen onclose={() => (stateModal.modal = null)} />
+	<MonkeyBuyBonusScreen onclose={() => (stateModal.modal = null)} />
 {/if}

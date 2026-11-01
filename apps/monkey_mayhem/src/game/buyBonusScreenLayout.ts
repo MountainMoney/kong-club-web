@@ -173,7 +173,7 @@ export const buyBonusCardHeight = (
 	return inner * scale + (padTop + BUY_BONUS_CARD_PAD) * scale;
 };
 
-/** CSS variable bundle for FootballBuyBonusCard. */
+/** CSS variable bundle for MonkeyBuyBonusCard. */
 export const buyBonusCardStyleVars = (width: number, accent: string, opts?: BuyBonusCardSizeOpts) => {
 	if (opts?.portraitSheet) {
 		const m = portraitSheetMetrics();

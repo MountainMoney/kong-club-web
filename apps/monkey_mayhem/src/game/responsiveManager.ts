@@ -18,7 +18,7 @@
 
  * │   └── Mascot (desktop/landscape only — hidden on portrait mobile)
 
- * └── UI MainContainer → FootballBottomBar
+ * └── UI MainContainer → MonkeyBottomBar
 
  * ```
 

@@ -7,9 +7,9 @@
 		buyBonusCardActionKind,
 		buyBonusPortraitListWidth,
 	} from '../../game/buyBonusScreen';
-	import FootballBuyBonusBetControl from './FootballBuyBonusBetControl.svelte';
-	import FootballBuyBonusCard from './FootballBuyBonusCard.svelte';
-	import FootballBuyBonusListCard from './FootballBuyBonusListCard.svelte';
+	import MonkeyBuyBonusBetControl from './MonkeyBuyBonusBetControl.svelte';
+	import MonkeyBuyBonusCard from './MonkeyBuyBonusCard.svelte';
+	import MonkeyBuyBonusListCard from './MonkeyBuyBonusListCard.svelte';
 
 	type Props = {
 		selectedCard: BuyBonusCardDef | undefined;
@@ -32,7 +32,7 @@
 	<div class="cards-area" class:loading={props.bonusLoading}>
 		{#if props.selectedCard}
 			<div class="confirm-stage">
-				<FootballBuyBonusCard
+				<MonkeyBuyBonusCard
 					card={props.selectedCard}
 					confirmed={true}
 					portraitSheet={true}
@@ -49,7 +49,7 @@
 				style={`gap: ${BUY_BONUS_LIST_ROW_GAP}px; max-width: ${listWidth}px;`}
 			>
 				{#each BUY_BONUS_CARDS as card (card.mode)}
-					<FootballBuyBonusListCard
+					<MonkeyBuyBonusListCard
 						{card}
 						actionLabel={buyBonusActionLabel(buyBonusCardActionKind(card.mode))}
 						disabled={props.isCardDisabled(card.mode)}
@@ -62,7 +62,7 @@
 
 	{#if !props.selectedCard}
 		<div class="bet-dock">
-			<FootballBuyBonusBetControl portrait={true} />
+			<MonkeyBuyBonusBetControl portrait={true} />
 		</div>
 	{/if}
 </div>

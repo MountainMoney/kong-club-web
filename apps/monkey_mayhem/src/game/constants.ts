@@ -338,9 +338,6 @@ export const SYMBOL_INFO_MAP = {
 	CG: createCoinSpine('jinbi'),
 	MW: createWildSprites(),
 	ST: createScatterSprites(),
-	SEE: createWildSprites(),
-	HEAR: createWildSprites(),
-	SPEAK: createWildSprites(),
 } as const;
 
 export const SCATTER_LAND_SOUND_MAP = {

@@ -33,7 +33,7 @@
 	});
 	const showWinFrame = $derived(
 		['win', 'postWinStatic'].includes(props.state) &&
-			!['ST', 'MW', 'SEE', 'HEAR', 'SPEAK'].includes(props.rawSymbol.name),
+			!['ST', 'MW'].includes(props.rawSymbol.name),
 	);
 
 	const frameW = SYMBOL_SIZE * 0.92;

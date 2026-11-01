@@ -6,12 +6,12 @@
 
 	import UiFadeContainer from 'components-ui-pixi/src/components/UiFadeContainer.svelte';
 
-	import FootballFiestaLayoutDesktop from './ui/FootballFiestaLayoutDesktop.svelte';
-	import FootballFiestaLayoutPortrait from './ui/FootballFiestaLayoutPortrait.svelte';
-	import FootballFiestaLayoutLandscape from './ui/FootballFiestaLayoutLandscape.svelte';
-	import FootballFiestaLayoutTablet from './ui/FootballFiestaLayoutTablet.svelte';
-	import FootballEnableSpaceHold from './FootballEnableSpaceHold.svelte';
-	import { getEffectiveFootballLayoutType } from '../game/responsiveProfile.svelte';
+	import MonkeyFiestaLayoutDesktop from './ui/MonkeyFiestaLayoutDesktop.svelte';
+	import MonkeyFiestaLayoutPortrait from './ui/MonkeyFiestaLayoutPortrait.svelte';
+	import MonkeyFiestaLayoutLandscape from './ui/MonkeyFiestaLayoutLandscape.svelte';
+	import MonkeyFiestaLayoutTablet from './ui/MonkeyFiestaLayoutTablet.svelte';
+	import MonkeyEnableSpaceHold from './MonkeyEnableSpaceHold.svelte';
+	import { getEffectiveMonkeyLayoutType } from '../game/responsiveProfile.svelte';
 
 	type Props = {
 		logo: Snippet;
@@ -22,15 +22,15 @@
 	const { stateLayoutDerived } = getContextLayout();
 
 	const LAYOUT_MAP = {
-		desktop: FootballFiestaLayoutDesktop,
-		portrait: FootballFiestaLayoutPortrait,
-		landscape: FootballFiestaLayoutLandscape,
-		tablet: FootballFiestaLayoutTablet,
+		desktop: MonkeyFiestaLayoutDesktop,
+		portrait: MonkeyFiestaLayoutPortrait,
+		landscape: MonkeyFiestaLayoutLandscape,
+		tablet: MonkeyFiestaLayoutTablet,
 	} as const;
 
 	const effectiveLayoutType = $derived.by(() => {
 		const { width, height } = stateLayoutDerived.canvasSizes();
-		return getEffectiveFootballLayoutType(width, height, stateLayoutDerived.layoutType());
+		return getEffectiveMonkeyLayoutType(width, height, stateLayoutDerived.layoutType());
 	});
 
 	const LayoutComponent = $derived(LAYOUT_MAP[effectiveLayoutType]);
@@ -39,7 +39,7 @@
 
 {#if showToolbar}
 	{#if stateUi.config.mode !== 'replay'}
-		<FootballEnableSpaceHold />
+		<MonkeyEnableSpaceHold />
 	{/if}
 
 	<UiFadeContainer>

@@ -144,7 +144,6 @@ export const resetFxLabPreview = () => {
 	eventEmitter.broadcast({ type: 'monkeyTilesClear' });
 	eventEmitter.broadcast({ type: 'monkeyMechanicsReset', instant: true });
 	eventEmitter.broadcast({ type: 'freeSpinCounterHide' });
-	eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 	interruptWinPresentation();
 	stopWinCoinLoop();
 	stopMaxWinMusic();

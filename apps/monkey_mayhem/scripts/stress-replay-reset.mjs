@@ -23,7 +23,6 @@ const REPLAY_RESET_EVENTS = [
 	'monkeyTilesClear',
 	'monkeyTileWinPulseClear',
 	'monkeyMechanicsReset',
-	'globalMultiplierHide',
 	'multiplierGridHide',
 	'multiplierGridClear',
 	'boardFrameGlowHide',
@@ -81,9 +80,6 @@ function createReplayResetModel() {
 				tiles.progress = { value: 0, threshold: 10 };
 				tiles.modeLabel = '';
 				break;
-			case 'globalMultiplierHide':
-				multiplier.show = false;
-				break;
 			case 'multiplierGridClear':
 				multiplier.grid = [];
 				break;
@@ -138,7 +134,6 @@ function createReplayResetModel() {
 		broadcast('monkeyTileWinPulseClear');
 		broadcast('monkeyMechanicsReset');
 
-		broadcast('globalMultiplierHide');
 		broadcast('multiplierGridHide');
 		broadcast('multiplierGridClear');
 		broadcast('boardFrameGlowHide');
@@ -171,8 +166,7 @@ function createReplayResetModel() {
 		ui.freeSpinCounterTotal = 10;
 		tiles.levels = [[3]];
 		tiles.progress = { value: 5, threshold: 5 };
-		multiplier.show = true;
-		multiplier.value = playCount * 10;
+		multiplier.grid = [[1]];
 		tumbleWin.show = true;
 		tumbleWin.amount = playCount * 100;
 		bet.winBookEventAmount = playCount * 50;
@@ -195,7 +189,6 @@ function createReplayResetModel() {
 		tiles.levels.length === 0 &&
 		tiles.progress.value === 0 &&
 		tiles.modeLabel === '' &&
-		!multiplier.show &&
 		multiplier.grid.length === 0 &&
 		!tumbleWin.show &&
 		tumbleWin.amount === 0 &&

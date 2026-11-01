@@ -130,7 +130,7 @@ export const LAYOUT_EDGE_MARGIN = 8;
 export const BAR_LABEL_SIZE = 19;
 export const BAR_VALUE_SIZE = 34;
 
-/** Fine-tune after FootballBottomBar applies (valueSize - labelSize) / 2 visual lift. */
+/** Fine-tune after MonkeyBottomBar applies (valueSize - labelSize) / 2 visual lift. */
 export const TOOLBAR_TEXT_STACK_OPTICAL_Y = -2;
 
 const boardCenterRef = () => ({

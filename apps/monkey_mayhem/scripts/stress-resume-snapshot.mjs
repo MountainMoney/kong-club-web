@@ -23,7 +23,6 @@ const SNAPSHOT_RESTORE_STEP_ORDER = [
 	'freeSpinCounter',
 	'tiles',
 	'totalWin',
-	'globalMultiplier',
 	'progressFill',
 	'presentationReady',
 ];
@@ -41,7 +40,6 @@ const buildSnapshotRestorePlan = (bookEvents) => {
 	if (findLastBookEvent(bookEvents, 'updateFreeSpin')) plan.push('freeSpinCounter');
 	if (findLastBookEvent(bookEvents, 'updateLevelUpTiles')) plan.push('tiles');
 	if (findLastBookEvent(bookEvents, 'setTotalWin')) plan.push('totalWin');
-	if (findLastBookEvent(bookEvents, 'updateGlobalMult')) plan.push('globalMultiplier');
 	if (findLastBookEvent(bookEvents, 'progressFill')) plan.push('progressFill');
 	plan.push('presentationReady');
 	return plan;
@@ -76,7 +74,6 @@ const simulateRestoreExecution = async (bookEvents) => {
 	if (findLastBookEvent(bookEvents, 'updateFreeSpin')) record('freeSpinCounter');
 	if (findLastBookEvent(bookEvents, 'updateLevelUpTiles')) record('tiles');
 	if (findLastBookEvent(bookEvents, 'setTotalWin')) record('totalWin');
-	if (findLastBookEvent(bookEvents, 'updateGlobalMult')) record('globalMultiplier');
 	if (findLastBookEvent(bookEvents, 'progressFill')) record('progressFill');
 	record('presentationReady');
 
@@ -148,16 +145,12 @@ console.log('stress-resume-snapshot: mid-bonus resume indices (bonus_hear book)'
 	}
 }
 
-console.log('stress-resume-snapshot: board before tiles and totalWin before globalMultiplier');
+console.log('stress-resume-snapshot: board before tiles');
 {
 	const events = loadBonusHearBook();
 	const { snapshotEvents } = convertToResumableBet(events, 20);
 	const plan = buildSnapshotRestorePlan(snapshotEvents);
 	assert(plan.indexOf('board') < plan.indexOf('tiles'), 'board must restore before tiles');
-	assert(
-		plan.indexOf('totalWin') < plan.indexOf('globalMultiplier'),
-		'totalWin must restore before globalMultiplier',
-	);
 	assert(
 		plan.indexOf('freeSpinCounter') < plan.indexOf('tiles'),
 		'freeSpinCounter must restore before tiles',

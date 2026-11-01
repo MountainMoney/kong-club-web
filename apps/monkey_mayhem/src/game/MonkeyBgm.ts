@@ -11,9 +11,9 @@ export const WIN_LEVEL_BGM_NAMES = [
 	'bgm_winlevel_max',
 ] as const satisfies readonly MusicName[];
 
-export const syncFootballBgmVolume = (_musicSliderPct?: number) => {};
+export const syncMonkeyBgmVolume = (_musicSliderPct?: number) => {};
 
-export const resumeFootballBgmAfterWinSting = (inFreegame: boolean) => {
+export const resumeMonkeyBgmAfterWinSting = (inFreegame: boolean) => {
 	stopMaxWinMusic();
 	eventEmitter.broadcast({
 		type: 'soundMusic',

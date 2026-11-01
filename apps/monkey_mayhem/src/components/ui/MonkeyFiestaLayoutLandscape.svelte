@@ -2,9 +2,10 @@
 	import type { Snippet } from 'svelte';
 
 	import { MainContainer } from 'components-layout';
+	import { Container } from 'pixi-svelte';
 	import { getContextLayout } from 'utils-layout';
 
-	import FootballBottomBar from './FootballBottomBar.svelte';
+	import MonkeyBottomBar from './MonkeyBottomBar.svelte';
 
 	type Props = {
 		logo: Snippet;
@@ -17,7 +18,11 @@
 </script>
 
 <MainContainer>
-	<FootballBottomBar
+	<Container x={main.width - 16} y={10}>
+		{@render props.logo()}
+	</Container>
+
+	<MonkeyBottomBar
 		layoutWidth={main.width}
 		layoutHeight={main.height}
 		replayMode={props.replayMode ?? false}

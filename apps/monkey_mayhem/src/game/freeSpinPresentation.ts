@@ -60,7 +60,6 @@ export const presentBuyBonusFreeSpinEntry = async ({
 	stateGame.gameType = 'freegame';
 	stateGame.sessionBonusTier = tier === 3 ? 3 : tier === 1 ? 1 : 2;
 	eventEmitter.broadcast({ type: 'boardFrameGlowShow' });
-	eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 	eventEmitter.broadcast({ type: 'freeSpinCounterShow' });
 	eventEmitter.broadcast({
 		type: 'freeSpinCounterUpdate',
@@ -93,7 +92,6 @@ export const presentBuyBonusFreeSpinTrigger = async ({
 
 	stateGame.gameType = 'basegame';
 	eventEmitter.broadcast({ type: 'boardFrameGlowHide' });
-	eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 	eventEmitter.broadcast({ type: 'freeSpinCounterHide' });
 	eventEmitter.broadcast({ type: 'boardShow' });
 	eventEmitter.broadcast({ type: 'soundScatterCounterClear' });
@@ -181,7 +179,6 @@ export const presentScatterFreeSpinIntro = async ({
 		eventEmitter.broadcast({ type: 'freeSpinIntroHide' });
 		stateGame.gameType = 'freegame';
 		eventEmitter.broadcast({ type: 'boardFrameGlowShow' });
-		eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 		eventEmitter.broadcast({ type: 'freeSpinCounterShow' });
 		eventEmitter.broadcast({
 			type: 'freeSpinCounterUpdate',

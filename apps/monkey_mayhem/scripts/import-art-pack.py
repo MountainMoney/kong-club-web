@@ -120,7 +120,7 @@ def main() -> None:
             im.save(MASCOT / "monkey.png", format="PNG", optimize=True)
             report.append(f"OK mascot/monkey.png from character.png {im.size[0]}x{im.size[1]}")
 
-    for keep in ("W.png", "EXPLODED_W.png", "SEE.png", "HEAR.png", "SPEAK.png", "MW.png"):
+    for keep in ("W.png", "EXPLODED_W.png", "MW.png"):
         p = SYM / keep
         report.append(f"{'KEEP' if p.exists() else 'MISSING'} monkeySymbols/{keep}")
 

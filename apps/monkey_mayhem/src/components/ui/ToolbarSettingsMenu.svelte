@@ -30,8 +30,8 @@
 		TOOLBAR_MENU_ROW_H,
 		TOOLBAR_MENU_W,
 	} from '../../game/toolbarMenuTheme';
-	import { syncFootballBgmVolume } from '../../game/footballBgm';
-	import { syncFootballSfxVolume } from '../../game/footballSoundPlayer';
+	import { syncMonkeyBgmVolume } from '../../game/MonkeyBgm';
+	import { syncMonkeySfxVolume } from '../../game/MonkeySoundPlayer';
 	import { eventEmitter } from '../../game/eventEmitter';
 	import { sound } from '../../game/sound';
 	import { shouldDisplayNetPosition, shouldDisplaySessionTimer } from '../../game/jurisdiction';
@@ -179,12 +179,12 @@
 	const setVolumeSfx = (value: number) => {
 		stateSound.volumeValueSoundEffect = value;
 		sound.applyVolumes();
-		syncFootballSfxVolume();
+		syncMonkeySfxVolume();
 	};
 
 	const setVolumeMusic = (value: number) => {
 		stateSound.volumeValueMusic = value;
-		syncFootballBgmVolume();
+		syncMonkeyBgmVolume();
 	};
 
 	const openInfo = () => {
@@ -394,7 +394,7 @@
 				scale={sx}
 				width={sliderW}
 				value={stateSound.volumeValueMusic}
-				onpreview={(v) => syncFootballBgmVolume(v)}
+				onpreview={(v) => syncMonkeyBgmVolume(v)}
 				onchange={setVolumeMusic}
 			/>
 		</Container>

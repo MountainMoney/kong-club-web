@@ -21,9 +21,6 @@ JOBS: dict[str, tuple[bool, int]] = {
     # JPEG placeholders copied from mascot — strip black until real art lands
     "monkeySymbols/ST.png": (True, 32),
     "monkeySymbols/MW.png": (True, 32),
-    "monkeySymbols/SEE.png": (True, 32),
-    "monkeySymbols/HEAR.png": (True, 32),
-    "monkeySymbols/SPEAK.png": (True, 32),
 }
 
 

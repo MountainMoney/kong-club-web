@@ -10,7 +10,7 @@ const staticDir = path.join(appRoot, 'static');
 const symbols = [
 	'LE', 'CO', 'OR', 'GR', 'BA', 'T', 'J', 'Q', 'K', 'A', 'CB', 'CS', 'CG',
 	'XM', 'XM_hollow', 'XM_green', 'XM_yellow', 'XM_red', 'CL', 'CL_empty',
-	'W', 'EXPLODED_W', 'ST', 'SEE', 'HEAR', 'SPEAK',
+	'W', 'EXPLODED_W', 'ST',
 ];
 
 const checks = [
@@ -25,8 +25,6 @@ const checks = [
 	'sprites/progressBar/progressBar.webp',
 	'spines/loader/loader.atlas',
 	'spines/loader/loader.webp',
-	'spines/globalMultiplier/multiframe.atlas',
-	'spines/globalMultiplier/multiframe.webp',
 	'spines/fsIntro/fs_screen.atlas',
 	'spines/fsIntro/fs_screen.json',
 	'spines/fsIntro/fs_screen_number.json',

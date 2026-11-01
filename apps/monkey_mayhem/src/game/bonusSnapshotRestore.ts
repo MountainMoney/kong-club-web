@@ -22,14 +22,13 @@ export const BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT = [
 	'progressFill',
 ] as const;
 
-/** Ordered restore phases — board before tiles; total win before global multiplier. */
+/** Ordered restore phases — board before tiles. */
 export const SNAPSHOT_RESTORE_STEP_ORDER = [
 	'bonusEntry',
 	'board',
 	'freeSpinCounter',
 	'tiles',
 	'totalWin',
-	'globalMultiplier',
 	'progressFill',
 	'presentationReady',
 ] as const;
@@ -111,8 +110,6 @@ export const restoreTotalWin = async (bookEvent: BookEventOfType<'setTotalWin'>)
 };
 
 export const restoreGlobalMultiplier = async (bookEvent: BookEventOfType<'updateGlobalMult'>) => {
-	// Never show global mult — MM bonuses have none.
-	await awaitRestoreEvent({ type: 'globalMultiplierHide' });
 	if (bookEvent.globalMult === 1) {
 		await awaitRestoreEvent({ type: 'tumbleWinAmountReset' });
 	}
@@ -131,7 +128,6 @@ export const buildSnapshotRestorePlan = (bookEvents: BookEvent[]): SnapshotResto
 	if (findLastBookEvent(bookEvents, 'updateFreeSpin')) plan.push('freeSpinCounter');
 	if (findLastBookEvent(bookEvents, 'updateLevelUpTiles')) plan.push('tiles');
 	if (findLastBookEvent(bookEvents, 'setTotalWin')) plan.push('totalWin');
-	if (findLastBookEvent(bookEvents, 'updateGlobalMult')) plan.push('globalMultiplier');
 	if (findLastBookEvent(bookEvents, 'progressFill')) plan.push('progressFill');
 
 	plan.push('presentationReady');

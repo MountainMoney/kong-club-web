@@ -586,8 +586,6 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		});
 	},
 	updateGlobalMult: async (bookEvent: BookEventOfType<'updateGlobalMult'>) => {
-		// MM has no global multiplier chrome (FF leftover). Keep tumble-win reset only.
-		eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 		if (bookEvent.globalMult === 1) {
 			eventEmitter.broadcast({ type: 'tumbleWinAmountReset' });
 		}
@@ -599,7 +597,6 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		await eventEmitter.broadcastAsync({ type: 'uiHide' });
 		// Keep freegame chrome + sessionBonusTier through Total Win art (Hear = tier 2).
 		eventEmitter.broadcast({ type: 'boardFrameGlowHide' });
-		eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 		eventEmitter.broadcast({ type: 'monkeyMechanicsReset' });
 		eventEmitter.broadcast({ type: 'freeSpinCounterHide' });
 		eventEmitter.broadcast({ type: 'tumbleWinAmountHide' });
@@ -748,7 +745,6 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	finalWin: async (bookEvent: BookEventOfType<'finalWin'>) => {
 		eventEmitter.broadcast({ type: 'multiplierGridClear' });
 		eventEmitter.broadcast({ type: 'multiplierGridHide' });
-		eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 		eventEmitter.broadcast({ type: 'tumbleWinAmountHide' });
 		if (stateGame.gameType === 'basegame') {
 			resetActiveBetModeAfterBuyFeature();

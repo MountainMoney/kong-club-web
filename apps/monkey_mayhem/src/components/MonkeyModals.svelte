@@ -4,7 +4,7 @@
 	import ModalError from 'components-ui-html/src/components/ModalError.svelte';
 	import ModalInsufficientBalance from './modals/ModalInsufficientBalance.svelte';
 	import ModalBetMenu from 'components-ui-html/src/components/ModalBetMenu.svelte';
-	import FootballModalBuyBonus from './modals/FootballModalBuyBonus.svelte';
+	import MonkeyModalBuyBonus from './modals/MonkeyModalBuyBonus.svelte';
 	import ModalAutoSpin from 'components-ui-html/src/components/ModalAutoSpin.svelte';
 	import ModalAutoSpinMessage from 'components-ui-html/src/components/ModalAutoSpinMessage.svelte';
 	import MonkeyModalPayTable from './modals/MonkeyModalPayTable.svelte';
@@ -20,7 +20,7 @@
 <ModalError />
 <ModalInsufficientBalance />
 <ModalBetMenu />
-<FootballModalBuyBonus />
+<MonkeyModalBuyBonus />
 <ModalAutoSpin />
 <ModalAutoSpinMessage />
 <MonkeyModalPayTable>

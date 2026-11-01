@@ -38,7 +38,6 @@
 	import Board from './Board.svelte';
 	import ClusterWinAmounts from './ClusterWinAmounts.svelte';
 	import TumbleBoard from './TumbleBoard.svelte';
-	import GlobalMultiplier from './GlobalMultiplier.svelte';
 	import PaylineWinHighlight from './PaylineWinHighlight.svelte';
 	import SpinWinOverlay from './SpinWinOverlay.svelte';
 	import ClickToSkip from './ClickToSkip.svelte';
@@ -204,7 +203,6 @@
 				<PlayfieldTitle />
 				<CoinFeatureDim />
 				<CoinFeatureReveal />
-				<GlobalMultiplier />
 				<ClusterWinAmounts />
 				<PaylineWinHighlight />
 			</Container>

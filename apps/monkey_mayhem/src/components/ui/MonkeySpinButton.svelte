@@ -3,7 +3,7 @@
 	import { Button, type ButtonProps } from 'components-pixi';
 	import { stateBet, stateBetDerived } from 'state-shared';
 
-	import FootballButtonBetProvider from './FootballButtonBetProvider.svelte';
+	import MonkeyButtonBetProvider from './MonkeyButtonBetProvider.svelte';
 	import { getContext } from 'components-ui-pixi/src/context';
 	import { SPIN_DIAMETER } from '../../game/layoutScene';
 	import { uiDisplaySize } from '../../game/uiAssetSizes';
@@ -47,7 +47,7 @@
 	const textRes = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 </script>
 
-<FootballButtonBetProvider>
+<MonkeyButtonBetProvider>
 	{#snippet children({ key, onpress })}
 		{@const isStopMode = key === 'stop_default' || key === 'stop_disabled'}
 		{@const disabled =
@@ -136,4 +136,4 @@
 		{/snippet}
 		</Button>
 	{/snippet}
-</FootballButtonBetProvider>
+</MonkeyButtonBetProvider>

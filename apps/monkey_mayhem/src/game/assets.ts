@@ -120,9 +120,6 @@ export default {
 	W: symbolSprite('W.png'),
 	EXPLODED_W: symbolSprite('EXPLODED_W.png'),
 	ST: symbolSprite('ST.png'),
-	SEE: symbolSprite('SEE.png'),
-	HEAR: symbolSprite('HEAR.png'),
-	SPEAK: symbolSprite('SPEAK.png'),
 	explosion: spineAsset('symbols3', 'explosion', 'symbols3.atlas'),
 	reelsFrame: sprites('sprites/reelsFrame/reels_frame.json'),
 	payFrame: sprite('sprites/payFrame/payFrame.png'),
@@ -144,7 +141,6 @@ export default {
 		src: '/assets/fonts/purpleFont/mm_purple.xml',
 	},
 	bigwin: spineAsset('bigwin', 'mm_bigwin', 'big_wins.atlas'),
-	globalMultiplier: spineAsset('globalMultiplier', 'multiframe', 'multiframe.atlas'),
 	fsIntro: spineAsset('fsIntro', 'fs_screen', 'fs_screen.atlas'),
 	fsOutroNumber: spineAsset('fsIntro', 'fs_total_number', 'fs_screen.atlas'),
 	progressBar: {

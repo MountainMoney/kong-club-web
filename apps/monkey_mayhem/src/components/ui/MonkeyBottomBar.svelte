@@ -8,14 +8,14 @@
 	import { stateBet, stateBetDerived, stateConfig, stateModal, stateUi, AUTO_SPINS_TEXT_OPTION_MAP } from 'state-shared';
 	import { bookEventAmountToWinCurrencyString, numberToBetCurrencyString, numberToCurrencyString } from 'utils-shared/amount';
 
-	import FootballSpinButton from './FootballSpinButton.svelte';
-	import FootballTurboButton from './FootballTurboButton.svelte';
+	import MonkeySpinButton from './MonkeySpinButton.svelte';
+	import MonkeyTurboButton from './MonkeyTurboButton.svelte';
 	import ToolbarHamburgerIcon from './ToolbarHamburgerIcon.svelte';
 	import ToolbarCloseIcon from './ToolbarCloseIcon.svelte';
 	import ToolbarSettingsMenu from './ToolbarSettingsMenu.svelte';
 	import BetChevronIcon from './BetChevronIcon.svelte';
 import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme';
-	import FootballAutoplayPopup from './FootballAutoplayPopup.svelte';
+	import MonkeyAutoplayPopup from './MonkeyAutoplayPopup.svelte';
 	import { AUTO_POPUP_ABOVE_BTN } from '../../game/autoplayPopupTheme';
 	import { uiDisplaySize } from '../../game/uiAssetSizes';
 	import { isGameplayInputAllowed } from '../../game/gameplayLock.svelte';
@@ -757,7 +757,7 @@ import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme'
 
 	<!-- Autoplay picker above spin/auto so number clicks hit cells, not the spin button -->
 	{#if autoPopupOpen && !inFreegame && !autoplayDisabledByJurisdiction}
-		<FootballAutoplayPopup
+		<MonkeyAutoplayPopup
 			scale={auxInMenu ? uiScale : sx}
 			x={autoPopupX}
 			y={autoPopupY}
@@ -768,7 +768,7 @@ import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme'
 	<!-- Spin button (hidden during bonus) -->
 	{#if !inFreegame}
 		<Container x={spinX} y={spinY} zIndex={4}>
-			<FootballSpinButton anchor={0.5} width={fsSpinW} height={fsSpinH} />
+			<MonkeySpinButton anchor={0.5} width={fsSpinW} height={fsSpinH} />
 		</Container>
 	{/if}
 
@@ -820,7 +820,7 @@ import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme'
 	<!-- Turbo — portrait: hamburger menu -->
 	{#if !auxInMenu && !spinSpeedDisabledByJurisdiction}
 		<Container x={turboX} y={turboY} zIndex={5}>
-			<FootballTurboButton anchor={0.5} width={turboW} height={turboH} disabled={turboDisabled} />
+			<MonkeyTurboButton anchor={0.5} width={turboW} height={turboH} disabled={turboDisabled} />
 		</Container>
 	{/if}
 

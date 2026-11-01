@@ -57,10 +57,10 @@
 	import { getPixiTextResolution, roundPix } from '../game/pixiTextCrisp';
 	import { eventEmitter } from '../game/eventEmitter';
 	import {
-		resumeFootballBgmAfterWinSting,
+		resumeMonkeyBgmAfterWinSting,
 		WIN_LEVEL_BGM_NAMES,
-	} from '../game/footballBgm';
-	import { stopWinTierStings } from '../game/footballSoundPlayer';
+	} from '../game/MonkeyBgm';
+	import { stopWinTierStings } from '../game/MonkeySoundPlayer';
 	import type { SoundEffectName } from '../game/sound';
 	import { stateGame } from '../game/stateGame.svelte';
 	import {
@@ -303,7 +303,7 @@
 		for (const name of WIN_LEVEL_BGM_NAMES) {
 			eventEmitter.broadcast({ type: 'soundStop', name });
 		}
-		resumeFootballBgmAfterWinSting(stateGame.gameType === 'freegame');
+		resumeMonkeyBgmAfterWinSting(stateGame.gameType === 'freegame');
 		void eventEmitter.broadcastAsync({ type: 'uiShow' });
 	};
 

@@ -43,7 +43,7 @@ export const syncGameLayoutProfile = (input: SyncLayoutProfileInput) => {
 };
 
 /** Single layout picker for UI + playfield — matches Stake SDK portrait/landscape routing. */
-export const getEffectiveFootballLayoutType = (
+export const getEffectiveMonkeyLayoutType = (
 	canvasWidth: number,
 	canvasHeight: number,
 	baseLayoutType: LayoutMode,

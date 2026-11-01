@@ -26,9 +26,6 @@
 	const SYMBOLS_LEFT = [
 		{ name: 'ST' },
 		{ name: 'MW' },
-		{ name: 'SEE' },
-		{ name: 'HEAR' },
-		{ name: 'SPEAK' },
 	];
 
 	const SYMBOLS_RIGHT = [

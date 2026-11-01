@@ -21,7 +21,7 @@
 
 	import { getContext } from '../game/context';
 	import { isFeatureSpinBetMode } from '../game/betModes';
-	import { WIN_LEVEL_BGM_NAMES } from '../game/footballBgm';
+	import { WIN_LEVEL_BGM_NAMES } from '../game/MonkeyBgm';
 	import {
 		playBaseGameMusic,
 		stopBaseGameMusic,

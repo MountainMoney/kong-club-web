@@ -2,7 +2,7 @@
 	import type { ButtonProps } from 'components-pixi';
 	import { stateModal } from 'state-shared';
 
-	import FootballThemedButton from './FootballThemedButton.svelte';
+	import MonkeyThemedButton from './MonkeyThemedButton.svelte';
 	import { getContext } from 'components-ui-pixi/src/context';
 
 	const props: Partial<Omit<ButtonProps, 'children'>> & { size?: number } = $props();
@@ -14,7 +14,7 @@
 	};
 </script>
 
-<FootballThemedButton
+<MonkeyThemedButton
 	{...props}
 	label="INFO"
 	accent="gold"

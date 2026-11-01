@@ -66,8 +66,8 @@
 		getSpinSpeedDisplayTier,
 		spinSpeedLabel,
 	} from '../../game/spinSpeed.svelte';
-	import { syncFootballBgmVolume } from '../../game/footballBgm';
-	import { syncFootballSfxVolume } from '../../game/footballSoundPlayer';
+	import { syncMonkeyBgmVolume } from '../../game/MonkeyBgm';
+	import { syncMonkeySfxVolume } from '../../game/MonkeySoundPlayer';
 	import ToolbarSettingsMenu from './summit/ToolbarSettingsMenu.svelte';
 
 	type Props = {
@@ -472,12 +472,12 @@
 
 	const setVolumeSfx = (value: number) => {
 		stateSound.volumeValueSoundEffect = value;
-		syncFootballSfxVolume();
+		syncMonkeySfxVolume();
 	};
 
 	const setVolumeMusic = (value: number) => {
 		stateSound.volumeValueMusic = value;
-		syncFootballBgmVolume();
+		syncMonkeyBgmVolume();
 	};
 
 	const handleGlobalPointerDown = (event: PointerEvent) => {

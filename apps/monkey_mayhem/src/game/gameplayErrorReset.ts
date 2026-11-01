@@ -71,7 +71,6 @@ const resetMonkeyMechanics = () => {
 };
 
 const resetMultiplierUi = () => {
-	eventEmitter.broadcast({ type: 'globalMultiplierHide' });
 	eventEmitter.broadcast({ type: 'multiplierGridHide' });
 	eventEmitter.broadcast({ type: 'multiplierGridClear' });
 	eventEmitter.broadcast({ type: 'boardFrameGlowHide' });

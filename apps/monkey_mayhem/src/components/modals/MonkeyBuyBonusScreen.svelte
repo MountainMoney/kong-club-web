@@ -39,8 +39,8 @@
 	} from '../../game/buyBonusScreen';
 	import { assetUrl } from '../../game/assetUrl';
 	import { buyBonusActionLabel, insufficientBalanceMessage, autoSpinBeforeBonusMessage } from '../../game/socialCopy';
-	import FootballBuyBonusBetControl from './FootballBuyBonusBetControl.svelte';
-	import FootballBuyBonusPortraitLayout from './FootballBuyBonusPortraitLayout.svelte';
+	import MonkeyBuyBonusBetControl from './MonkeyBuyBonusBetControl.svelte';
+	import MonkeyBuyBonusPortraitLayout from './MonkeyBuyBonusPortraitLayout.svelte';
 	import {
 		isAnyBuyBonusMathLoading,
 		isMathBooksLoading,
@@ -49,7 +49,7 @@
 	import { notifyFeatureSpinActivated } from '../../game/featureSpinPresentation.svelte';
 	import { ANTE_BET_MODE_KEY, FEATURE_SPIN_BET_MODE_KEY, activateToggleBetMode, type ActivateBetModeKey, type OneShotBuyModeKey } from '../../game/betModes';
 	import { isBuyFeatureDisabled } from '../../game/jurisdiction';
-	import FootballBuyBonusCard from './FootballBuyBonusCard.svelte';
+	import MonkeyBuyBonusCard from './MonkeyBuyBonusCard.svelte';
 
 	type Props = {
 		onclose: () => void;
@@ -268,7 +268,7 @@
 	{/if}
 
 	{#if isPortrait}
-		<FootballBuyBonusPortraitLayout
+		<MonkeyBuyBonusPortraitLayout
 			{selectedCard}
 			{bonusLoading}
 			{autoPlayActive}
@@ -284,13 +284,13 @@
 			<div class="content-stack" style={`gap: ${BUY_BONUS_BET_BLOCK_GAP}px;`}>
 				{#if !selectedCard}
 					<div class="hit">
-						<FootballBuyBonusBetControl />
+						<MonkeyBuyBonusBetControl />
 					</div>
 				{/if}
 
 				<div class="cards-stage" class:loading={bonusLoading}>
 					{#if selectedCard}
-						<FootballBuyBonusCard
+						<MonkeyBuyBonusCard
 							card={selectedCard}
 							confirmed={true}
 							actionLabel="OK"
@@ -304,7 +304,7 @@
 							style={`width: ${BUY_BONUS_GROUP_W}px; gap: ${BUY_BONUS_CARD_GAP}px; grid-template-columns: repeat(${BUY_BONUS_GRID_COLS}, ${BUY_BONUS_CARD_W}px);`}
 						>
 							{#each BUY_BONUS_CARDS as card (card.mode)}
-								<FootballBuyBonusCard
+								<MonkeyBuyBonusCard
 									{card}
 									confirmed={false}
 									actionLabel={buyBonusActionLabel(buyBonusCardActionKind(card.mode))}
