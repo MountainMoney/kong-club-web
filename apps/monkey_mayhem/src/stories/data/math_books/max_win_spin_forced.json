@@ -1,0 +1,1501 @@
+[
+  {
+    "label": "feature_spin-high-payout",
+    "book": {
+      "id": 22,
+      "payoutMultiplier": 43845,
+      "events": [
+        {
+          "index": 0,
+          "type": "reveal",
+          "board": [
+            [
+              {
+                "name": "A"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "Q"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "OR"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "CO"
+              },
+              {
+                "name": "GR"
+              },
+              {
+                "name": "GR"
+              },
+              {
+                "name": "GR"
+              },
+              {
+                "name": "GR"
+              },
+              {
+                "name": "GR"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "J"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "MW",
+                "wild": true
+              },
+              {
+                "name": "MW",
+                "wild": true
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              }
+            ],
+            [
+              {
+                "name": "BA"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              }
+            ]
+          ],
+          "paddingPositions": [
+            32,
+            29,
+            38,
+            27,
+            13,
+            1
+          ],
+          "gameType": "basegame",
+          "anticipation": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "index": 1,
+          "type": "updateLevelUpTiles",
+          "tileLevels": [
+            [
+              1,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ]
+          ],
+          "tileMultipliers": [
+            [
+              2,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ]
+          ],
+          "gameType": "basegame",
+          "mode": "feature_spin"
+        },
+        {
+          "index": 2,
+          "type": "updateLevelUpTiles",
+          "tileLevels": [
+            [
+              1,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ]
+          ],
+          "tileMultipliers": [
+            [
+              2,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              0
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ]
+          ],
+          "gameType": "basegame",
+          "mode": "feature_spin"
+        },
+        {
+          "index": 3,
+          "type": "winInfo",
+          "totalWin": 30,
+          "wins": [
+            {
+              "symbol": "K",
+              "clusterSize": 5,
+              "win": 5,
+              "positions": [
+                {
+                  "reel": 0,
+                  "row": 3
+                },
+                {
+                  "reel": 0,
+                  "row": 4
+                },
+                {
+                  "reel": 1,
+                  "row": 1
+                },
+                {
+                  "reel": 1,
+                  "row": 2
+                },
+                {
+                  "reel": 1,
+                  "row": 3
+                }
+              ],
+              "meta": {
+                "globalMult": 1,
+                "clusterMult": 1,
+                "monkeyMult": 1,
+                "winWithoutMult": 5,
+                "overlay": {
+                  "reel": 1,
+                  "row": 3
+                }
+              }
+            },
+            {
+              "symbol": "CO",
+              "clusterSize": 5,
+              "win": 10,
+              "positions": [
+                {
+                  "reel": 2,
+                  "row": 1
+                },
+                {
+                  "reel": 2,
+                  "row": 2
+                },
+                {
+                  "reel": 2,
+                  "row": 3
+                },
+                {
+                  "reel": 2,
+                  "row": 4
+                },
+                {
+                  "reel": 2,
+                  "row": 5
+                }
+              ],
+              "meta": {
+                "globalMult": 1,
+                "clusterMult": 1,
+                "monkeyMult": 1,
+                "winWithoutMult": 10,
+                "overlay": {
+                  "reel": 2,
+                  "row": 3
+                }
+              }
+            },
+            {
+              "symbol": "GR",
+              "clusterSize": 7,
+              "win": 15,
+              "positions": [
+                {
+                  "reel": 3,
+                  "row": 1
+                },
+                {
+                  "reel": 3,
+                  "row": 2
+                },
+                {
+                  "reel": 3,
+                  "row": 3
+                },
+                {
+                  "reel": 3,
+                  "row": 4
+                },
+                {
+                  "reel": 3,
+                  "row": 5
+                },
+                {
+                  "reel": 4,
+                  "row": 3
+                },
+                {
+                  "reel": 4,
+                  "row": 4
+                }
+              ],
+              "meta": {
+                "globalMult": 1,
+                "clusterMult": 1,
+                "monkeyMult": 1,
+                "winWithoutMult": 15,
+                "overlay": {
+                  "reel": 3,
+                  "row": 3
+                }
+              }
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "type": "updateTumbleWin",
+          "amount": 30
+        },
+        {
+          "index": 5,
+          "type": "progressFill",
+          "value": 5,
+          "threshold": 5,
+          "mode": "feature_spin",
+          "activationCount": 0
+        },
+        {
+          "index": 6,
+          "type": "boardActivation",
+          "activationWin": 43800,
+          "tileMultipliers": [
+            [
+              2,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              0
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ]
+          ],
+          "coinFeature": {
+            "totalPayout": 438.0,
+            "rounds": 1,
+            "items": [
+              {
+                "reel": 0,
+                "row": 0,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 4.0,
+                "displayValue": 24,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 24.0,
+                "payout": 24.0,
+                "round": 1
+              },
+              {
+                "reel": 1,
+                "row": 0,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 4.0,
+                "displayValue": 24,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 24.0,
+                "payout": 24.0,
+                "round": 1
+              },
+              {
+                "reel": 2,
+                "row": 0,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 1.0,
+                "displayValue": 6,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 6.0,
+                "payout": 6.0,
+                "round": 1
+              },
+              {
+                "reel": 3,
+                "row": 0,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 3.0,
+                "displayValue": 18,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 18.0,
+                "payout": 18.0,
+                "round": 1
+              },
+              {
+                "reel": 1,
+                "row": 1,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": 2,
+                "row": 1,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 4.0,
+                "displayValue": 24,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 24.0,
+                "payout": 24.0,
+                "round": 1
+              },
+              {
+                "reel": 3,
+                "row": 1,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 4.0,
+                "displayValue": 24,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 24.0,
+                "payout": 24.0,
+                "round": 1
+              },
+              {
+                "reel": 0,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 3.0,
+                "displayValue": 18,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 18.0,
+                "payout": 18.0,
+                "round": 1
+              },
+              {
+                "reel": 1,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 4.0,
+                "displayValue": 24,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 24.0,
+                "payout": 24.0,
+                "round": 1
+              },
+              {
+                "reel": 2,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 3.0,
+                "displayValue": 18,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 18.0,
+                "payout": 18.0,
+                "round": 1
+              },
+              {
+                "reel": 3,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": 4,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 2.0,
+                "displayValue": 12,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 12.0,
+                "payout": 12.0,
+                "round": 1
+              },
+              {
+                "reel": 5,
+                "row": 2,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": 0,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 2.0,
+                "displayValue": 12,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 12.0,
+                "payout": 12.0,
+                "round": 1
+              },
+              {
+                "reel": 1,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 3.0,
+                "displayValue": 18,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 18.0,
+                "payout": 18.0,
+                "round": 1
+              },
+              {
+                "reel": 2,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 2.0,
+                "displayValue": 12,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 12.0,
+                "payout": 12.0,
+                "round": 1
+              },
+              {
+                "reel": 3,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 1.0,
+                "displayValue": 6,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 6.0,
+                "payout": 6.0,
+                "round": 1
+              },
+              {
+                "reel": 4,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": 5,
+                "row": 3,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 3.0,
+                "displayValue": 18,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 18.0,
+                "payout": 18.0,
+                "round": 1
+              },
+              {
+                "reel": 2,
+                "row": 4,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": 3,
+                "row": 4,
+                "kind": "coin",
+                "symbol": "CB",
+                "value": 5.0,
+                "displayValue": 30,
+                "tileLevel": 1,
+                "tileMultiplier": 1,
+                "resolvedValue": 30.0,
+                "payout": 30.0,
+                "round": 1
+              },
+              {
+                "reel": -1,
+                "row": -1,
+                "kind": "multiplier",
+                "symbol": "XM",
+                "value": 6.0,
+                "displayValue": 6,
+                "tileLevel": 0,
+                "tileMultiplier": 1,
+                "resolvedValue": 6.0,
+                "payout": 6.0,
+                "round": 1
+              }
+            ]
+          }
+        },
+        {
+          "index": 7,
+          "type": "updateTumbleWin",
+          "amount": 43830
+        },
+        {
+          "index": 8,
+          "type": "progressFill",
+          "value": 0,
+          "threshold": 5,
+          "mode": "feature_spin",
+          "activationCount": 1
+        },
+        {
+          "index": 9,
+          "type": "tumbleBoard",
+          "newSymbols": [
+            [
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              }
+            ],
+            [
+              {
+                "name": "LE"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "LE"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "T"
+              }
+            ],
+            [
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "A"
+              }
+            ]
+          ],
+          "explodingSymbols": [
+            {
+              "reel": 0,
+              "row": 3
+            },
+            {
+              "reel": 0,
+              "row": 4
+            },
+            {
+              "reel": 1,
+              "row": 1
+            },
+            {
+              "reel": 1,
+              "row": 2
+            },
+            {
+              "reel": 1,
+              "row": 3
+            },
+            {
+              "reel": 2,
+              "row": 1
+            },
+            {
+              "reel": 2,
+              "row": 2
+            },
+            {
+              "reel": 2,
+              "row": 3
+            },
+            {
+              "reel": 2,
+              "row": 4
+            },
+            {
+              "reel": 2,
+              "row": 5
+            },
+            {
+              "reel": 3,
+              "row": 1
+            },
+            {
+              "reel": 3,
+              "row": 2
+            },
+            {
+              "reel": 3,
+              "row": 3
+            },
+            {
+              "reel": 3,
+              "row": 4
+            },
+            {
+              "reel": 3,
+              "row": 5
+            },
+            {
+              "reel": 4,
+              "row": 1
+            },
+            {
+              "reel": 4,
+              "row": 3
+            },
+            {
+              "reel": 4,
+              "row": 4
+            },
+            {
+              "reel": 5,
+              "row": 5
+            }
+          ],
+          "resultBoard": [
+            [
+              {
+                "name": "A"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "Q"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "OR"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "CO"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "J"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              }
+            ],
+            [
+              {
+                "name": "BA"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              }
+            ]
+          ]
+        },
+        {
+          "index": 10,
+          "type": "updateLevelUpTiles",
+          "tileLevels": [
+            [
+              1,
+              0,
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              1,
+              0
+            ]
+          ],
+          "tileMultipliers": [
+            [
+              2,
+              0,
+              2,
+              2,
+              2
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ],
+            [
+              0,
+              0,
+              2,
+              2,
+              0
+            ]
+          ],
+          "gameType": "basegame",
+          "mode": "feature_spin"
+        },
+        {
+          "index": 11,
+          "type": "winInfo",
+          "totalWin": 15,
+          "wins": [
+            {
+              "symbol": "OR",
+              "clusterSize": 5,
+              "win": 15,
+              "positions": [
+                {
+                  "reel": 0,
+                  "row": 5
+                },
+                {
+                  "reel": 1,
+                  "row": 2
+                },
+                {
+                  "reel": 1,
+                  "row": 3
+                },
+                {
+                  "reel": 1,
+                  "row": 4
+                },
+                {
+                  "reel": 1,
+                  "row": 5
+                }
+              ],
+              "meta": {
+                "globalMult": 1,
+                "clusterMult": 1,
+                "monkeyMult": 1,
+                "winWithoutMult": 15,
+                "overlay": {
+                  "reel": 1,
+                  "row": 4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "type": "updateTumbleWin",
+          "amount": 43845
+        },
+        {
+          "index": 13,
+          "type": "tumbleBoard",
+          "newSymbols": [
+            [
+              {
+                "name": "K"
+              }
+            ],
+            [
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              }
+            ],
+            [],
+            [],
+            [],
+            []
+          ],
+          "explodingSymbols": [
+            {
+              "reel": 0,
+              "row": 5
+            },
+            {
+              "reel": 1,
+              "row": 2
+            },
+            {
+              "reel": 1,
+              "row": 3
+            },
+            {
+              "reel": 1,
+              "row": 4
+            },
+            {
+              "reel": 1,
+              "row": 5
+            }
+          ],
+          "resultBoard": [
+            [
+              {
+                "name": "A"
+              },
+              {
+                "name": "K"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "Q"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "OR"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "OR"
+              }
+            ],
+            [
+              {
+                "name": "OR"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "CO"
+              },
+              {
+                "name": "LE"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              }
+            ],
+            [
+              {
+                "name": "J"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              },
+              {
+                "name": "J"
+              },
+              {
+                "name": "Q"
+              },
+              {
+                "name": "Q"
+              }
+            ],
+            [
+              {
+                "name": "BA"
+              },
+              {
+                "name": "A"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "BA"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "T"
+              },
+              {
+                "name": "CO"
+              }
+            ]
+          ]
+        },
+        {
+          "index": 14,
+          "type": "setWin",
+          "amount": 43845,
+          "winLevel": 9
+        },
+        {
+          "index": 15,
+          "type": "setTotalWin",
+          "amount": 43845
+        },
+        {
+          "index": 16,
+          "type": "finalWin",
+          "amount": 43845
+        }
+      ],
+      "criteria": "feature_spin",
+      "baseGameWins": 438.45,
+      "freeGameWins": 0.0
+    }
+  }
+]

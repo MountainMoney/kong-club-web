@@ -1,0 +1,179 @@
+@font-face {
+	font-family: "Unbounded";
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+	src: url("./assets/unbounded-800.woff2") format("woff2");
+}
+
+#trifecta-site-loader {
+	--loader-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--loader-progress: 0;
+	--background: #161616;
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	width: 100%;
+	height: 100%;
+	min-height: 240px;
+	overflow: hidden;
+	opacity: 1;
+	background: var(--background);
+	color: #dcdcdc;
+	pointer-events: auto;
+}
+
+#trifecta-site-loader.is-playing.is-complete {
+	animation: loader-screen-out 0.8s ease both;
+	pointer-events: none;
+}
+
+#trifecta-site-loader .grid-vignette,
+#trifecta-site-loader .triangle-grid,
+#trifecta-site-loader .light-waves,
+#trifecta-site-loader .edge-shade {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+#trifecta-site-loader .triangle-grid {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%23303330' d='M4.5 5h5L7 9.4z'/%3E%3C/svg%3E");
+	background-repeat: repeat;
+	background-position: center;
+	background-size: 10px 10px;
+}
+
+#trifecta-site-loader .grid-vignette::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(ellipse 58% 52% at 50% 48%, transparent 4%, #16161680 42%, #161616 90%);
+}
+
+#trifecta-site-loader .light-waves {
+	opacity: 0.85;
+	mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+	-webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+#trifecta-site-loader .wave-fallback {
+	background: radial-gradient(ellipse 65% 3% at 45% 49%, #8b988529, transparent 85%);
+	animation: trifecta-fallback-drift 14s ease-in-out infinite alternate;
+}
+
+#trifecta-site-loader .edge-shade {
+	background: radial-gradient(ellipse at center, transparent 24%, #16161630 65%, #161616b3 100%);
+}
+
+#trifecta-site-loader .site-loader-brand {
+	position: absolute;
+	z-index: 6;
+	top: 50%;
+	left: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 22px;
+	transform: translate(-50%, -50%);
+	user-select: none;
+}
+
+#trifecta-site-loader .site-loader-lockup {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 18px;
+	opacity: 0;
+}
+
+#trifecta-site-loader.is-playing .site-loader-lockup {
+	animation: loader-fade 0.9s var(--loader-ease) 1.85s both;
+}
+
+#trifecta-site-loader .site-loader-mark {
+	display: contents;
+}
+
+#trifecta-site-loader .trinity {
+	width: clamp(120px, 14vw, 188px);
+	height: auto;
+	filter: invert(1) drop-shadow(0 0 7px rgba(255, 255, 255, 0.24));
+}
+
+#trifecta-site-loader .site-loader-name {
+	margin: 0;
+	color: #fff;
+	font-family: "Unbounded", "Arial Black", sans-serif;
+	font-weight: 800;
+	font-size: clamp(1.15rem, 2.6vw, 1.85rem);
+	letter-spacing: 0.36em;
+	padding-left: 0.36em;
+	text-transform: uppercase;
+	opacity: 0.86;
+	text-shadow: 0 0 8px rgba(255, 255, 255, 0.24);
+}
+
+#trifecta-site-loader .site-loader-progress {
+	position: relative;
+	z-index: 5;
+	width: clamp(200px, 28vw, 300px);
+	height: 1px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.14);
+	opacity: 0;
+}
+
+#trifecta-site-loader.is-playing .site-loader-progress {
+	animation: loader-fade 0.7s ease 2.9s both;
+}
+
+#trifecta-site-loader .site-loader-progress span {
+	display: block;
+	width: calc(var(--loader-progress) * 100%);
+	height: 100%;
+	background: #fff;
+	opacity: 0.86;
+	box-shadow: 0 0 7px rgba(255, 255, 255, 0.38);
+	transition: width 0.18s ease-out;
+}
+
+@keyframes loader-screen-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes loader-screen-out {
+	from { opacity: 1; }
+	to { opacity: 0; }
+}
+
+@keyframes loader-fade {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes trifecta-fallback-drift {
+	from { transform: translateY(-2%) rotate(-5deg); }
+	to { transform: translateY(2%) rotate(5deg); }
+}
+
+@media (max-width: 600px) {
+	#trifecta-site-loader .grid-vignette::after {
+		background: radial-gradient(ellipse 85% 50% at center, transparent 4%, #16161699 50%, #161616 94%);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#trifecta-site-loader .site-loader-lockup,
+	#trifecta-site-loader .site-loader-progress {
+		animation: none !important;
+		opacity: 1;
+	}
+
+	#trifecta-site-loader .wave-fallback {
+		animation: none;
+	}
+}

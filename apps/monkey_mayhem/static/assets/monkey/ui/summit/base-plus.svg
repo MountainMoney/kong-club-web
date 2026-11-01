@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22.0233" height="23.5454" viewBox="0 0 22.0233 23.5454" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="plusbet" filter="url(#filter0_d_0_13)">
+<path d="M13.0361 2H8.93229V8.8213H2V13.0914H8.93229V19.968H13.0361V13.0914H20.0233V8.8213H13.0361V2Z" fill="white"/>
+<path d="M14.0361 1V7.82129H21.0234V14.0918H14.0361V20.9678H7.93262V14.0918H1V7.82129H7.93262V1H14.0361Z" stroke="black" stroke-width="2"/>
+</g>
+<defs>
+<filter id="filter0_d_0_13" x="0" y="0" width="22.0233" height="23.5454" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1.57742"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_13"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_13" result="shape"/>
+</filter>
+</defs>
+</svg>

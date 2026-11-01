@@ -1,0 +1,48 @@
+export default {
+
+	HOME: 'HOME',
+
+	PLAY: 'PLAY',
+
+	'PLAY MENU': 'PLAY MENU',
+
+	'SELECT YOUR PLAY': 'SELECT YOUR PLAY',
+
+	'NOT ENOUGH COINS': 'NOT ENOUGH COINS',
+
+	'NOT ENOUGH COINS TO START THIS PLAY. PLEASE LOWER THE PLAY LEVEL.':
+
+		'NOT ENOUGH COINS TO START THIS PLAY. PLEASE LOWER THE PLAY LEVEL.',
+
+	REPLAY_LOADING: 'Loading bet replay…',
+
+	REPLAY_UNAVAILABLE: 'Replay unavailable',
+
+	REPLAY_TITLE: 'Bet Replay',
+
+	REPLAY_READY: 'Review the play details, then press Play to watch the full replay.',
+
+	REPLAY_COMPLETE: 'Replay complete. You can watch the same event again.',
+
+	REPLAY_DISCLAIMER: 'This is a replay of a previous bet round. No bets will be placed.',
+
+	REPLAY_START: 'Play',
+
+	REPLAY_EVENT: 'Play Again',
+
+	BET: 'BET',
+
+	'BET MENU': 'BET MENU',
+
+	'SELECT YOUR BET': 'SELECT YOUR BET',
+
+	'INSUFFICIENT BALANCE': 'INSUFFICIENT BALANCE',
+
+	'INSUFFICIENT FUNDS TO PLACE THIS BET. PLEASE ADD FUNDS TO YOUR ACCOUNT OR LOWER THE BET LEVEL.':
+
+		'INSUFFICIENT FUNDS TO PLACE THIS BET. PLEASE ADD FUNDS TO YOUR ACCOUNT OR LOWER THE BET LEVEL.',
+
+	'NOT TRANSLATED': 'NOT TRANSLATED',
+
+};
+

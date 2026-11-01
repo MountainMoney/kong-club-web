@@ -1,0 +1,131 @@
+/* Summit 2026-08-27 type system — excerpt 12, shared by HTML chrome. */
+.game-shell,
+.summit-ui-type {
+	--type-stroke: 0.1em;
+	--type-shadow-y: 0.1em;
+	--type-shadow-color: rgba(0, 0, 0, 0.55);
+	--type-stroke-outside:
+		calc(var(--type-stroke) * 1) 0 0 #000,
+		calc(var(--type-stroke) * 0.9239) calc(var(--type-stroke) * 0.3827) 0 #000,
+		calc(var(--type-stroke) * 0.7071) calc(var(--type-stroke) * 0.7071) 0 #000,
+		calc(var(--type-stroke) * 0.3827) calc(var(--type-stroke) * 0.9239) 0 #000,
+		0 calc(var(--type-stroke) * 1) 0 #000,
+		calc(var(--type-stroke) * -0.3827) calc(var(--type-stroke) * 0.9239) 0 #000,
+		calc(var(--type-stroke) * -0.7071) calc(var(--type-stroke) * 0.7071) 0 #000,
+		calc(var(--type-stroke) * -0.9239) calc(var(--type-stroke) * 0.3827) 0 #000,
+		calc(var(--type-stroke) * -1) 0 0 #000,
+		calc(var(--type-stroke) * -0.9239) calc(var(--type-stroke) * -0.3827) 0 #000,
+		calc(var(--type-stroke) * -0.7071) calc(var(--type-stroke) * -0.7071) 0 #000,
+		calc(var(--type-stroke) * -0.3827) calc(var(--type-stroke) * -0.9239) 0 #000,
+		0 calc(var(--type-stroke) * -1) 0 #000,
+		calc(var(--type-stroke) * 0.3827) calc(var(--type-stroke) * -0.9239) 0 #000,
+		calc(var(--type-stroke) * 0.7071) calc(var(--type-stroke) * -0.7071) 0 #000,
+		calc(var(--type-stroke) * 0.9239) calc(var(--type-stroke) * -0.3827) 0 #000,
+		0 var(--type-shadow-y) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 1) var(--type-shadow-y) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.9239) calc(var(--type-stroke) * 0.3827 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.7071) calc(var(--type-stroke) * 0.7071 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.3827) calc(var(--type-stroke) * 0.9239 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		0 calc(var(--type-stroke) * 1 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.3827) calc(var(--type-stroke) * 0.9239 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.7071) calc(var(--type-stroke) * 0.7071 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.9239) calc(var(--type-stroke) * 0.3827 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -1) var(--type-shadow-y) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.9239) calc(var(--type-stroke) * -0.3827 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.7071) calc(var(--type-stroke) * -0.7071 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * -0.3827) calc(var(--type-stroke) * -0.9239 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		0 calc(var(--type-stroke) * -1 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.3827) calc(var(--type-stroke) * -0.9239 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.7071) calc(var(--type-stroke) * -0.7071 + var(--type-shadow-y)) 0 var(--type-shadow-color),
+		calc(var(--type-stroke) * 0.9239) calc(var(--type-stroke) * -0.3827 + var(--type-shadow-y)) 0 var(--type-shadow-color);
+	font-family: 'Fredoka One', Inter, sans-serif;
+	font-weight: 400;
+	font-synthesis: none;
+}
+
+/* Recipe A: 10% outside ring and matching Y drop. */
+.ui-type,
+.bonus-bet-value span,
+.bonus-bet-value strong,
+.bonus-card-title,
+.bonus-card-description,
+.bonus-card-volatility,
+.bonus-card-cost,
+.sprite.spin.fs-chip span,
+.sprite.spin.fs-chip strong,
+.sprite.auto.fs-chip span,
+.sprite.auto.fs-chip strong,
+.info-panel h2,
+.bonus-close,
+.bonus-carousel-arrow,
+.opening-splash-cta,
+.bonus-intro-cta,
+.bonus-outro-cta,
+.stake-modal-card h2,
+.stake-modal-card p,
+.auto-popup-title,
+.auto-popup-subtitle,
+.corner-credits-left,
+.corner-credits-right {
+	font-family: 'Fredoka One', Inter, sans-serif;
+	font-weight: 400;
+	-webkit-text-stroke: 0;
+	text-shadow: var(--type-stroke-outside);
+}
+
+.bonus-card > button[data-bonus-action],
+.bonus-card .action-btn,
+.list-card .action-btn,
+.confirm-actions button,
+.stake-modal-card button,
+.auto-count,
+.auto-popup button {
+	font-family: 'Fredoka One', Inter, sans-serif;
+	font-weight: 400;
+	-webkit-text-stroke: 0;
+	text-shadow: var(--type-stroke-outside);
+}
+
+/* Recipe B: centered HUD stroke with the drop measured from its visible edge. */
+.toolbar-meter .amount span,
+.win-popup span {
+	font-family: 'Fredoka One', Inter, sans-serif;
+	font-weight: 400;
+	--hud-stroke: max(0.1em, calc(4px * var(--ui-scale, 1)));
+	-webkit-text-stroke: var(--hud-stroke) #000;
+	paint-order: stroke fill;
+	text-shadow: 0 calc(var(--hud-stroke) * 0.5 + var(--type-shadow-y, 0.1em)) 0
+		var(--type-shadow-color, rgba(0, 0, 0, 0.55));
+}
+
+.toolbar-meter .amount strong:not(.yellow-type),
+.win-popup strong {
+	font-family: 'Fredoka One', Inter, sans-serif;
+	font-weight: 400;
+	--hud-stroke: max(0.1em, calc(6px * var(--ui-scale, 1)));
+	-webkit-text-stroke: var(--hud-stroke) #000;
+	paint-order: stroke fill;
+	text-shadow: 0 calc(var(--hud-stroke) * 0.5 + var(--type-shadow-y, 0.1em)) 0
+		var(--type-shadow-color, rgba(0, 0, 0, 0.55));
+}
+
+.toolbar.bonus-mode .amount span,
+.toolbar.bonus-mode .amount strong {
+	overflow: visible;
+	text-overflow: clip;
+	white-space: nowrap;
+	max-width: 100%;
+}
+
+.game-shell.portrait .toolbar-meter .amount span {
+	-webkit-text-stroke: 0;
+	text-shadow: none;
+	opacity: 0.88;
+}
+
+.game-shell.portrait .toolbar-meter .amount strong:not(.yellow-type),
+.toolbar.bonus-mode .amount span,
+.toolbar.bonus-mode .amount strong:not(.yellow-type) {
+	-webkit-text-stroke: 0;
+	text-shadow: var(--type-stroke-outside);
+}

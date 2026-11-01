@@ -1,0 +1,10 @@
+{
+  "modes": [
+    "base",
+    "base_ante",
+    "feature_spin",
+    "bonus_hear",
+    "max_win_spin"
+  ],
+  "outputDir": "C:\\Users\\Cole\\Desktop\\Slots\\Monkey Mayhem\\web-sdk\\apps\\monkey_mayhem\\src\\stories\\data\\math_books"
+}

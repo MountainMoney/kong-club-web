@@ -1,0 +1,14 @@
+barrel.png
+size:1538,1538
+filter:Linear,Linear
+pma:true
+W
+bounds:0,1026,512,512
+guang
+bounds:513,1026,512,512
+tong
+bounds:1026,1026,512,512
+tong1
+bounds:0,513,512,512
+tong2
+bounds:513,513,512,512
