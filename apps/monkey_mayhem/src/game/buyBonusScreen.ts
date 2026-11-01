@@ -107,7 +107,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
 		title: 'EXTRA CHANCE',
-		description: `Double bonus chance for ${extraChanceCostLabel()} base bet (~1 in 200 spins).`,
+		description: `Double the base bonus chance: 1 in 110 spins instead of 1 in 220, for ${extraChanceCostLabel()} base bet.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'extraChance' },
 		volatility: volatilityForMode(ANTE_BET_MODE_KEY),

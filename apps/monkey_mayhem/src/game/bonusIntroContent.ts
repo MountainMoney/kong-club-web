@@ -15,7 +15,7 @@ export const BONUS_INTRO_BY_TIER: Record<MonkeyBonusTier, BonusIntroContent> = {
 	2: {
 		tier: 2,
 		title: 'HEAR NO EVIL',
-		description: 'The board stays. Progress bar fills 1 per connection.\nTiles persist. Coin game at 5/5.',
+		description: 'The board stays. Progress bar fills 1 per connection.\nTiles persist. Coin game at 5/5, up to 3 times per spin.',
 	},
 	3: {
 		tier: 3,

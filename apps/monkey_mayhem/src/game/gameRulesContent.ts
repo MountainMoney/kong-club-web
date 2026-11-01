@@ -92,10 +92,10 @@ const buildProgressBarSection = (): GameRuleData =>
 	ruleSection(
 		'PROGRESS BAR & BOARD ACTIVATION',
 		isSocialMode()
-			? `On regular plays, each winning tumble fills the Progress Bar by one step. In Hear free games, each winning connection fills the bar by one step. When the bar fills (5 steps), Board Activation starts the coin collect.
+			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
 
 On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.`
-			: `On regular spins, each winning tumble fills the Progress Bar by one step. In Hear free spins, each winning connection fills the bar by one step. When the bar fills (5 steps), Board Activation starts the coin collect.
+			: `On regular spins, each winning tumble fills the Progress Bar by one step. In See and Hear free spins, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free spin. When the bar fills (5 steps), Board Activation starts the coin collect.
 
 On regular base spins, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Spin and free spins, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per spin.`,
 	);
@@ -130,18 +130,22 @@ const buildScatterSection = (): GameRuleData =>
 		isSocialMode()
 			? `Stone tablet scatters do not pay. They start a bonus:
 • 1–2 scatters do not start a bonus
-• 3 scatters → See No Evil (${RULES_FREE_SPINS} free games; board clears; Progress Bar threshold 5)
-• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free games, board stays, Progress Bar threshold 5)
+• 3 scatters → See No Evil (${RULES_FREE_SPINS} free games; board clears; each winning cluster fills the Progress Bar; threshold 5)
+• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free games, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free game)
 • 5+ scatters → Monkey Madness (${RULES_FREE_SPINS} free games; board stays; tiles go silver then gold, no bronze; coin game every play)
+
+Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from 1 in 220 plays to 1 in 110. The 3, 4, and 5 scatter mix stays the same.
 
 You can buy See No Evil (100×) or Hear No Evil (200×), or activate Gamble (${config.betModes.bonus_gamble.cost}×): 50% dead play, 40% Hear, 10% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
 			: `Stone tablet scatters do not pay. They start a bonus:
 • 1–2 scatters do not start a bonus
-• 3 scatters → See No Evil (${RULES_FREE_SPINS} free spins; board clears; Progress Bar threshold 5)
-• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free spins, board stays, Progress Bar threshold 5)
+• 3 scatters → See No Evil (${RULES_FREE_SPINS} free spins; board clears; each winning cluster fills the Progress Bar; threshold 5)
+• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free spins, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free spin)
 • 5+ scatters → Monkey Madness (${RULES_FREE_SPINS} free spins; board stays; tiles go silver then gold, no bronze; coin game every spin)
+
+Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from 1 in 220 spins to 1 in 110. The 3, 4, and 5 scatter mix stays the same.
 
 You can buy See No Evil (100×) or Hear No Evil (200×), or activate Gamble (${config.betModes.bonus_gamble.cost}×): 50% dead spin, 40% Hear, 10% Monkey Madness.
 
