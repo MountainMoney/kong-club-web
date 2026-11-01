@@ -150,11 +150,9 @@ export const buyBonusModeCostMultiplier = (mode: string) =>
 
 export { isActivateBetMode };
 
-/** Gamble stays an activate mode but the card shows BUY. */
-export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
-	if (mode === 'bonus_gamble') return 'buy';
-	return isActivateBetMode(mode) ? 'activate' : 'buy';
-};
+/** Feature, TRIFECTA, and Gamble stay on. See and Hear are one-shot buys. */
+export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' =>
+	isActivateBetMode(mode) ? 'activate' : 'buy';
 
 export const BUY_BONUS_MENU_PREFETCH = [
 	'/assets/sprites/monkeySymbols/ST.png',
