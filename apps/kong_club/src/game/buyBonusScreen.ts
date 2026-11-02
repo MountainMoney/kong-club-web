@@ -107,7 +107,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
 		title: 'EXTRA CHANCE',
-		description: `Double the base bonus chance: 1 in 110 spins instead of 1 in 220, for ${extraChanceCostLabel()} base bet.`,
+		description: `Double the base bonus chance: about 1 in 130 spins instead of about 1 in 260, for ${extraChanceCostLabel()} base bet.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'extraChance' },
 		volatility: volatilityForMode(ANTE_BET_MODE_KEY),
@@ -134,7 +134,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: 'bonus_see',
 		title: 'SEE NO EVIL',
-		description: 'Buy the See No Evil bonus for 100× bet. 3 scatters. The board clears, then 10 free spins.',
+		description: `Buy the See No Evil bonus for ${config.betModes.bonus_see.cost}× bet. 3 scatters. The board clears, then 10 free spins.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 3 },
 		volatility: volatilityForMode('bonus_see'),
@@ -143,7 +143,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: 'bonus_hear',
 		title: 'HEAR NO EVIL',
-		description: 'Buy the Hear No Evil bonus for 200× bet. 4 scatters. The board stays, then 10 free spins.',
+		description: `Buy the Hear No Evil bonus for ${config.betModes.bonus_hear.cost}× bet. 4 scatters. The board stays, then 10 free spins.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 4 },
 		volatility: volatilityForMode('bonus_hear'),

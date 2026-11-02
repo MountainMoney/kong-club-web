@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * Kong Club FE math audit — cost-aware mode samples from warm books cache.
- * Reports RTP proxy, hit rate, profit rate (buys), and hard-face coin checks.
+ * Kong Club FE math audit.
+ * RTP is LUT-weighted from publish lookUpTable_<mode>_0.csv
+ * (id,weight,payout — payout is ×100 bet multiples), divided by mode cost.
+ * Hard coin faces are still checked on warm books when that cache exists.
  *
  * Usage: node scripts/math-audit.mjs
  */
@@ -13,16 +15,100 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, '..');
 const cacheDir = path.resolve(appRoot, '.cache/math-books');
 
+/** Same publish root as vite-plugin-math-books.js (`apps/kong_club/../../../math-sdk/...`). */
+const PUBLISH_DIR = path.resolve(
+	appRoot,
+	'../../../math-sdk/games/kong_club/library/publish_files',
+);
+
 const MODE_COST = {
 	base: 1,
 	base_ante: 1.4,
-	feature_spin: 50,
-	peak_spin: 1000,
-	bonus_see: 100,
-	bonus_hear: 200,
+	feature_spin: 65,
+	peak_spin: 1400,
+	bonus_see: 115,
+	bonus_hear: 250,
+	bonus_gamble: 380,
 };
 
 const HARD_FACES = new Set([1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500]);
+
+export function lutPathForMode(mode) {
+	return path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
+}
+
+/**
+ * @param {string} text CSV rows: id,weight,payout (payout ×100). Optional header skipped.
+ * @returns {{ id: string, weight: bigint, payout: bigint }[]}
+ */
+export function parseLutCsv(text) {
+	const rows = [];
+	const lines = text.split(/\r?\n/);
+	for (const raw of lines) {
+		const line = raw.trim();
+		if (!line || line.startsWith('#')) continue;
+		const parts = line.split(',');
+		if (parts.length < 3) continue;
+		const [id, weightStr, payoutStr] = parts;
+		if (!/^-?\d+$/.test(weightStr.trim()) || !/^-?\d+$/.test(payoutStr.trim())) continue;
+		rows.push({
+			id: id.trim(),
+			weight: BigInt(weightStr.trim()),
+			payout: BigInt(payoutStr.trim()),
+		});
+	}
+	return rows;
+}
+
+/** BigInt ratio as a JS number. Expands 15 decimal digits so huge weights stay exact. */
+function ratio(numerator, denominator) {
+	if (denominator === 0n) return 0;
+	const neg = numerator < 0n;
+	let frac = neg ? -numerator : numerator;
+	const whole = frac / denominator;
+	frac %= denominator;
+	let digits = '';
+	for (let i = 0; i < 15; i += 1) {
+		frac *= 10n;
+		digits += (frac / denominator).toString();
+		frac %= denominator;
+	}
+	const value = Number(`${whole.toString()}.${digits}`);
+	return neg ? -value : value;
+}
+
+/**
+ * Weighted RTP and hit stats from LUT rows.
+ * payout is ×100, so mean bet-multiple = Σ(w·payout) / Σw / 100.
+ * RTP = that mean / mode cost.
+ */
+export function weightedLutStats(rows, cost) {
+	let weightSum = 0n;
+	let weightedPayout = 0n;
+	let hitWeight = 0n;
+	let profitWeight = 0n;
+	let maxPayout = 0n;
+	const profitCutoff = BigInt(Math.round(cost * 100));
+	for (const row of rows) {
+		if (row.weight < 0n) continue;
+		weightSum += row.weight;
+		weightedPayout += row.weight * row.payout;
+		if (row.payout > maxPayout) maxPayout = row.payout;
+		if (row.payout > 0n) hitWeight += row.weight;
+		if (row.payout > profitCutoff) profitWeight += row.weight;
+	}
+	const mean = weightSum === 0n ? 0 : ratio(weightedPayout, weightSum) / 100;
+	const rtp = cost > 0 ? mean / cost : 0;
+	return {
+		n: rows.length,
+		weight_sum: weightSum.toString(),
+		mean_payout: Number(mean.toFixed(6)),
+		rtp,
+		hit_rate: weightSum === 0n ? 0 : ratio(hitWeight, weightSum),
+		profit_rate: weightSum === 0n ? 0 : ratio(profitWeight, weightSum),
+		max_paid: Number(maxPayout) / 100,
+	};
+}
 
 function loadModeBooks(mode) {
 	const candidates = [
@@ -34,17 +120,7 @@ function loadModeBooks(mode) {
 		const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
 		return Array.isArray(raw) ? raw : raw.books || [];
 	}
-	return [];
-}
-
-function payoutOf(book) {
-	// Warm / Python books store payoutMultiplier as ×100 integers (bet multiples × 100).
-	if (book?.payoutMultiplier != null) return Number(book.payoutMultiplier) / 100;
-	if (book?.payout_multiplier != null) return Number(book.payout_multiplier) / 100;
-	const events = book?.events || [];
-	const setWin = [...events].reverse().find((e) => e.type === 'setWin' || e.type === 'setTotalWin');
-	if (setWin?.amount == null) return 0;
-	return Number(setWin.amount) / 100;
+	return null;
 }
 
 function coinFacesOk(book) {
@@ -62,46 +138,107 @@ function coinFacesOk(book) {
 	return true;
 }
 
-function auditMode(mode) {
-	const cost = MODE_COST[mode];
+function auditHardFaces(mode) {
 	const books = loadModeBooks(mode);
-	const n = books.length;
-	if (!n) {
-		return { mode, n: 0, error: 'no books in fe_math_cache — run pnpm warm:books' };
-	}
-	let hits = 0;
-	let profits = 0;
-	let sum = 0;
-	let maxPaid = 0;
+	if (!books) return { books_n: 0, hard_face_violations: null, hard_faces_checked: false };
 	let badFaces = 0;
 	for (const book of books) {
-		const pay = payoutOf(book);
-		sum += pay;
-		if (pay > 0) hits += 1;
-		if (pay > cost) profits += 1;
-		if (pay > maxPaid) maxPaid = pay;
 		if (!coinFacesOk(book)) badFaces += 1;
 	}
-	const mean = sum / n;
-	const rtp = mean / cost;
+	return { books_n: books.length, hard_face_violations: badFaces, hard_faces_checked: true };
+}
+
+export function auditMode(mode) {
+	const cost = MODE_COST[mode];
+	const lutFile = lutPathForMode(mode);
+	if (!fs.existsSync(lutFile)) {
+		return {
+			mode,
+			cost,
+			n: 0,
+			error: `missing LUT ${lutFile}`,
+			rtp_method: 'lut-weighted',
+		};
+	}
+	const rows = parseLutCsv(fs.readFileSync(lutFile, 'utf8'));
+	if (!rows.length) {
+		return { mode, cost, n: 0, error: `empty LUT ${lutFile}`, rtp_method: 'lut-weighted' };
+	}
+	const stats = weightedLutStats(rows, cost);
+	const faces = auditHardFaces(mode);
 	return {
 		mode,
-		n,
+		n: stats.n,
+		weight_sum: stats.weight_sum,
 		cost,
-		rtp_pct: Number((rtp * 100).toFixed(3)),
-		hit_rate_pct: Number(((100 * hits) / n).toFixed(2)),
-		profit_rate_pct: Number(((100 * profits) / n).toFixed(2)),
-		max_paid: Number(maxPaid.toFixed(4)),
-		hard_face_violations: badFaces,
-		ok: badFaces === 0,
+		rtp_method: 'lut-weighted',
+		rtp_pct: Number((stats.rtp * 100).toFixed(3)),
+		hit_rate_pct: Number((stats.hit_rate * 100).toFixed(2)),
+		profit_rate_pct: Number((stats.profit_rate * 100).toFixed(2)),
+		max_paid: Number(stats.max_paid.toFixed(4)),
+		...faces,
+		ok: faces.hard_face_violations == null || faces.hard_face_violations === 0,
 	};
 }
 
-const results = Object.keys(MODE_COST).map(auditMode);
-console.log(JSON.stringify(results, null, 2));
-const failed = results.filter((r) => r.error || r.hard_face_violations > 0);
-if (failed.length) {
-	console.error('math-audit: FAIL', failed.map((f) => f.mode).join(', '));
-	process.exit(1);
+function readConfigCosts() {
+	const src = fs.readFileSync(path.join(appRoot, 'src/game/config.ts'), 'utf8');
+	const start = src.indexOf('betModes:');
+	const block = start >= 0 ? src.slice(start) : src;
+	const costs = {};
+	for (const match of block.matchAll(/^\t\t([A-Za-z0-9_]+):\s*\{\s*cost:\s*([0-9.]+)/gm)) {
+		costs[match[1]] = Number(match[2]);
+	}
+	return costs;
 }
-console.log('math-audit: hard coin faces OK across warm books');
+
+function assertCostsMatchConfig() {
+	const fromConfig = readConfigCosts();
+	const keys = Object.keys(MODE_COST);
+	for (const mode of keys) {
+		if (fromConfig[mode] !== MODE_COST[mode]) {
+			throw new Error(
+				`MODE_COST.${mode}=${MODE_COST[mode]} does not match config.ts cost ${fromConfig[mode]}`,
+			);
+		}
+	}
+	for (const mode of Object.keys(fromConfig)) {
+		if (MODE_COST[mode] == null) throw new Error(`config.ts mode ${mode} missing from MODE_COST`);
+	}
+}
+
+function selfTest() {
+	assertCostsMatchConfig();
+	const csv = ['id,weight,payout', '1,1,0', '2,3,200', '9,1,1000'].join('\n');
+	const rows = parseLutCsv(csv);
+	if (rows.length !== 3) throw new Error(`expected 3 rows, got ${rows.length}`);
+	const stats = weightedLutStats(rows, 2);
+	// weights 1+3+1=5; payout sum 0+600+1000=1600; mean ×100 = 320; mean = 3.2; rtp = 1.6
+	if (Math.abs(stats.mean_payout - 3.2) > 1e-9) throw new Error(`mean ${stats.mean_payout}`);
+	if (Math.abs(stats.rtp - 1.6) > 1e-9) throw new Error(`rtp ${stats.rtp}`);
+	const heavy = weightedLutStats([{ id: '1', weight: 10n ** 18n, payout: 9650n }], 1);
+	if (Math.abs(heavy.rtp - 96.5) > 1e-9) throw new Error(`heavy rtp ${heavy.rtp}`);
+	// hits: payout>0 weight 4/5; profit: payout>200 weight 1/5
+	if (Math.abs(stats.hit_rate - 0.8) > 1e-9) throw new Error(`hit ${stats.hit_rate}`);
+	if (Math.abs(stats.profit_rate - 0.2) > 1e-9) throw new Error(`profit ${stats.profit_rate}`);
+	if (stats.max_paid !== 10) throw new Error(`max ${stats.max_paid}`);
+	console.log('math-audit self-test: OK');
+}
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) {
+	if (process.argv.includes('--self-test')) {
+		selfTest();
+		process.exit(0);
+	}
+	assertCostsMatchConfig();
+	const results = Object.keys(MODE_COST).map(auditMode);
+	console.log(JSON.stringify(results, null, 2));
+	const failed = results.filter((r) => r.error || (r.hard_face_violations ?? 0) > 0);
+	if (failed.length) {
+		console.error('math-audit: FAIL', failed.map((f) => `${f.mode}${f.error ? `: ${f.error}` : ''}`).join(', '));
+		process.exit(1);
+	}
+	console.log('math-audit: LUT-weighted RTP ok; hard coin faces OK where warm books exist');
+}

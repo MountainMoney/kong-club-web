@@ -328,8 +328,7 @@ export function initKongClubBetModes() {
 				title: `${SUMMIT_SPIN_TITLE} (${config.betModes.peak_spin.cost}×)`,
 				button: SUMMIT_SPIN_LABEL,
 				parent: 'base',
-				description:
-					'Each spin costs 1000× bet. The whole board starts Gold. After it lands the bar fills — it can dump, or hit full and play the coin game.',
+				description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills — it can dump, or hit full and play the coin game.`,
 			}),
 			modeEntry('bonus_see', {
 				type: 'buy',
