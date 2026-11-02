@@ -1,3 +1,5 @@
+import { isSocialMode } from './socialCopy';
+
 export type MonkeyBonusTier = 1 | 2 | 3;
 
 export type BonusIntroContent = {
@@ -15,7 +17,7 @@ export const BONUS_INTRO_BY_TIER: Record<MonkeyBonusTier, BonusIntroContent> = {
 	2: {
 		tier: 2,
 		title: 'HEAR NO EVIL',
-		description: 'The board stays. Progress bar fills 1 per connection.\nTiles persist. Coin game at 5/5, up to 3 times per spin.',
+		description: 'The board stays. Progress bar fills 1 per connection.\nTiles persist. One coin game per spin.',
 	},
 	3: {
 		tier: 3,
@@ -25,9 +27,13 @@ export const BONUS_INTRO_BY_TIER: Record<MonkeyBonusTier, BonusIntroContent> = {
 };
 
 export const bonusIntroContentForTier = (tier: number | undefined): BonusIntroContent => {
-	if (tier === 3) return BONUS_INTRO_BY_TIER[3];
-	if (tier === 1) return BONUS_INTRO_BY_TIER[1];
-	return BONUS_INTRO_BY_TIER[2];
+	const content =
+		tier === 3 ? BONUS_INTRO_BY_TIER[3] : tier === 1 ? BONUS_INTRO_BY_TIER[1] : BONUS_INTRO_BY_TIER[2];
+	if (!isSocialMode()) return content;
+	return {
+		...content,
+		description: content.description.replace(/\bspin\b/gi, 'play'),
+	};
 };
 
 /** Map `kongClubMode.state` (e.g. `organic_bonus_hear`) to intro tier. */
@@ -38,4 +44,5 @@ export const bonusTierFromModeState = (state: string | undefined): MonkeyBonusTi
 	return 2;
 };
 
-export const bonusIntroSpinsLabel = (totalFreeSpins: number) => `${totalFreeSpins} FREE SPINS`;
+export const bonusIntroSpinsLabel = (totalFreeSpins: number) =>
+	isSocialMode() ? `${totalFreeSpins} FREE GAMES` : `${totalFreeSpins} FREE SPINS`;

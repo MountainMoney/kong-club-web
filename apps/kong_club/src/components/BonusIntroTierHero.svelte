@@ -3,6 +3,7 @@
 
 	import type { MonkeyBonusTier } from '../game/bonusIntroContent';
 	import { hasLoadedAssetTexture } from '../game/introAssets';
+	import { isSocialMode } from '../game/socialCopy';
 
 	type Props = {
 		tier: MonkeyBonusTier;
@@ -18,7 +19,7 @@
 	const mascotSize = $derived(Math.round(displaySize * 0.68));
 	const tokenSize = $derived(Math.round(displaySize * 0.28));
 	const tokenCount = $derived(props.tier === 2 ? 4 : 3);
-	const tokenKey = $derived(props.tier === 3 ? 'CG' : 'ST');
+	const tokenKey = $derived(props.tier === 3 ? 'CG' : isSocialMode() ? 'STSocial' : 'ST');
 	const tokenGap = $derived(Math.round(tokenSize * 1.12));
 	const groupH = $derived(mascotSize + Math.round(tokenSize * 0.72));
 	const mascotY = $derived(Math.round(-groupH * 0.5 + mascotSize * 0.5));

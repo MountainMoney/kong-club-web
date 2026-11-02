@@ -44,7 +44,7 @@ export const toolbarLabel = (key: 'balance' | 'bet' | 'win' | 'totalWin') => {
 	)[key];
 };
 
-export const buyBonusLabel = () => (isSocialMode() ? 'PLAY BONUS' : 'BUY BONUS');
+export const buyBonusLabel = () => (isSocialMode() ? 'FEATURES' : 'BUY BONUS');
 
 export const freeSpinsToolbarLabel = () => (isSocialMode() ? 'FREE GAMES' : 'FREE SPINS');
 
@@ -77,7 +77,7 @@ export const betControlIncreaseAria = () =>
 
 export const autoSpinBeforeBonusMessage = () =>
 	isSocialMode()
-		? 'Stop Auto Play before playing a bonus.'
+		? 'Stop Auto Play before starting a feature.'
 		: 'Stop Auto Spin before buying a bonus.';
 
 export const buyBonusActionLabel = (kind: 'buy' | 'activate' | 'ok') => {
@@ -88,7 +88,7 @@ export const buyBonusActionLabel = (kind: 'buy' | 'activate' | 'ok') => {
 
 export const insufficientBalanceMessage = () =>
 	isSocialMode()
-		? 'Insufficient balance for this bonus feature.'
+		? 'Insufficient balance for this feature.'
 		: 'Insufficient balance for this bonus cost.';
 
 export const insufficientSpinBalanceMessage = () =>
@@ -108,12 +108,15 @@ export const insufficientExtraChanceMessage = () =>
 
 export const insufficientFeatureSpinMessage = () =>
 	isSocialMode()
-		? 'Insufficient balance for Feature Spin at this play amount.'
+		? 'Insufficient balance for Feature Play at this play amount.'
 		: 'Insufficient balance for Feature Spin at this bet.';
 
 /** Player-facing bet mode title for replay / UI (not raw math key). */
 export const betModeDisplayTitle = (modeKey: string) => {
 	const normalized = normalizeLegacyBetModeKey(modeKey);
+	if (isSocialMode() && normalized in PAYTABLE_MODE_LABELS) {
+		return paytableModeLabel(normalized as PaytableModeKey);
+	}
 	const meta = stateMeta.betModeMeta?.[normalized];
 	return meta?.text?.title ?? normalized.toUpperCase();
 };
@@ -122,14 +125,14 @@ export const betModeDisplayTitle = (modeKey: string) => {
 export const replayModeDisplayTitle = (modeKey: string) =>
 	betModeDisplayTitle(modeKey).replace(/\s*\([^)]*\)\s*$/, '');
 
-/** Official Stake Engine disclaimer — verbatim in both modes. Do not rewrite. */
+/** Official general disclaimer. Social mode must not contain the word Stake. */
 export const STAKE_GAME_DISCLAIMER =
-	'Malfunction voids all wins and plays. A consistent internet connection is required. In the event of a disconnection, reload the game to finish any uncompleted rounds. The expected return is calculated over many plays. The game display is not representative of any physical device and is for illustrative purposes only. Winnings are settled according to the amount received from the Remote Game Server and not from events within the web browser. TM and © 2026 Stake Engine.';
+	'Malfunction voids all wins and plays. A consistent internet connection is required. In the event of a disconnection, reload the game to finish any uncompleted rounds. The expected return is calculated over many plays. The game display is not representative of any physical device and is for illustrative purposes only. Winnings are settled according to the amount received from the Remote Game Server and not from events within the web browser. TM and © 2026 Engine.';
 
 export const stakeGameDisclaimer = () => STAKE_GAME_DISCLAIMER;
 
 export const isOfficialDisclaimerContent = (text: string) =>
-	text.includes('TM and ©') && /Stake Engine/i.test(text);
+	text.includes('TM and ©') && text.includes('Remote Game Server') && /\bEngine\b/.test(text);
 
 /** Apply social-safe substitutions to rules / info copy. */
 export const applySocialCopy = (text: string) => {
@@ -139,9 +142,12 @@ export const applySocialCopy = (text: string) => {
 	return text
 		.replace(/\bStake Engine\b/g, 'the game server')
 		.replace(/\bstake engine\b/gi, 'the game server')
-		.replace(/\bbuy a mystery bonus\b/gi, 'play a mystery bonus')
-		.replace(/\bbuy bonus\b/gi, 'get bonus')
-		.replace(/\bbonus buy\b/gi, 'bonus feature')
+		.replace(/\bdead plays?\b/gi, 'quiet round')
+		.replace(/\bdead spins?\b/gi, 'quiet round')
+		.replace(/\bmystery bonus\b/gi, 'mystery feature')
+		.replace(/\bbuy a mystery feature\b/gi, 'play a mystery feature')
+		.replace(/\bbuy bonus\b/gi, 'play feature')
+		.replace(/\bbonus buy\b/gi, 'feature')
 		.replace(/\bbought\b/gi, 'instantly triggered')
 		.replace(/\bbuying\b/gi, 'playing')
 		.replace(/\bbuy\b/gi, 'play')
@@ -163,8 +169,9 @@ export const applySocialCopy = (text: string) => {
 		.replace(/\bpaying\b/gi, 'winning')
 		.replace(/\bpaylines\b/gi, 'win lines')
 		.replace(/\bpayline\b/gi, 'win line')
-		.replace(/\bgamble\b/gi, 'mystery bonus')
+		.replace(/\bgamble\b/gi, 'play')
 		.replace(/\bgambling\b/gi, 'playing')
+		.replace(/\bbonus\b/gi, 'feature')
 		.replace(/\bwinnings\b/gi, 'wins')
 		.replace(/\bcash\b/gi, 'coins')
 		.replace(/\bmoney\b/gi, 'coins')
@@ -193,7 +200,7 @@ const PAYTABLE_COPY = {
 		default:
 			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 		social:
-			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
+			'Scatter (toucan): does not award a win. 3 scatters start See No Evil; 4 start Hear No Evil; 5 or more start Monkey Madness.',
 	},
 	levelUpTiles: {
 		default:
@@ -208,8 +215,8 @@ const PAYTABLE_COPY = {
 			'MULTI (XM): rare Board Activation prize. Multiplies coin faces on the 8 adjacent tiles (×2 / ×3 / ×4 / ×5 / ×10 / ×20). The MULTI itself does not award a value.',
 	},
 	peakSpin: {
-		default: `TRIFECTA Spin (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
-		social: `TRIFECTA Play (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
+		default: `TRIFECTA Spin (${config.betModes.peak_spin.cost}×): 72% of spins pay nothing. The rest light every cell gold and play the coin game with gold coin faces.`,
+		social: `TRIFECTA Play (${config.betModes.peak_spin.cost}×): 72% of plays win nothing. The rest light every cell gold and play the coin game with gold coin faces.`,
 	},
 	collectorPower: {
 		default:
@@ -234,7 +241,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Feature' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;

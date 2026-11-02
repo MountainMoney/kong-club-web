@@ -11,7 +11,12 @@ import {
 	volatilityForMode,
 	volatilityStarCount,
 } from '../buyBonusScreen';
-import { bonusDescriptionCopy, paytableModeLabel, type PaytableModeKey } from '../socialCopy';
+import {
+	bonusDescriptionCopy,
+	isSocialMode,
+	paytableModeLabel,
+	type PaytableModeKey,
+} from '../socialCopy';
 import { BONUS_BUY } from './constants';
 
 export type CardCut = 'desktop' | 'wide' | 'mobile' | 'confirm';
@@ -72,6 +77,9 @@ type OfferSeed = {
 	theme: string;
 	body: string;
 	detail: string;
+	/** Social-mode lines. Written out so restricted words are not left to a rewrite. */
+	socialBody?: string;
+	socialDetail?: string;
 	price: number;
 };
 
@@ -82,8 +90,10 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 512, height: 512 },
 		theme: 'Lobby',
 		body: 'About 1 in 130 spins instead of about 1 in 260.',
+		socialBody: 'About 1 in 130 plays instead of about 1 in 260.',
 		detail:
 			'Stays on for every spin until you turn it off. Doubles the base bonus chance for 1.4× bet.',
+		socialDetail: 'Stays on for every play until you turn it off. Doubles the chance for 1.4× play amount.',
 		price: config.betModes.base_ante.cost,
 	},
 	{
@@ -91,9 +101,12 @@ const SEEDS: OfferSeed[] = [
 		art: 'CG',
 		artSize: { width: 983, height: 1024 },
 		theme: 'Feature',
-		body: 'The progress bar starts full. Every spin lands a 5+ cluster.',
+		body: 'The progress bar starts full. Not every spin lands a 5+ cluster.',
+		socialBody: 'The progress bar starts full. Not every play lands a 5+ cluster.',
 		detail:
-			'Each spin costs 65× bet with the progress bar filled. After the tumbles stop, the coin game plays.',
+			'Each spin costs 65× bet. The bar starts full. 56% of spins have no 5+ cluster and no scatter. The rest tumble, then the coin game plays.',
+		socialDetail:
+			'Each play is 65× play amount. The bar starts full. 56% of plays have no 5+ cluster and no scatter. The rest tumble, then the coin game plays.',
 		price: config.betModes.feature_spin.cost,
 	},
 	{
@@ -101,9 +114,12 @@ const SEEDS: OfferSeed[] = [
 		art: 'monkeyMascot',
 		artSize: { width: 662, height: 903 },
 		theme: 'Peak',
-		body: 'The whole board starts gold. The bar can dump, or hit the coin game.',
+		body: '72% pay nothing. The rest light every cell gold and play the coin game.',
+		socialBody: '72% win nothing. The rest light every cell gold and play the coin game.',
 		detail:
-			'Each spin costs 1,400× bet. The whole board starts gold. After it lands the bar fills. It can dump, or hit full and play the coin game.',
+			'Each spin costs 1,400× bet. 72% pay nothing. The rest light every cell gold and play the coin game with gold coin faces.',
+		socialDetail:
+			'Each play is 1,400× play amount. 72% win nothing. The rest light every cell gold and play the coin game with gold coin faces.',
 		price: config.betModes.peak_spin.cost,
 	},
 	{
@@ -112,7 +128,10 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 819, height: 1024 },
 		theme: 'See',
 		body: '3 scatters. The board clears, then 10 free spins.',
+		socialBody: '3 scatters. The board clears, then 10 free games.',
 		detail: 'Buy See No Evil for 115× bet. 3 scatters. The board clears, then 10 free spins.',
+		socialDetail:
+			'Play See No Evil for 115× play amount. 3 scatters. The board clears, then 10 free games.',
 		price: config.betModes.bonus_see.cost,
 	},
 	{
@@ -120,8 +139,12 @@ const SEEDS: OfferSeed[] = [
 		art: 'hearMonkey',
 		artSize: { width: 819, height: 1024 },
 		theme: 'Hear',
-		body: '4 scatters. The board stays, then 10 free spins.',
-		detail: 'Buy Hear No Evil for 250× bet. 4 scatters. The board stays, then 10 free spins.',
+		body: '4 scatters. The board stays, then 10 free spins. One coin game per free spin.',
+		socialBody: '4 scatters. The board stays, then 10 free games. One coin game per play.',
+		detail:
+			'Buy Hear No Evil for 250× bet. 4 scatters. The board stays, then 10 free spins. One coin game per free spin.',
+		socialDetail:
+			'Play Hear No Evil for 250× play amount. 4 scatters. The board stays, then 10 free games. One coin game per play.',
 		price: config.betModes.bonus_hear.cost,
 	},
 	{
@@ -131,8 +154,11 @@ const SEEDS: OfferSeed[] = [
 		// Backdrop keys are ggBg*Gamble. The card title comes from paytableModeLabel.
 		theme: 'Gamble',
 		body: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
+		socialBody: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
 		detail:
 			'Each spin costs 380× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
+		socialDetail:
+			'Each play is 380× play amount. 50% nothing, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
 		price: config.betModes.bonus_pick.cost,
 	},
 ];
@@ -154,7 +180,8 @@ export const slotOf = (offer: BonusOffer) => {
 const tuneArt = (id: string, spot: BonusOffer['artSpot']) => {
 	if (!spot) return spot;
 	// The bonus mark includes its own lettering, so it sits higher on the confirm card.
-	if (id === ANTE_BET_MODE_KEY && spot.confirm) {
+	// The real-money scatter includes the word BONUS, so it sits higher on the confirm card.
+	if (id === ANTE_BET_MODE_KEY && spot.confirm && !isSocialMode()) {
 		spot.confirm = { ...spot.confirm, scale: (spot.confirm.scale ?? 1) * 0.82, dy: -36 };
 	}
 	// The gold coin is almost square and was crowding the title.
@@ -172,13 +199,17 @@ export const bonusOffers = (): BonusOffer[] =>
 		return {
 			id: seed.id,
 			kind: buyBonusCardActionKind(seed.id),
-			art: seed.art,
+			art: seed.id === ANTE_BET_MODE_KEY && isSocialMode() ? 'STSocial' : seed.art,
 			artSpot: tuneArt(seed.id, spots(seed.artSize.width, seed.artSize.height)),
 			backdrop: backdrop(seed.theme),
 			tier: volatilityStarCount(volatility),
 			title: paytableModeLabel(seed.id),
-			body: bonusDescriptionCopy(seed.body),
-			detail: bonusDescriptionCopy(seed.detail),
+			body:
+				isSocialMode() && seed.socialBody ? seed.socialBody : bonusDescriptionCopy(seed.body),
+			detail:
+				isSocialMode() && seed.socialDetail
+					? seed.socialDetail
+					: bonusDescriptionCopy(seed.detail),
 			volatility,
 			price: seed.price,
 		};

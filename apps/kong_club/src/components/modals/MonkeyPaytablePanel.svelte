@@ -1,24 +1,34 @@
 <script lang="ts">
-	import config from '../../game/config';
 	import {
 		clusterPayAtSize,
 		SMALL_CLUSTER_TIERS,
 		type SmallClusterPayTierValues,
 	} from '../../game/clusterPaytable';
-	import { paytableCopy, paytableModeLabel } from '../../game/socialCopy';
+	import { isSocialMode, paytableCopy, paytableModeLabel } from '../../game/socialCopy';
 	import { shouldDisplayRtp } from '../../game/jurisdiction';
 	import { assetUrl } from '../../game/assetUrl';
+	import {
+		PUBLISHED_MAX_WIN_LABEL,
+		PUBLISHED_MODE_COST,
+		PUBLISHED_RTP_PCT,
+		formatPublishedCost,
+		type PublishedModeKey,
+	} from '../../game/publishedMath';
 
-	const symbolSrc = (key: string) => assetUrl(`/assets/sprites/monkeySymbols/${key}.png`);
+	const symbolSrc = (key: string) =>
+		assetUrl(
+			`/assets/sprites/monkeySymbols/${key === 'ST' && isSocialMode() ? 'ST_social' : key}.png`,
+		);
 
 	const showRtp = $derived(shouldDisplayRtp());
 
-	type BetModeKey = keyof typeof config.betModes;
-
-	const modeRtpLine = (modeKey: BetModeKey, label: string) => {
-		const mode = config.betModes[modeKey];
-		if (!showRtp) return label;
-		return `${label} — RTP ${(mode.rtp * 100).toFixed(2)}% · Max win ${mode.max_win.toLocaleString('en-US')}×`;
+	const modeRtpLine = (modeKey: PublishedModeKey, label: string) => {
+		const cost = formatPublishedCost(PUBLISHED_MODE_COST[modeKey]);
+		const stake = isSocialMode() ? 'base play amount' : 'base bet';
+		const price = isSocialMode() ? `${cost}× play amount` : `cost ${cost}×`;
+		const maxWin = `Max win ${PUBLISHED_MAX_WIN_LABEL}× ${stake}`;
+		if (!showRtp) return `${label} — ${price} · ${maxWin}`;
+		return `${label} — ${price} · RTP ${PUBLISHED_RTP_PCT}% · ${maxWin}`;
 	};
 
 	const modeRtpLines = $derived(

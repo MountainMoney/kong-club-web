@@ -17,6 +17,7 @@ const V2_CONTENT_BOX = {
 	OR: { x: 46, y: 32, w: 429, h: 440 },
 	Q: { x: 66, y: 48, w: 394, h: 452 },
 	ST: { x: 8, y: 27, w: 504, h: 457 },
+	STSocial: { x: 32, y: 51, w: 448, h: 362 },
 	T: { x: 19, y: 65, w: 456, h: 377 },
 	W: { x: 50, y: 34, w: 425, h: 447 },
 } as const;
@@ -101,6 +102,7 @@ export const SYMBOL_NATIVE_PX = {
 	OR: V2_CANVAS,
 	Q: V2_CANVAS,
 	ST: V2_CANVAS,
+	STSocial: V2_CANVAS,
 	T: V2_CANVAS,
 	W: V2_CANVAS,
 } as const;

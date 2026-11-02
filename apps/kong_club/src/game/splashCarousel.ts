@@ -12,10 +12,8 @@ export type SplashFeaturePanel = {
 export const splashFeaturePanels = (): SplashFeaturePanel[] => [
 	{
 		id: 'hidden_bonus',
-		title: 'HIDDEN BONUS',
-		subtitle: isSocialMode()
-			? 'Land scatters for See, Hear, or Monkey Madness'
-			: 'Land scatters for See, Hear, or Monkey Madness',
+		title: isSocialMode() ? 'HIDDEN FEATURE' : 'HIDDEN BONUS',
+		subtitle: 'Land scatters for See, Hear, or Monkey Madness',
 	},
 	{
 		id: 'max_win',
@@ -24,7 +22,7 @@ export const splashFeaturePanels = (): SplashFeaturePanel[] => [
 	},
 	{
 		id: 'coin_game',
-		title: 'BONUS COIN FEATURE',
+		title: isSocialMode() ? 'COIN FEATURE' : 'BONUS COIN FEATURE',
 		subtitle: isSocialMode()
 			? 'Fill the bar. Lit tiles reveal coins.'
 			: 'Fill the bar. Lit tiles pay coins.',

@@ -11,6 +11,7 @@ import type { RawSymbol, SymbolState, Position } from './types';
 import { beginBetPlayback, endBetPlayback } from './spinSkip.svelte';
 import { resetGameplayAfterBookError } from './gameplayErrorReset';
 import { normalizeLegacyBetModeKey } from './betModes';
+import { isSocialMode } from './socialCopy';
 
 // general utils
 export const { getEmptyBoard } = createGetEmptyPaddedBoard({ reelsDimensions: BOARD_DIMENSIONS });
@@ -87,5 +88,9 @@ export const getSymbolInfo = ({
 	state: SymbolState;
 }) => {
 	const symbolKey = getSymbolKey({ rawSymbol });
-	return SYMBOL_INFO_MAP[symbolKey][state];
+	const info = SYMBOL_INFO_MAP[symbolKey][state];
+	if (symbolKey === 'ST' && isSocialMode() && info.type === 'sprite') {
+		return { ...info, assetKey: 'STSocial' } as typeof info;
+	}
+	return info;
 };
