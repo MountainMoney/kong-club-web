@@ -4,16 +4,16 @@
 export const BUY_BONUS_REF_W = 1920;
 export const BUY_BONUS_REF_H = 1080;
 
-export const BUY_BONUS_CARD_W = 296;
-export const BUY_BONUS_CARD_CONFIRM_W = 440;
-export const BUY_BONUS_CARD_GAP = 20;
+export const BUY_BONUS_CARD_W = 460;
+export const BUY_BONUS_CARD_CONFIRM_W = 460;
+export const BUY_BONUS_CARD_GAP = 16;
 export const BUY_BONUS_CARD_PAD = 8;
 /** Max scatter cluster width inside card padding (keeps trophies on-card). */
 export const BUY_BONUS_CLUSTER_MAX_W =
 	BUY_BONUS_CARD_W - BUY_BONUS_CARD_PAD * 2;
 /** Extra space above the title (added to top edge padding). */
 export const BUY_BONUS_CARD_PAD_TOP_EXTRA = 12;
-export const BUY_BONUS_CARD_RADIUS_PX = 4;
+export const BUY_BONUS_CARD_RADIUS_PX = 18;
 
 /** Portrait mobile card width (Le Bandit–style compact row). */
 export const BUY_BONUS_PORTRAIT_CARD_W = 168;
@@ -127,6 +127,7 @@ export const buyBonusCardHeight = (
 	opts?: BuyBonusCardSizeOpts,
 ): number | undefined => {
 	if (opts?.portraitSheet) return undefined;
+	if (!opts?.compact && !opts?.showDescription) return 176;
 
 	if (opts?.compact) {
 		const m = compactMetrics();

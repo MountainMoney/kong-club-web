@@ -178,7 +178,7 @@ export const applySocialCopy = (text: string) => {
 
 /** Paytable uses curated strings — avoid applySocialCopy on pays/paying/win phrasing. */
 const PAYTABLE_COPY = {
-	title: { default: 'Paytable', social: 'Win Table' },
+	title: { default: 'PAY TABLE', social: 'WIN TABLE' },
 	intro: {
 		default:
 			'Clusters pay when 5 or more matching symbols connect. Values are multiples of your total bet. Cluster pay = base pay × the sum of lit tile multipliers (Bronze 2× / Silver 5× / Gold 10×).',

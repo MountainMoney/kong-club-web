@@ -103,6 +103,17 @@ export const volatilityLabelFromStd = (std: number): string => {
 const volatilityForMode = (mode: string): string =>
 	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode] ?? 0);
 
+/** GG-style star row: Low 2, Medium 3, High 4, Very High 5. */
+export const volatilityStarCount = (label: string) => {
+	if (/very high/i.test(label)) return 5;
+	if (/high/i.test(label)) return 4;
+	if (/medium/i.test(label)) return 3;
+	return 2;
+};
+
+export const volatilityCaps = (label: string) =>
+	`${label.replace(/^volatility:\s*/i, '').trim().toUpperCase()} VOLATILITY`;
+
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
@@ -111,7 +122,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'extraChance' },
 		volatility: volatilityForMode(ANTE_BET_MODE_KEY),
-		buttonColor: '#D96411',
+		buttonColor: '#FFE14A',
 	},
 	{
 		mode: 'feature_spin',
@@ -120,7 +131,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'featureSpin' },
 		volatility: volatilityForMode('feature_spin'),
-		buttonColor: '#D96411',
+		buttonColor: '#7DFF6A',
 	},
 	{
 		mode: 'peak_spin',
@@ -129,7 +140,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'summitSpin' },
 		volatility: volatilityForMode('peak_spin'),
-		buttonColor: '#D96411',
+		buttonColor: '#FFD500',
 	},
 	{
 		mode: 'bonus_see',
@@ -138,7 +149,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 3 },
 		volatility: volatilityForMode('bonus_see'),
-		buttonColor: '#6BA8F5',
+		buttonColor: '#5EE7FF',
 	},
 	{
 		mode: 'bonus_hear',
@@ -147,7 +158,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 4 },
 		volatility: volatilityForMode('bonus_hear'),
-		buttonColor: '#6BA8F5',
+		buttonColor: '#FF8A3D',
 	},
 	{
 		mode: 'bonus_gamble',
@@ -156,7 +167,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
 		volatility: volatilityForMode('bonus_gamble'),
-		buttonColor: '#50BE50',
+		buttonColor: '#FF5AD1',
 	},
 ];
 

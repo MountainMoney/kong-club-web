@@ -102,7 +102,7 @@
 
 	<button type="button" class="menu-row info-row" onclick={() => onInfo()}>
 		<span class="menu-info-i" aria-hidden="true">i</span>
-		<span class="menu-label">INFO</span>
+		<span class="menu-label">GAME INFO</span>
 	</button>
 
 	<div class="menu-row slider-row">
@@ -121,12 +121,11 @@
 		display: grid;
 		gap: 0;
 		padding: var(--menu-pad);
-		border: 2px solid #fff;
-		border-radius: 12px;
-		background-color: rgba(28, 28, 28, 0.78);
-		background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1.2px);
-		background-size: 8px 8px;
-		box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
+		border: 2px solid #3a3a3a;
+		border-radius: 16px;
+		background-color: #161616;
+		background-image: none;
+		box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 		backdrop-filter: blur(10px);
 		-webkit-backdrop-filter: blur(10px);
 	}
@@ -182,7 +181,9 @@
 		display: block;
 		justify-self: center;
 		align-self: center;
-		font-family: 'Fredoka One', Inter, sans-serif;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
+		letter-spacing: 0.08em;
 		font-size: calc(var(--menu-label-size) * 1.7);
 		font-weight: 400;
 		line-height: 1;
@@ -193,7 +194,9 @@
 	}
 
 	.menu-label {
-		font-family: 'Fredoka One', Inter, sans-serif;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
+		letter-spacing: 0.08em;
 		font-size: var(--menu-label-size);
 		font-weight: 400;
 		letter-spacing: 0.02em;

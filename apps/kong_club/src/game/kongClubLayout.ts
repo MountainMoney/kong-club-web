@@ -159,14 +159,19 @@ export const MONKEY_MASCOT = {
 	stumpNudge: { x: 8, y: 18 },
 } as const;
 
-/** Title — top-left, sized to stay in the header (square logo must not cover the grid). */
+/**
+ * Logo sits on the top beam of the vine frame, centered — wordmark is in the
+ * upper portion of the square title plate.
+ */
 export const getMonkeyTitleLayout = (board: MonkeyBoardLayout) => {
 	const frame = getMonkeyUnifiedFrameLayout(board);
+	const centerX = frame.x + frame.width * (0.5 - frame.anchor.x);
+	const topY = frame.y - frame.height * frame.anchor.y;
 	return {
-		x: 12,
-		y: 8,
-		width: Math.round(frame.width * 0.25),
-		anchor: { x: 0, y: 0 } as const,
+		x: centerX,
+		y: topY + frame.height * 0.02,
+		width: Math.round(frame.width * 0.36),
+		anchor: { x: 0.5, y: 0.48 } as const,
 	};
 };
 
@@ -226,15 +231,29 @@ export type MonkeyMascotMainTransform = {
 /** Feet on the jungle_bg stump (bg ratios → canvas → main-layout). */
 export const getMonkeyMascotLayout = (
 	main: MonkeyMascotMainTransform | { width: number; height: number },
-	_board?: MonkeyBoardLayout,
+	board?: MonkeyBoardLayout,
 	canvas?: { width: number; height: number },
 ) => {
 	const m = MONKEY_MASCOT;
-	const height = main.height * m.heightScreenRatio;
-	const width = height * m.aspect;
-
 	const canvasW = canvas?.width ?? main.width;
 	const canvasH = canvas?.height ?? main.height;
+	const portrait = canvasH > canvasW * 1.05;
+
+	if (portrait && board) {
+		const frame = getMonkeyUnifiedFrameLayout(board);
+		const frameBottom = frame.y + frame.height * (1 - frame.anchor.y);
+		const height = main.height * 0.2;
+		const width = height * m.aspect;
+		return {
+			x: main.width * 0.5,
+			y: Math.min(main.height * 0.9, frameBottom + height * 0.72),
+			width,
+			height,
+		};
+	}
+
+	const height = main.height * m.heightScreenRatio;
+	const width = height * m.aspect;
 	const bg = getJungleBgCover(canvasW, canvasH);
 	const stumpCanvasX = bg.x - bg.width / 2 + m.stumpBgRatio.x * bg.width;
 	const stumpCanvasY = bg.y - bg.height / 2 + m.stumpBgRatio.y * bg.height;
@@ -258,4 +277,7 @@ export const getMonkeyMascotLayout = (
 	return { x: feetX, y: feetY, width, height };
 };
 
-export const isMonkeyMascotVisible = (layoutType: LayoutMode) => layoutType !== 'portrait';
+export const isMonkeyMascotVisible = (layoutType: LayoutMode) => {
+	void layoutType;
+	return true;
+};

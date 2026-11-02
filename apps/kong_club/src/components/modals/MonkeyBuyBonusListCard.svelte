@@ -159,7 +159,8 @@
 	<button
 		type="button"
 		class="action-btn"
-		style={`background-color: ${props.card.buttonColor};`}
+		class:buy={props.actionLabel === 'BUY'}
+		class:activate={props.actionLabel === 'ACTIVATE'}
 		disabled={props.disabled}
 		data-bonus-action
 		onclick={(event) => {
@@ -181,14 +182,13 @@
 		min-height: 76px;
 		padding: 10px 10px 10px 8px;
 		box-sizing: border-box;
-		background-color: rgba(28, 28, 28, 0.78);
-		background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1.2px);
-		background-size: 8px 8px;
-		border-radius: 12px;
-		border: 3px solid #fff;
-		border-left: 3px solid #fff;
-		box-shadow: none;
-		font-family: 'Fredoka One', Inter, sans-serif;
+		background-color: #161616;
+		background-image: none;
+		border-radius: 16px;
+		border: 2px solid #3a3a3a;
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
 		color: #fff;
 		cursor: pointer;
 		touch-action: manipulation;
@@ -363,5 +363,28 @@
 			opacity: 0.45;
 			cursor: not-allowed;
 		}
+
+		&.activate {
+			background: transparent;
+			color: #ffd500;
+			border: 2px solid #ffd500;
+			border-radius: 12px;
+			font-weight: 800;
+		}
+
+		&.buy {
+			background: #ffd500;
+			color: #161616;
+			border-radius: 12px;
+			font-weight: 800;
+		}
+	}
+
+	.title {
+		color: var(--accent, #ffd500);
+		font-weight: 800;
+		-webkit-text-stroke: 0.6px #1a1208;
+		paint-order: stroke fill;
+		text-shadow: none;
 	}
 </style>
