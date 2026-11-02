@@ -727,7 +727,11 @@
 						<span>{toolbarLabel('balance')}</span>
 						<strong>{balanceValue}</strong>
 					</div>
-					<div class="amount win-inline" class:on={winPopupOpen}>
+					<div
+						class="amount win-inline"
+						class:on={winPopupOpen}
+						style={`--label-size:${Math.round(toolbarLabelSize * 1.05)}px; --value-size:${Math.round(layout.valueSize * 1.15)}px`}
+					>
 						<span>{winChipLabel}</span>
 						<strong>{winPopupOpen ? winPopupAmount : ''}</strong>
 					</div>
@@ -2061,50 +2065,93 @@
 	}
 
 	.gg-portrait .portrait-controls {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1.05fr 0.92fr 0.78fr 1.28fr 0.78fr 0.92fr 0.92fr;
+		gap: 10px;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0 22px;
-		height: 248px;
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
+		padding: 8px 18px 0;
+		height: auto;
 	}
 
-	.gg-portrait .sprite,
-	.gg-portrait .bonus-button,
-	.gg-portrait .hamburger,
-	.gg-portrait .bet-step {
+	.gg-portrait .portrait-controls > .sprite,
+	.gg-portrait .portrait-controls > .bonus-button,
+	.gg-portrait .portrait-controls > .hamburger,
+	.gg-portrait .portrait-controls > .bet-step {
 		position: relative;
 		left: auto !important;
 		top: auto !important;
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 1;
+		min-width: 0;
+		max-height: 200px;
+		box-sizing: border-box;
 	}
 
-	.gg-portrait .sprite.spin {
-		width: 210px;
-		height: 210px;
+	.gg-portrait .bet-step {
+		display: grid;
+		place-items: center;
+		background: #1a1a1a;
+		border: 2px solid #6a6a6a;
+		border-radius: 16px;
 	}
 
-	.gg-portrait .bonus-button {
-		width: 128px;
-		height: 104px;
+	.gg-portrait .bet-step svg {
+		width: 62%;
+		height: 62%;
+	}
+
+	.gg-portrait .bet-step svg path {
+		stroke: #ffffff;
+		stroke-width: 3.4;
+	}
+
+	.gg-portrait .hamburger {
+		display: grid;
+		place-items: center;
+		background: #1a1a1a;
+		border: 2px solid #6a6a6a;
+		border-radius: 16px;
 	}
 
 	.gg-portrait .sprite.turbo,
-	.gg-portrait .sprite.auto,
-	.gg-portrait .hamburger,
-	.gg-portrait .bet-step {
-		width: 92px;
-		height: 92px;
+	.gg-portrait .sprite.auto {
+		background: #1a1a1a;
+		border: 2px solid #3a3a3a;
+		border-radius: 16px;
 	}
 
 	.gg-portrait .portrait-meters {
 		display: grid;
 		grid-template-columns: 1fr 1fr 1fr;
 		align-items: end;
-		padding: 4px 28px 8px;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 10px 18px 6px;
 	}
 
 	.gg-portrait .portrait-meters .amount {
 		align-items: center;
 		text-align: center;
+	}
+
+	.gg-portrait .portrait-meters .amount span {
+		font-size: 26px;
+		color: #b8b8b8;
+		letter-spacing: 0.12em;
+	}
+
+	.gg-portrait .portrait-meters .amount strong {
+		font-size: 44px;
+		color: #ffffff;
+	}
+
+	.gg-portrait .portrait-meters .win-inline span,
+	.gg-portrait .portrait-meters .win-inline strong {
+		color: #ffd500;
 	}
 
 	.gg-portrait .portrait-meters .win-inline {

@@ -9,7 +9,12 @@
 	import { getMonkeyTitleLayout } from '../game/kongClubLayout';
 
 	const context = getContext();
-	const layout = $derived(getMonkeyTitleLayout(context.stateGameDerived.boardLayout()));
+	const layout = $derived(
+		getMonkeyTitleLayout(
+			context.stateGameDerived.boardLayout(),
+			context.stateLayoutDerived.layoutType() === 'portrait',
+		),
+	);
 	const ready = $derived(hasLoadedAssetTexture(context.stateApp.loadedAssets, 'title_art'));
 	const logoScale = $derived(introLogoUniformScale(layout.width));
 	const titleShadow = new DropShadowFilter({

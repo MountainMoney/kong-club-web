@@ -185,9 +185,11 @@ export const buyBonusModeCostMultiplier = (mode: string) =>
 
 export { isActivateBetMode };
 
-/** Feature, TRIFECTA, and Gamble stay on. See and Hear are one-shot buys. */
-export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' =>
-	isActivateBetMode(mode) ? 'activate' : 'buy';
+/** Feature and TRIFECTA stay on. See, Hear, and Gamble are scatter buys. */
+export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
+	if (mode === 'bonus_gamble') return 'buy';
+	return isActivateBetMode(mode) ? 'activate' : 'buy';
+};
 
 export const BUY_BONUS_MENU_PREFETCH = [
 	'/assets/sprites/monkeySymbols/ST.png',

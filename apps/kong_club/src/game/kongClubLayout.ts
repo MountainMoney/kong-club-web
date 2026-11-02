@@ -66,13 +66,21 @@ export const getMonkeyBoardLayout = (
 	anchor: { x: number; y: number };
 	pivot: { x: number; y: number };
 } => {
-	const targetFrameW = main.width * MOCKUP_FRAME_W_RATIO;
 	const base = baseFrameSize();
+	const portrait = main.height > main.width * 1.05;
+	// Portrait: symbol grid ≈ 90% of the playfield width, sitting in the upper half.
+	const targetFrameW = portrait
+		? main.width * 0.9 * (base.w / MM_BASE_GRID.w)
+		: main.width * MOCKUP_FRAME_W_RATIO;
 	const scale = targetFrameW / base.w;
+	const frameH = base.h * scale;
+	const centerY = portrait
+		? main.height * 0.05 + frameH / 2
+		: main.height * MOCKUP_BOARD_CENTER_Y_RATIO;
 
 	return {
 		x: main.width * 0.5,
-		y: main.height * MOCKUP_BOARD_CENTER_Y_RATIO,
+		y: centerY,
 		width: MM_BASE_GRID.w,
 		height: MM_BASE_GRID.h,
 		scale,
@@ -163,10 +171,18 @@ export const MONKEY_MASCOT = {
  * Logo sits on the top beam of the vine frame, centered — wordmark is in the
  * upper portion of the square title plate.
  */
-export const getMonkeyTitleLayout = (board: MonkeyBoardLayout) => {
+export const getMonkeyTitleLayout = (board: MonkeyBoardLayout, portrait = false) => {
 	const frame = getMonkeyUnifiedFrameLayout(board);
 	const centerX = frame.x + frame.width * (0.5 - frame.anchor.x);
 	const topY = frame.y - frame.height * frame.anchor.y;
+	if (portrait) {
+		return {
+			x: centerX,
+			y: topY + frame.height * 0.01,
+			width: Math.round(Math.min(frame.width * 0.42, board.width * (board.scale ?? 1) * 1.15)),
+			anchor: { x: 0.5, y: 0.46 } as const,
+		};
+	}
 	return {
 		x: centerX,
 		y: topY + frame.height * 0.02,
@@ -242,11 +258,11 @@ export const getMonkeyMascotLayout = (
 	if (portrait && board) {
 		const frame = getMonkeyUnifiedFrameLayout(board);
 		const frameBottom = frame.y + frame.height * (1 - frame.anchor.y);
-		const height = main.height * 0.2;
+		const height = main.height * 0.15;
 		const width = height * m.aspect;
 		return {
 			x: main.width * 0.5,
-			y: Math.min(main.height * 0.9, frameBottom + height * 0.72),
+			y: Math.min(main.height * 0.96, frameBottom + height * 0.62),
 			width,
 			height,
 		};

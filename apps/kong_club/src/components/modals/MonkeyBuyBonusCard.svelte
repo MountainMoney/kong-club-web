@@ -81,11 +81,19 @@
 		props.portraitSheet ? 1 : props.compact ? width / BUY_BONUS_CARD_W : styleVars.scale,
 	);
 	/** Icon cluster scale — separate from typography on portrait sheet. */
-	const artScale = $derived(
-		props.portraitSheet
-			? styleVars.imageH / BUY_BONUS_IMAGE_H
-			: cardScale,
-	);
+	const artScale = $derived.by(() => {
+		if (props.portraitSheet) return styleVars.imageH / BUY_BONUS_IMAGE_H;
+		if (props.confirmed || props.compact) return cardScale;
+		const cluster =
+			props.card.iconLayout.kind === 'scatter'
+				? buyBonusScatterLayout(props.card.iconLayout.count as 3 | 4 | 5)
+				: props.card.iconLayout.kind === 'featureSpin'
+					? buyBonusCoinTriangleLayout()
+					: null;
+		if (!cluster) return cardScale;
+		const box = props.confirmed ? 220 : 168;
+		return Math.min(box / cluster.clusterWidth, box / cluster.clusterHeight);
+	});
 
 	const priceText = $derived(
 		formatMoney(stateBet.betAmount * buyBonusModeCostMultiplier(props.card.mode), 'bet'),
@@ -186,11 +194,10 @@
 			{volatilityCaps(props.card.volatility)}
 			<span class="stars" aria-hidden="true">{'★'.repeat(volatilityStarCount(props.card.volatility))}</span>
 		</p>
-		<p class="cost bonus-card-cost">{priceText}</p>
-
 		<div class="btn-accent" aria-hidden="true"></div>
 
 		{#if props.confirmed && props.onback}
+			<p class="cost bonus-card-cost">{priceText}</p>
 			<div class="btn-row" data-bonus-action>
 				<button
 					type="button"
@@ -205,24 +212,27 @@
 				>CONFIRM</button>
 			</div>
 		{:else}
-			<button
-				type="button"
-				class="action-btn"
-				class:buy={props.actionLabel === 'BUY'}
-				class:activate={props.actionLabel === 'ACTIVATE'}
-				disabled={props.disabled}
-				data-bonus-action
-				onclick={(event) => {
-					event.stopPropagation();
-					if (props.confirmed) {
-						props.onaction?.(event);
-					} else {
-						props.onselect?.();
-					}
-				}}
-			>
-				{props.actionLabel}
-			</button>
+			<div class="card-foot">
+				<p class="cost bonus-card-cost">{priceText}</p>
+				<button
+					type="button"
+					class="action-btn"
+					class:buy={props.actionLabel === 'BUY'}
+					class:activate={props.actionLabel === 'ACTIVATE'}
+					disabled={props.disabled}
+					data-bonus-action
+					onclick={(event) => {
+						event.stopPropagation();
+						if (props.confirmed) {
+							props.onaction?.(event);
+						} else {
+							props.onselect?.();
+						}
+					}}
+				>
+					{props.actionLabel}
+				</button>
+			</div>
 		{/if}
 	</div>
 </div>
@@ -625,20 +635,24 @@
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .bonus-card-inner {
 		display: grid;
-		grid-template-columns: 120px minmax(0, 1fr) auto;
+		grid-template-columns: 38% minmax(0, 1fr) auto;
 		grid-template-areas:
 			'art title title'
 			'art vol vol'
-			'price price btn';
+			'art price btn';
 		align-items: center;
+		column-gap: 12px;
+		row-gap: 4px;
 		text-align: left;
 		height: 100%;
+		box-sizing: border-box;
+		padding: 14px 16px 16px 8px;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .image-wrap {
 		grid-area: art;
-		width: 112px;
-		height: 112px;
+		width: 100%;
+		height: 168px;
 		margin: 0;
 		overflow: hidden;
 	}
@@ -653,30 +667,41 @@
 		align-items: flex-start;
 	}
 
-	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .cost {
-		grid-area: price;
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot {
+		grid-column: 2 / 4;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		min-width: 0;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .cost {
 		width: auto;
+		flex: 1 1 auto;
+		min-width: 0;
+		margin: 0;
 		text-align: left;
 		font-size: 22px;
 	}
 
-	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .action-btn {
-		grid-area: btn;
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .action-btn {
+		flex: 0 0 auto;
 		width: auto;
 		min-width: 118px;
-		min-height: 42px;
+		min-height: 44px;
+		margin: 0;
 		padding: 0 14px;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .hero-trophy,
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .bonus-image {
-		width: 92px;
-		height: 92px;
+		width: 160px;
+		height: 160px;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .icon-cluster--scatter {
-		transform: scale(0.22);
-		transform-origin: center center;
+		transform: none;
 	}
 
 	@keyframes gg-card-in {
