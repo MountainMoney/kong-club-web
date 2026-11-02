@@ -49,6 +49,11 @@ export const createIntermediateMachineResumeBet = (actors: {
 								target: 'ending',
 							},
 						],
+						onError: [
+							{
+								target: 'end',
+							},
+						],
 					},
 				},
 				ending: {
@@ -60,6 +65,11 @@ export const createIntermediateMachineResumeBet = (actors: {
 							rawBet: context.rawBet,
 						}),
 						onDone: [
+							{
+								target: 'end',
+							},
+						],
+						onError: [
 							{
 								target: 'end',
 							},

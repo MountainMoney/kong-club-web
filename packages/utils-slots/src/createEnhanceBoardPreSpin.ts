@@ -12,6 +12,7 @@ export function createEnhanceBoardPreSpin<TReel extends Reel<any, any>>({
 
 	const preSpin = async ({ paddingBoard }: { paddingBoard?: TRawSymbol[][] }) => {
 		stateSlots.isPreSpinning = true;
+		stateSlots.fallOutStartedAt = performance.now();
 
 		const isTurboBeforeAll = stateBet.isTurbo;
 

@@ -25,14 +25,28 @@ export type CascadingReelSpinOptions = {
 	symbolFallInInterval: number;
 	symbolFallInBounceSpeed: number;
 	symbolFallInBounceSizeMulti: number;
+	/** Defaults to cubicOut when omitted. */
+	symbolFallInEasing?: (t: number) => number;
 	symbolFallOutSpeed: number;
 	symbolFallOutInterval: number;
 	// reel
 	reelFallInDelay: number;
+	/** L→R fall-in wave gap (ms). Omit to derive a tight stagger from reelFallOutDelay. */
+	reelFallInStagger?: number;
 	// extra padding
 	reelPaddingMultiplierNormal: number;
 	reelPaddingMultiplierAnticipated: number;
 	reelFallOutDelay: number;
+	/** Extra empty hang (ms) before the first anticipated reel rains. Omit = 0. */
+	reelAnticipationHangMs?: number;
+	/** Inclusive hang range. When set, enhance-board rolls once per spin. */
+	reelAnticipationHangMsMin?: number;
+	reelAnticipationHangMsMax?: number;
+	/** L→R gap (ms) between anticipated reels. Omit = reelFallInStagger. */
+	reelAnticipationStaggerMs?: number;
+	/** Inclusive tease-reel gap range. When set, enhance-board rolls once per spin. */
+	reelAnticipationStaggerMsMin?: number;
+	reelAnticipationStaggerMsMax?: number;
 };
 
 type ReelCreateOptions<TRawSymbol extends object, TSymbolState extends string> = {
@@ -42,6 +56,8 @@ type ReelCreateOptions<TRawSymbol extends object, TSymbolState extends string> =
 	symbolHeight: number;
 	onReelStopping: () => void;
 	onSymbolLand: (args: { rawSymbol: TRawSymbol }) => void;
+	/** Filler faces while a tease reel keeps raining. Must not include scatters. */
+	getTeaseRawSymbol?: () => TRawSymbol;
 };
 
 export type SpinningReelCreateOptions<

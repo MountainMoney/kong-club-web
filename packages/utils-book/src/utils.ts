@@ -10,7 +10,9 @@ export function recordBookEvent<TBookEvent extends BaseBookEvent>({
 	bookEvent: TBookEvent;
 }) {
 	if (PUBLIC_CHROMATIC || stateUrlDerived.replay()) {
-		console.log('mock request end-event:', { index: bookEvent.index, type: bookEvent.type });
+		if (import.meta.env.DEV) {
+			console.log('mock request end-event:', { index: bookEvent.index, type: bookEvent.type });
+		}
 		return;
 	}
 
@@ -21,7 +23,7 @@ export function recordBookEvent<TBookEvent extends BaseBookEvent>({
 			sessionID: stateUrlDerived.sessionID(),
 		});
 	} catch (error) {
-		console.error(error);
+		if (import.meta.env.DEV) console.error(error);
 	}
 }
 

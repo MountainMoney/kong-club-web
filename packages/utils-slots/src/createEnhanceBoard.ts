@@ -2,12 +2,15 @@ import { createEnhanceBoardPreSpin } from './createEnhanceBoardPreSpin';
 import { createEnhanceBoardSpin } from './createEnhanceBoardSpin';
 import type { Reel, GetRawSymbolFromReel } from './types';
 
-export function createEnhanceBoard() {
+export function createEnhanceBoard(options?: { overlapFallInWithFallOut?: boolean }) {
 	function enhanceBoard<TReel extends Reel<any, any>>({ board }: { board: TReel[] }) {
 		type TRawSymbol = GetRawSymbolFromReel<TReel>;
 
 		const { preSpin } = createEnhanceBoardPreSpin({ board });
-		const { spin } = createEnhanceBoardSpin({ board });
+		const { spin } = createEnhanceBoardSpin({
+			board,
+			overlapFallInWithFallOut: options?.overlapFallInWithFallOut,
+		});
 		const settle = (rawBoard?: TRawSymbol[][]) =>
 			board.forEach((reel, reelIndex) => {
 				const rawSymbols = rawBoard?.[reelIndex] || [];

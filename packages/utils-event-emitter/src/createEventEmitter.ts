@@ -29,7 +29,10 @@ export function createEventEmitter<TEmitterEvent extends EmitterEventBase>() {
 	};
 
 	const subscribeOnMount = (emitterEventHandlerMap: Partial<EmitterEventHandlerMap>) => {
-		onMount(() => subscribeHandlerMap(emitterEventHandlerMap));
+		onMount(() => {
+			const unsubscribe = subscribeHandlerMap(emitterEventHandlerMap);
+			return unsubscribe;
+		});
 	};
 
 	const broadcast = (emitterEvent: TEmitterEvent) => {
@@ -45,7 +48,11 @@ export function createEventEmitter<TEmitterEvent extends EmitterEventBase>() {
 		return Promise.all(getPromises());
 	};
 
+	/** Register handlers immediately (FX Lab / book-driven UI that must not miss early events). */
+	const subscribe = subscribeHandlerMap;
+
 	const eventEmitter = {
+		subscribe,
 		subscribeOnMount,
 		broadcast,
 		broadcastAsync,

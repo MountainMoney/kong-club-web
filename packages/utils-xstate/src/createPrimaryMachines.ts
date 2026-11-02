@@ -1,7 +1,7 @@
 import { fromPromise } from 'xstate';
 
 import { API_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
-import { stateBet, stateUrlDerived, stateModal } from 'state-shared';
+import { stateBet, stateBetDerived, stateUrlDerived, stateModal } from 'state-shared';
 import { requestBet, requestEndRound } from 'rgs-requests';
 
 import type { BaseBet } from './types';
@@ -27,20 +27,20 @@ const handleRequestBet = async ({ onError }: { onError: () => void }) => {
 		} else {
 			throw {
 				error: 'Empty state in data.round',
-				message: JSON.stringify({ data }),
+				message: import.meta.env.DEV ? JSON.stringify({ data }) : 'Empty state in data.round',
 			};
 		}
 	} catch (error) {
 		onError();
 		stateBet.autoSpinsCounter = 0;
 		stateModal.modal = { name: 'error', error };
-		console.error(error);
+		if (import.meta.env.DEV) console.error(error);
 		throw error;
 	}
 };
 
-const handleRequestEndRound = async () => {
-	if(stateUrlDerived.replay()) return;
+const handleRequestEndRound = async ({ onError }: { onError?: () => void }) => {
+	if (stateUrlDerived.replay()) return;
 
 	try {
 		const data = await requestEndRound({
@@ -54,14 +54,18 @@ const handleRequestEndRound = async () => {
 
 		if (data?.balance?.amount !== undefined) {
 			return data;
-		} else {
-			throw {
-				error: 'Empty amount in data.balance',
-				message: JSON.stringify({ data }),
-			};
 		}
+
+		throw {
+			error: 'Empty amount in data.balance',
+			message: import.meta.env.DEV ? JSON.stringify({ data }) : 'Empty amount in data.balance',
+		};
 	} catch (error) {
-		console.error(error);
+		onError?.();
+		stateBet.autoSpinsCounter = 0;
+		stateModal.modal = { name: 'error', error };
+		if (import.meta.env.DEV) console.error(error);
+		throw error;
 	}
 };
 
@@ -69,11 +73,16 @@ const handleUpdateBalance = ({ balanceAmountFromApi }: { balanceAmountFromApi: n
 	stateBet.balanceAmount = balanceAmountFromApi / API_AMOUNT_MULTIPLIER;
 };
 
+const debitWageredBet = () => {
+	stateBet.balanceAmount = Math.max(0, stateBet.balanceAmount - stateBetDerived.betCost());
+};
+
 type Options<TBet extends BaseBet> = {
 	onResumeGameActive: (betToResume: TBet) => TBet;
 	onResumeGameInactive: (betToResume: TBet) => void;
 	onNewGameStart: () => Promise<void> | undefined;
 	onNewGameError: () => any;
+	onEndRoundError?: () => unknown;
 	onPlayGame: (bet: TBet) => Promise<void>;
 	checkIsBonusGame: (bet: TBet) => boolean;
 };
@@ -84,6 +93,7 @@ function createPrimaryMachines<TBet extends BaseBet>(options: Options<TBet>) {
 		onResumeGameInactive,
 		onNewGameStart,
 		onNewGameError,
+		onEndRoundError,
 		onPlayGame,
 		checkIsBonusGame,
 	} = options;
@@ -93,11 +103,16 @@ function createPrimaryMachines<TBet extends BaseBet>(options: Options<TBet>) {
 	const BET_TYPE_METHODS_MAP = {
 		noWin: {
 			newGame: async () => undefined,
-			endGame: async () => undefined,
+			endGame: async () => {
+				if (balanceAmountFromApiHolder !== null) {
+					handleUpdateBalance({ balanceAmountFromApi: balanceAmountFromApiHolder });
+					balanceAmountFromApiHolder = null;
+				}
+			},
 		},
 		singleRoundWin: {
 			newGame: async () => {
-				const endRoundData = await handleRequestEndRound();
+				const endRoundData = await handleRequestEndRound({ onError: onEndRoundError });
 				if (endRoundData?.balance) {
 					balanceAmountFromApiHolder = endRoundData.balance.amount;
 				}
@@ -112,7 +127,7 @@ function createPrimaryMachines<TBet extends BaseBet>(options: Options<TBet>) {
 		bonusWin: {
 			newGame: async () => undefined,
 			endGame: async () => {
-				const data = await handleRequestEndRound();
+				const data = await handleRequestEndRound({ onError: onEndRoundError });
 				if (data?.balance) {
 					handleUpdateBalance({ balanceAmountFromApi: data.balance.amount });
 					balanceAmountFromApiHolder = null;
@@ -144,8 +159,10 @@ function createPrimaryMachines<TBet extends BaseBet>(options: Options<TBet>) {
 
 		if (data) {
 			if (data.balance) {
-				handleUpdateBalance({ balanceAmountFromApi: data.balance.amount });
+				balanceAmountFromApiHolder = data.balance.amount;
 			}
+
+			debitWageredBet();
 
 			const bet = data.round as TBet;
 			const betType = getBetType({ bet });

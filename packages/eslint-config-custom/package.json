@@ -1,15 +1,27 @@
 {
   "name": "eslint-config-custom",
   "version": "0.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "./index.cjs",
+  "exports": {
+    ".": {
+      "import": "./flat.js",
+      "require": "./index.cjs"
+    },
+    "./flat": "./flat.js",
+    "./legacy": "./index.cjs"
+  },
   "license": "MIT",
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "latest",
-    "@typescript-eslint/parser": "latest",
-    "eslint-config-prettier": "latest",
-    "eslint-config-turbo": "latest",
-    "eslint-plugin-svelte": "latest",
-    "@types/node": "latest"
+    "@eslint/js": "9.21.0",
+    "@types/node": "22.13.5",
+    "@typescript-eslint/eslint-plugin": "8.62.0",
+    "@typescript-eslint/parser": "8.62.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-config-turbo": "2.10.0",
+    "eslint-plugin-svelte": "3.19.0",
+    "globals": "16.0.0",
+    "typescript-eslint": "8.62.0"
   },
   "publishConfig": {
     "access": "public"

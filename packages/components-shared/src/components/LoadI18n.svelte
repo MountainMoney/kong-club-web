@@ -8,7 +8,7 @@
 	import { onMount, type Snippet } from 'svelte';
 
 	import { stateUrlDerived, type Language } from 'state-shared';
-	import type { MessagesMap } from 'utils-shared/i18n';
+	import { resolveLocaleMessages, type MessagesMap } from 'utils-shared/i18n';
 
 	type Props = {
 		debug?: boolean;
@@ -21,22 +21,30 @@
 	let loaded = $state(false);
 
 	const loadMessages = (lang: Language) => {
-		const messages = props.messagesMap[lang];
-		if (props.debug) console.log({ messages });
-		return messages;
+		const { locale, messages } = resolveLocaleMessages(lang, props.messagesMap);
+		if (props.debug) console.log({ locale, messages });
+		return { locale, messages };
 	};
 
 	onMount(() => {
+		const initLocale = (lang: Language) => {
+			const { locale, messages } = loadMessages(lang);
+			stateI18nDerived.init(locale, messages);
+			return locale;
+		};
+
 		try {
-			const messages = loadMessages(stateUrlDerived.lang());
-			stateI18nDerived.init(stateUrlDerived.lang(), messages);
+			initLocale(stateUrlDerived.lang());
 		} catch (error) {
-			console.error("Loading fallback locale 'en' because of error", error);
+			if (import.meta.env.DEV) {
+				console.error("[i18n] Failed to init locale; falling back to 'en'.", error);
+			}
 			try {
-				const messages = loadMessages('en');
-				stateI18nDerived.init('en', messages);
-			} catch (error) {
-				console.error("Loading fallback locale 'en' without any messages because of error", error);
+				initLocale('en');
+			} catch (fallbackError) {
+				if (import.meta.env.DEV) {
+					console.error("[i18n] Failed to init 'en' fallback; using empty catalog.", fallbackError);
+				}
 				stateI18nDerived.init('en', {});
 			}
 		}

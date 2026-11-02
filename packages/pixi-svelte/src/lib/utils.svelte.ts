@@ -1,5 +1,3 @@
-import WebFont from 'webfontloader';
-
 import type { PixiPoint, Sizes } from './types';
 
 export const REM = 16;
@@ -58,26 +56,77 @@ export function detectWebGL() {
 	return -1;
 }
 
+const FONT_PRELOAD_TIMEOUT_MS = 4_000;
+
 export const preloadFont = () =>
 	new Promise<void>((resolve) => {
-		try {
-			WebFont.load({
-				typekit: {
-					id: 'aba0ebl',
-				},
-				active: () => {
-					resolve();
-				},
-				inactive: () => {
-					console.error('Web font load inactive');
-					resolve();
-				},
-			});
-		} catch (error) {
-			console.error(error);
+		let settled = false;
+		const finish = () => {
+			if (settled) return;
+			settled = true;
+			clearTimeout(timeoutId);
 			resolve();
+		};
+
+		const timeoutId = setTimeout(finish, FONT_PRELOAD_TIMEOUT_MS);
+
+		try {
+			// Main platform builds must not request external font providers.
+			void document.fonts?.ready.then(finish, finish);
+		} catch {
+			// Font preload is cosmetic and must not block Pixi init.
+			finish();
 		}
 	});
+
+/**
+ * Pixi 8 resets width/height when `texture` is assigned. Apply texture first,
+ * then the rest, then size so cell-fit sprites stay cell-fit.
+ */
+export const applyPixiProps = <TProps extends object>(
+	props: TProps,
+	target: object,
+	ignore?: (keyof TProps)[],
+) => {
+	const keys = (Object.keys(props) as (keyof TProps)[]).filter(
+		(key) => props[key] !== undefined && (!ignore || !ignore.includes(key)),
+	);
+	const assign = (key: keyof TProps) => {
+		const name = String(key);
+		const value = props[key];
+		const dest = (target as Record<string, { set?: (...args: number[]) => void }>)[name];
+		if (
+			(name === 'scale' || name === 'anchor' || name === 'pivot' || name === 'position') &&
+			dest &&
+			typeof dest.set === 'function'
+		) {
+			if (typeof value === 'number') dest.set(value);
+			else if (value && typeof value === 'object' && 'x' in value && 'y' in value) {
+				const point = value as { x: number; y: number };
+				dest.set(point.x, point.y);
+			}
+			return;
+		}
+		(target as Record<string, unknown>)[name] = value;
+	};
+	if (keys.includes('texture' as keyof TProps)) assign('texture' as keyof TProps);
+	if (keys.includes('textures' as keyof TProps)) assign('textures' as keyof TProps);
+	for (const key of keys) {
+		if (
+			key === 'texture' ||
+			key === 'textures' ||
+			key === 'scale' ||
+			key === 'width' ||
+			key === 'height'
+		) {
+			continue;
+		}
+		assign(key);
+	}
+	if (keys.includes('scale' as keyof TProps)) assign('scale' as keyof TProps);
+	if (keys.includes('width' as keyof TProps)) assign('width' as keyof TProps);
+	if (keys.includes('height' as keyof TProps)) assign('height' as keyof TProps);
+};
 
 export function propsSyncEffect<TProps extends object, TTarget>({
 	props,
@@ -88,19 +137,12 @@ export function propsSyncEffect<TProps extends object, TTarget>({
 	target?: TTarget | (() => TTarget);
 	ignore?: (keyof TProps)[];
 }) {
-	$effect(() => {
-		// The whole thing is wrapped inside an $effect
-		// and because of ”props[key]“，it will react with every single props updated.
-		let targetInstance = target instanceof Function ? target() : target;
-		if (targetInstance) {
-			(Object.keys(props) as (keyof TProps)[])
-				.filter((key) => (ignore ? !ignore.includes(key) : true))
-				.forEach((key) => {
-					if (props[key] !== undefined) {
-						// @ts-ignore
-						targetInstance[key] = props[key];
-					}
-				});
+	const run = () => {
+		const targetInstance = target instanceof Function ? target() : target;
+		if (targetInstance && typeof targetInstance === 'object') {
+			applyPixiProps(props, targetInstance, ignore);
 		}
-	});
+	};
+	run();
+	$effect(run);
 }

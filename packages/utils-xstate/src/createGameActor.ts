@@ -39,6 +39,7 @@ const stateResumeBet = {
 		id: 'resumeBet',
 		src: 'resumeBet' as const,
 		onDone: 'idle',
+		onError: 'idle',
 	},
 };
 
@@ -47,6 +48,7 @@ const stateBet = {
 		id: 'bet',
 		src: 'bet' as const,
 		onDone: 'idle',
+		onError: 'idle',
 	},
 };
 
@@ -55,6 +57,7 @@ const stateAutoBet = {
 		id: 'autoBet',
 		src: 'autoBet' as const,
 		onDone: 'idle',
+		onError: 'idle',
 	},
 };
 

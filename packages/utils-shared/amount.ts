@@ -8,42 +8,61 @@ const NO_LOCALISATION_CURRENCY_MAP: Record<string, string> = {
 	XSC: 'SC',
 };
 
-// bookEventAmount: is the amount or win numbers in the events of books, e.g. the amount in setTotalWin bookEvent
-// {
-// 	"index": 3,
-// 	"type": "setTotalWin",
-// 	"amount": 100
-// },
-// if betting on $1,   100 bookEventAmount equals to $1.    betAmountMultiplier is (100 / BOOK_AMOUNT_MULTIPLIER =) 1
-// if betting on $1,    50 bookEventAmount equals to $0.5.  betAmountMultiplier is ( 50 / BOOK_AMOUNT_MULTIPLIER =) 0.5
-// if betting on $0.5, 100 bookEventAmount equals to $0.5.  betAmountMultiplier is (100 / BOOK_AMOUNT_MULTIPLIER =) 1
-// if betting on $0.5,  50 bookEventAmount equals to $0.25. betAmountMultiplier is ( 50 / BOOK_AMOUNT_MULTIPLIER =) 0.5
-
 export const bookEventAmountToBetAmountMultiplier = (bookEventAmount: number) =>
 	bookEventAmount / BOOK_AMOUNT_MULTIPLIER;
 
 export const bookEventAmountToNormalisedAmount = (bookEventAmount: number) => {
 	const betAmountMultiplier = bookEventAmountToBetAmountMultiplier(bookEventAmount);
-	return stateBet.wageredBetAmount * betAmountMultiplier;
+	const chip = stateBet.betAmount || stateBet.wageredBetAmount;
+	return chip * betAmountMultiplier;
 };
 
 export const numberToFloat = (value: number) => Number.parseFloat(`${value}`);
 
-export const numberToCurrencyString = (value: number) => {
+/** Stake: show 3 fractional cents when bet or amount is below 5¢. */
+export const EXTENDED_DECIMAL_THRESHOLD = 0.05;
+
+export const usesExtendedAmountDecimals = (amount: number) =>
+	Number.isFinite(amount) && amount > 0 && amount < EXTENDED_DECIMAL_THRESHOLD;
+
+/** Win displays use 3 decimals on sub-5¢ current bets/wins; balance stays at 2. */
+export const usesExtendedWinDecimals = (normalisedWinAmount: number) =>
+	usesExtendedAmountDecimals(stateBet.betAmount) ||
+	usesExtendedAmountDecimals(normalisedWinAmount);
+
+/** Bet / cost displays use 3 decimals when the wager or shown value is under 5¢. */
+export const usesExtendedBetDecimals = (displayAmount: number) =>
+	usesExtendedAmountDecimals(stateBet.betAmount) ||
+	usesExtendedAmountDecimals(stateBet.wageredBetAmount) ||
+	usesExtendedAmountDecimals(displayAmount);
+
+const formatCurrencyAmount = (value: number, fractionDigits: 2 | 3) => {
 	if (stateBet.currency in NO_LOCALISATION_CURRENCY_MAP) {
-		return `${NO_LOCALISATION_CURRENCY_MAP[stateBet.currency]} ${numberToFloat(value).toFixed(2)}`;
+		return `${NO_LOCALISATION_CURRENCY_MAP[stateBet.currency]} ${numberToFloat(value).toFixed(fractionDigits)}`;
 	}
 
 	return stateI18n.i18n.number(value, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
+		minimumFractionDigits: fractionDigits,
+		maximumFractionDigits: fractionDigits,
 		style: 'currency',
 		currency: stateBet.currency,
-		// numberingSystem: 'latn',
 	});
 };
+
+export const numberToCurrencyString = (value: number) => formatCurrencyAmount(value, 2);
+
+export const numberToBetCurrencyString = (value: number) =>
+	formatCurrencyAmount(value, usesExtendedBetDecimals(value) ? 3 : 2);
+
+export const numberToWinCurrencyString = (value: number) =>
+	formatCurrencyAmount(value, usesExtendedWinDecimals(value) ? 3 : 2);
 
 export const bookEventAmountToCurrencyString = (bookEventAmount: number) => {
 	const normalisedAmount = bookEventAmountToNormalisedAmount(bookEventAmount);
 	return numberToCurrencyString(normalisedAmount);
+};
+
+export const bookEventAmountToWinCurrencyString = (bookEventAmount: number) => {
+	const normalisedAmount = bookEventAmountToNormalisedAmount(bookEventAmount);
+	return numberToWinCurrencyString(normalisedAmount);
 };

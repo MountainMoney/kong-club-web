@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 
-	import { requestAuthenticate, requestReplay } from 'rgs-requests';
+	import { requestAuthenticate } from 'rgs-requests';
 	import { stateUrlDerived, stateBet, stateConfig, stateModal, stateUi } from 'state-shared';
 	import { API_AMOUNT_MULTIPLIER, MOST_USED_BET_INDEXES } from 'constants-shared/bet';
 
-	type Props = { children: Snippet };
+	type Props = {
+		children: Snippet;
+		/** Called after auth/replay gate completes and bet state from RGS is applied. */
+		onAuthenticated?: () => void;
+	};
 
 	const props: Props = $props();
 
@@ -98,47 +102,24 @@
 
 				if (authenticateData.round?.mode) {
 					stateBet.activeBetModeKey = authenticateData.round.mode;
-				};
+				}
 			}
 		} catch (error) {
-			console.error(error);
+			if (import.meta.env.DEV) console.error(error);
 			stateModal.modal = { name: 'error', error };
 		}
 	};
 
-	const handleReplay = async () => {
-		stateBet.betAmount = (stateUrlDerived.amount() / API_AMOUNT_MULTIPLIER) || 0;
-		stateBet.wageredBetAmount = (stateUrlDerived.amount() / API_AMOUNT_MULTIPLIER) || 0;
-		stateBet.activeBetModeKey = stateUrlDerived.mode();
-
-		const data = await requestReplay({
-			rgsUrl: stateUrlDerived.rgsUrl(),
-			game: stateUrlDerived.game(),
-			mode: stateUrlDerived.mode(),
-			version: stateUrlDerived.version(),
-			event: stateUrlDerived.event(),
-		});
-
-		if(data) {
-			// @ts-ignore
-			stateBet.betToResume = {
-				...data,
-				event: '0',
-				active: true,
-				mode: stateUrlDerived.mode(),
-			};
-		}
-	};
-
 	onMount(async () => {
-		if(stateUrlDerived.replay()) {
+		if (stateUrlDerived.replay()) {
+			// Replay fetch + Play gate live in the game's ReplayMode controller.
 			stateUi.config.mode = 'replay';
-			await handleReplay();
 		} else {
 			stateUi.config.mode = 'default';
 			await authenticate();
-		};
+		}
 
+		props.onAuthenticated?.();
 		authenticated = true;
 	});
 </script>

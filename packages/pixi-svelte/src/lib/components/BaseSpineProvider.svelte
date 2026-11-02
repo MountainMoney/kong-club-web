@@ -11,12 +11,11 @@
 </script>
 
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { propsSyncEffect } from '../utils.svelte';
 	import { setContextSpine, getContextParent } from '../context.svelte';
 
 	const props: Props = $props();
-	const parentContext = getContext('@@pixi_parent') as ReturnType<typeof getContextParent>;
+	const parentContext = getContextParent();
 	const spine = new SPINE_PIXI.Spine(props.spineData);
 
 	propsSyncEffect({ props, target: spine, ignore: ['children'] });

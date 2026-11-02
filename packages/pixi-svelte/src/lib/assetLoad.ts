@@ -44,3 +44,37 @@ export const getProcessed = ({
 	// @ts-expect-error
 	return processMethod({ key, rawAsset, src });
 };
+
+/** Cap parallel `PIXI.Assets.load` so mobile WebViews do not decode the whole manifest at once. */
+export const ASSET_LOAD_CONCURRENCY = 3;
+export const ASSET_LOAD_CONCURRENCY_COARSE = 2;
+
+export const assetLoadConcurrency = () => {
+	if (typeof window === 'undefined') return ASSET_LOAD_CONCURRENCY;
+	const coarse =
+		typeof window.matchMedia === 'function' && window.matchMedia('(pointer:coarse)').matches;
+	const mobile =
+		typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+	return coarse || mobile ? ASSET_LOAD_CONCURRENCY_COARSE : ASSET_LOAD_CONCURRENCY;
+};
+
+export const mapPool = async <T, R>(
+	items: readonly T[],
+	worker: (item: T, index: number) => Promise<R>,
+	concurrency = ASSET_LOAD_CONCURRENCY,
+): Promise<R[]> => {
+	if (items.length === 0) return [];
+	const results: R[] = new Array(items.length);
+	let nextIndex = 0;
+	const run = async () => {
+		while (true) {
+			const index = nextIndex;
+			nextIndex += 1;
+			if (index >= items.length) return;
+			results[index] = await worker(items[index], index);
+		}
+	};
+	const workerCount = Math.min(Math.max(1, concurrency), items.length);
+	await Promise.all(Array.from({ length: workerCount }, () => run()));
+	return results;
+};

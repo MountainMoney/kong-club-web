@@ -21,7 +21,7 @@
 	);
 </script>
 
-{#if texture === PIXI.Texture.EMPTY || debug}
+{#if import.meta.env.DEV && (texture === PIXI.Texture.EMPTY || debug)}
 	{console.error(`Sprite: key "${key}" is not found in the loadedAssets`)}
 	{console.log('loadedAssets', $state.snapshot(context.stateApp).loadedAssets)}
 {/if}

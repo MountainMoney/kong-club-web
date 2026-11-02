@@ -3,15 +3,21 @@
 	import * as PIXI from 'pixi.js';
 
 	import { getContextApp } from '../context.svelte';
-	import { getProcessed } from '../assetLoad';
-	import type { LoadedAssets, RawAsset } from '../types';
+	import { assetLoadConcurrency, getProcessed, mapPool } from '../assetLoad';
+	import type { LoadedAssets, RawAsset, Asset } from '../types';
 
 	type Props = { children: Snippet };
 
 	const props: Props = $props();
 	const context = getContextApp();
 
+	const ASSET_LOAD_TIMEOUT_MS = 45_000;
+	const LOG_PREFIX = '[AssetsLoader]';
+
 	let preLoaded = $state(false);
+	let preLoading = $state(false);
+	let postLoading = $state(false);
+	let postLoaded = $state(false);
 
 	const assetNameList = $derived(
 		context.stateApp.assets
@@ -29,30 +35,92 @@
 			: [],
 	);
 
-	let counter = 0;
+	const totalAssetCount = $derived(preAssetNameList.length + assetNameList.length);
+	let loadedCount = $state(0);
 
-	const onProgress = (value: number) => {
-		if (preLoaded && value === 1) {
-			counter = counter + 1;
-			const ratio = counter / assetNameList.length;
-			context.stateApp.loadingProgress = ratio * 100;
+	const bumpProgress = (phase: 'preload' | 'postload', message: string) => {
+		context.stateApp.loadingStatusMessage = message;
+		if (context.stateApp.loaded) return;
+		context.stateApp.loadingPhase = phase;
+		if (totalAssetCount <= 0) {
+			context.stateApp.loadingProgress = 100;
+			return;
+		}
+		context.stateApp.loadingProgress = Math.min(99, (loadedCount / totalAssetCount) * 100);
+	};
+
+	const resolveLoadSrc = (asset: Asset) => {
+		const { type, src } = asset;
+		return type === 'spine'
+			? Object.values(src).filter((item): item is string => typeof item === 'string')
+			: src;
+	};
+
+	const resolveLogUrl = (asset: Asset): string => {
+		const src = resolveLoadSrc(asset);
+		return Array.isArray(src) ? src.join(', ') : String(src);
+	};
+
+	const loadWithTimeout = async (promise: Promise<unknown>, key: string, url: string) => {
+		let timeoutId: ReturnType<typeof setTimeout> | undefined;
+		const timeout = new Promise<never>((_, reject) => {
+			timeoutId = setTimeout(
+				() => reject(new Error(`Timed out after ${ASSET_LOAD_TIMEOUT_MS}ms`)),
+				ASSET_LOAD_TIMEOUT_MS,
+			);
+		});
+		try {
+			return await Promise.race([promise, timeout]);
+		} finally {
+			if (timeoutId !== undefined) clearTimeout(timeoutId);
 		}
 	};
 
-	const loadAssets = async (nameList: string[]) => {
-		const loadedAssetsArray = await Promise.all(
-			nameList.map(async (key) => {
-				try {
-					const { type, src } = context.stateApp.assets![key];
-					const loadSrc =
-						type === 'spine' ? Object.values(src).filter((item) => typeof item === 'string') : src;
-					const rawAsset = await PIXI.Assets.load<RawAsset>(loadSrc, onProgress);
-					const processed = getProcessed({ key, rawAsset, type, src });
-					return processed;
-				} catch (error) {
-					console.error(error);
-				}
-			}),
+	const recordLoadError = (key: string, url: string, error: unknown) => {
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(`${LOG_PREFIX} Failed "${key}" (${url}):`, error);
+		const entry = { key, url, message };
+		const existing = context.stateApp.loadErrors ?? [];
+		if (!existing.some((e) => e.key === key)) {
+			context.stateApp.loadErrors = [...existing, entry];
+		}
+	};
+
+	const loadSingleAsset = async (key: string, phase: 'preload' | 'postload') => {
+		const asset = context.stateApp.assets![key];
+		const url = resolveLogUrl(asset);
+		bumpProgress(phase, `Loading ${key}…`);
+
+		try {
+			const loadSrc = resolveLoadSrc(asset);
+			const rawAsset = (await loadWithTimeout(
+				PIXI.Assets.load<RawAsset>(loadSrc),
+				key,
+				url,
+			)) as RawAsset;
+			const processed = getProcessed({ key, rawAsset, type: asset.type, src: asset.src }) ?? {};
+			loadedCount += 1;
+			context.stateApp.loadedAssets = {
+				...context.stateApp.loadedAssets,
+				...processed,
+			};
+			bumpProgress(phase, `Loaded ${key}`);
+			return processed;
+		} catch (error) {
+			recordLoadError(key, url, error);
+			loadedCount += 1;
+			bumpProgress(phase, `Skipped ${key} (failed)`);
+			return {};
+		}
+	};
+
+	const loadAssets = async (nameList: string[], phase: 'preload' | 'postload') => {
+		if (!nameList.length) return {} as LoadedAssets;
+
+		const loadedAssetsArray = await mapPool(
+			nameList,
+			(key) => loadSingleAsset(key, phase),
+			assetLoadConcurrency(),
 		);
 
 		return loadedAssetsArray.reduce(
@@ -64,35 +132,60 @@
 		);
 	};
 
+	const markPlayable = () => {
+		context.stateApp.loadingProgress = 100;
+		context.stateApp.loadingPhase =
+			(context.stateApp.loadErrors?.length ?? 0) > 0 ? 'error' : 'done';
+		context.stateApp.loadingStatusMessage =
+			(context.stateApp.loadErrors?.length ?? 0) > 0
+				? 'Loaded with fallbacks — starting game'
+				: 'Ready';
+		context.stateApp.loaded = true;
+	};
+
 	$effect(() => {
-		if (!preLoaded) {
-			(async () => {
+		if (preLoaded || preLoading) return;
+		(async () => {
+			preLoading = true;
+			try {
+				context.stateApp.loadingPhase = 'preload';
+				context.stateApp.loadingStatusMessage = 'Loading core assets…';
+				context.stateApp.loadErrors = [];
+				loadedCount = 0;
+
 				if (preAssetNameList.length > 0) {
-					const preLoadedAssets = await loadAssets(preAssetNameList);
-					if (preLoadedAssets) context.stateApp.loadedAssets = preLoadedAssets;
+					await loadAssets(preAssetNameList, 'preload');
 				}
+			} catch (error) {
+				console.error(`${LOG_PREFIX} Preload fatal:`, error);
+				recordLoadError('__preload__', 'batch', error);
+			} finally {
+				markPlayable();
 				preLoaded = true;
-			})();
-		}
+				preLoading = false;
+			}
+		})();
 	});
 
 	$effect(() => {
-		if (!context.stateApp.loaded && preLoaded) {
-			(async () => {
+		if (!preLoaded || postLoaded || postLoading) return;
+		(async () => {
+			postLoading = true;
+			try {
 				if (assetNameList.length > 0) {
-					const postLoadedAssets = await loadAssets(assetNameList);
-					if (postLoadedAssets)
-						context.stateApp.loadedAssets = {
-							...context.stateApp.loadedAssets,
-							...postLoadedAssets,
-						};
+					await loadAssets(assetNameList, 'postload');
 				}
-				context.stateApp.loaded = true;
-			})();
-		}
+			} catch (error) {
+				console.error(`${LOG_PREFIX} Postload fatal:`, error);
+				recordLoadError('__postload__', 'batch', error);
+			} finally {
+				postLoaded = true;
+				postLoading = false;
+			}
+		})();
 	});
 </script>
 
-{#if preLoaded}
+{#if context.stateApp.loaded}
 	{@render props.children()}
 {/if}

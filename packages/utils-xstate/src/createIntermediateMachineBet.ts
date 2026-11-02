@@ -73,6 +73,11 @@ export const createIntermediateMachineBet = ({
 								target: 'ending',
 							},
 						],
+						onError: [
+							{
+								target: 'end',
+							},
+						],
 					},
 				},
 				ending: {
@@ -86,6 +91,11 @@ export const createIntermediateMachineBet = ({
 						onDone: [
 							{
 								target: 'checkSpaceHold',
+							},
+						],
+						onError: [
+							{
+								target: 'end',
 							},
 						],
 					},

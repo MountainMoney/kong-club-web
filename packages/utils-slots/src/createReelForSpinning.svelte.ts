@@ -67,6 +67,8 @@ export function createReelForSpinning<TRawSymbol extends object, TSymbolState ex
 		motion: 'stopped' as SpinningReelMotion,
 		spinType: 'normal' as SpinType,
 		anticipating: false,
+		anticipationLevel: 0,
+		teaseLandAt: 0,
 		readyToSpin: () => {},
 		spinOptions: () => ({}) as SpinningReelSpinOptions,
 	});

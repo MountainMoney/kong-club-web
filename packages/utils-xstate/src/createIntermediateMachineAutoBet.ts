@@ -114,6 +114,14 @@ export const createIntermediateMachineAutoBet = ({ bet }: { bet: IntermediateMac
 					invoke: {
 						id: 'checkAutoSpinsCounter',
 						src: 'checkAutoSpinsCounter',
+						onDone: 'updateAutoSpinsCounter',
+						onError: 'end',
+					},
+				},
+				updateAutoSpinsCounter: {
+					invoke: {
+						id: 'updateAutoSpinsCounter',
+						src: 'updateAutoSpinsCounter',
 						onDone: 'playing',
 						onError: 'end',
 					},
@@ -122,14 +130,8 @@ export const createIntermediateMachineAutoBet = ({ bet }: { bet: IntermediateMac
 					invoke: {
 						id: 'bet',
 						src: 'bet',
-						onDone: 'updateAutoSpinsCounter',
-					},
-				},
-				updateAutoSpinsCounter: {
-					invoke: {
-						id: 'updateAutoSpinsCounter',
-						src: 'updateAutoSpinsCounter',
 						onDone: 'checkInsufficientFunds',
+						onError: 'end',
 					},
 				},
 				end: {

@@ -11,6 +11,7 @@
 
 <script lang="ts">
 	import type { LoadedSprite } from '../types';
+	import { onDestroy } from 'svelte';
 	import { getContextApp, getContextParticleParent } from '../context.svelte';
 
 	const props: Props = $props();
@@ -27,15 +28,22 @@
 	particleContainer.addParticle(...particles);
 	props.init(particles);
 
+	const tick = () => {
+		props.update(particles);
+		particleContainer.update();
+	};
+
 	if (context.stateApp.pixiApplication) {
-		context.stateApp.pixiApplication.ticker.add(() => {
-			props.update(particles);
-			particleContainer.update();
-		});
+		context.stateApp.pixiApplication.ticker.add(tick);
 	}
+
+	onDestroy(() => {
+		context.stateApp.pixiApplication?.ticker.remove(tick);
+		particleContainer.removeParticle(...particles);
+	});
 </script>
 
-{#if texture === PIXI.Texture.EMPTY}
+{#if import.meta.env.DEV && texture === PIXI.Texture.EMPTY}
 	{console.error(`Particle: key "${props.key}" is not found in the loadedAssets`)}
 	{console.log('loadedAssets', $state.snapshot(context.stateApp).loadedAssets)}
 {/if}

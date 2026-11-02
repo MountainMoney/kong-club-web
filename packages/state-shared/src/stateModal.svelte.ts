@@ -38,6 +38,11 @@ type ModalSettings = {
 	name: 'settings';
 };
 
+type ModalInsufficientBalance = {
+	name: 'insufficientBalance';
+	message?: string;
+};
+
 type Modal =
 	| ModalEmpty
 	| ModalError
@@ -46,6 +51,7 @@ type Modal =
 	| ModalBuyBonusConfirm
 	| ModalAutoSpin
 	| ModalAutoSpinMessage
+	| ModalInsufficientBalance
 	| ModalPayTable
 	| ModalGameRules
 	| ModalSettings;
