@@ -1,5 +1,7 @@
 import { stateConfig, stateMeta, stateUrlDerived } from 'state-shared';
 
+import config from './config';
+
 /** Stake social / Stake.us copy mode. */
 export const isSocialMode = () =>
 	stateUrlDerived.social() || stateConfig.jurisdiction.socialCasino;
@@ -179,9 +181,9 @@ const PAYTABLE_COPY = {
 	title: { default: 'Paytable', social: 'Win Table' },
 	intro: {
 		default:
-			'Clusters pay when 5 or more matching symbols connect. Values are multiples of your total bet. Level-Up Tiles on the winning cluster multiply that pay (Bronze 2× / Silver 5× / Gold 10× add on).',
+			'Clusters pay when 5 or more matching symbols connect. Values are multiples of your total bet. Cluster pay = base pay × the sum of lit tile multipliers (Bronze 2× / Silver 5× / Gold 10×).',
 		social:
-			'Clusters win when 5 or more matching symbols connect. Values are multiples of your total play amount. Level-Up Tiles on the winning cluster multiply that win (Bronze 2× / Silver 5× / Gold 10× add on).',
+			'Clusters win when 5 or more matching symbols connect. Values are multiples of your total play amount. Cluster win = base win × the sum of lit tile multipliers (Bronze 2× / Silver 5× / Gold 10×).',
 	},
 	wild: {
 		default: 'Wild (MW): substitutes for all paying symbols.',
@@ -193,8 +195,12 @@ const PAYTABLE_COPY = {
 		social:
 			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 	},
-	levelUpTiles:
-		'Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble.',
+	levelUpTiles: {
+		default:
+			'Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster pay = base pay × the sum of lit tile multipliers. Coin values: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.',
+		social:
+			'Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster win = base win × the sum of lit tile multipliers. Coin values: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.',
+	},
 	multiPower: {
 		default:
 			'MULTI (XM): Board Activation prize. Multiplies coin faces on the 8 adjacent tiles (×2 / ×3 / ×4 / ×5 / ×10 / ×20). The MULTI itself does not pay.',
@@ -202,10 +208,8 @@ const PAYTABLE_COPY = {
 			'MULTI (XM): rare Board Activation prize. Multiplies coin faces on the 8 adjacent tiles (×2 / ×3 / ×4 / ×5 / ×10 / ×20). The MULTI itself does not award a value.',
 	},
 	peakSpin: {
-		default:
-			'TRIFECTA Spin (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
-		social:
-			'TRIFECTA Play (1000×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.',
+		default: `TRIFECTA Spin (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
+		social: `TRIFECTA Play (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
 	},
 	collectorPower: {
 		default:
