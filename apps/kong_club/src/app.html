@@ -4,10 +4,7 @@
 		<meta charset="utf-8" />
 		<title>Kong Club</title>
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1, viewport-fit=cover"
-		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		%sveltekit.head%
 		<link rel="stylesheet" href="%sveltekit.assets%/trifecta/loader.css" />
 		<link
@@ -61,6 +58,20 @@
 				font-style: normal;
 				font-display: swap;
 			}
+			@font-face {
+				font-family: 'Rubik';
+				src: url('%sveltekit.assets%/assets/fonts/Rubik-SemiBold.woff2') format('woff2');
+				font-weight: 600;
+				font-style: normal;
+				font-display: swap;
+			}
+			@font-face {
+				font-family: 'Rubik';
+				src: url('%sveltekit.assets%/assets/fonts/Rubik-Bold.woff2') format('woff2');
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
 			html,
 			body {
 				margin: 0;
@@ -84,11 +95,25 @@
 			<section class="site-loader-brand" aria-label="Trifecta">
 				<div class="site-loader-lockup">
 					<div class="site-loader-mark" aria-hidden="true">
-						<img class="trinity" src="%sveltekit.assets%/trifecta/triforce-svgrepo-com.svg" width="80" height="80" alt="" draggable="false" />
+						<img
+							class="trinity"
+							src="%sveltekit.assets%/trifecta/triforce-svgrepo-com.svg"
+							width="80"
+							height="80"
+							alt=""
+							draggable="false"
+						/>
 					</div>
 					<p class="site-loader-name">TRIFECTA</p>
 				</div>
-				<div class="site-loader-progress" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+				<div
+					class="site-loader-progress"
+					role="progressbar"
+					aria-label="Loading progress"
+					aria-valuemin="0"
+					aria-valuemax="100"
+					aria-valuenow="0"
+				>
 					<span></span>
 				</div>
 			</section>

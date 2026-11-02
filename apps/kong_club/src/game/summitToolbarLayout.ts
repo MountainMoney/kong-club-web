@@ -42,7 +42,10 @@ export const getDesignSize = (canvasWidth: number, canvasHeight: number) => {
 
 export const getMainLayoutScale = (canvasWidth: number, canvasHeight: number) => {
 	const design = getDesignSize(canvasWidth, canvasHeight);
-	return Math.min(canvasWidth / Math.max(design.width, 1), canvasHeight / Math.max(design.height, 1));
+	return Math.min(
+		canvasWidth / Math.max(design.width, 1),
+		canvasHeight / Math.max(design.height, 1),
+	);
 };
 
 export const safeAreaToDesign = (
@@ -262,7 +265,13 @@ export const getSummitToolbarLayout = (
 			isPopoutL(canvasWidth, canvasHeight));
 	const sceneScale = getMainLayoutScale(canvasWidth, canvasHeight);
 	const isCompact = !portrait && !isDesktopLocked && canvasWidth < 900;
-	const mode = portrait ? 'portrait' : isDesktopLocked ? 'desktop' : isCompact ? 'compact' : 'fluid';
+	const mode = portrait
+		? 'portrait'
+		: isDesktopLocked
+			? 'desktop'
+			: isCompact
+				? 'compact'
+				: 'fluid';
 	const layoutWidth = design.width;
 	const layoutHeight = design.height;
 	const safeDesign = safeAreaToDesign(
@@ -425,15 +434,28 @@ export const getSummitToolbarLayout = (
 };
 
 /** Canvas Y of the top of Summit chrome (WIN chip / spin hang) for Pixi skip hit. */
+/** Skip taps stop where Gaia's Grotto's bar begins, so the spin and chips keep their hits. */
 export const getSummitSkipCanvasHeight = (
 	canvasWidth: number,
 	canvasHeight: number,
 	inBonus = false,
 	forcePortrait = false,
 ) => {
-	const layout = getSummitToolbarLayout(canvasWidth, canvasHeight, inBonus, forcePortrait);
-	const stageTop = (canvasHeight - layout.designHeight * layout.sceneScale) / 2;
-	const chromeTop =
-		stageTop + (layout.toolbarTopY + Math.min(0, layout.winY, layout.spinY, layout.bonusY)) * layout.sceneScale;
-	return Math.max(0, chromeTop);
+	void inBonus;
+	void forcePortrait;
+	const portrait = canvasWidth < canvasHeight;
+	const barFit = (canvasWidth * 0.94) / 1280;
+	const compact = portrait || barFit < 0.6;
+	if (!compact) {
+		const scale = Math.min(1, barFit, canvasHeight / 1080);
+		return Math.max(0, canvasHeight - (164 + 12) * scale);
+	}
+	const designH = 812;
+	const designW = 480;
+	const top = 625.5;
+	const scale = portrait
+		? Math.min(canvasWidth / designW, canvasHeight / designH)
+		: Math.min(1, canvasWidth / designW, (canvasHeight * 0.3) / (designH - top));
+	const originY = portrait ? (canvasHeight - designH * scale) / 2 : canvasHeight - designH * scale;
+	return Math.max(0, originY + top * scale);
 };
