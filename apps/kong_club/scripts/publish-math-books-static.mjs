@@ -17,7 +17,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_pick',
 ];
 
 const parseLutCsv = (text, bookCount) => {

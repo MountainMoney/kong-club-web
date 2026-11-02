@@ -1,5 +1,7 @@
 import { stateConfig, stateMeta, stateUrlDerived } from 'state-shared';
 
+import { normalizeLegacyBetModeKey } from './betModes';
+
 import config from './config';
 
 /** Stake social / Stake.us copy mode. */
@@ -111,11 +113,9 @@ export const insufficientFeatureSpinMessage = () =>
 
 /** Player-facing bet mode title for replay / UI (not raw math key). */
 export const betModeDisplayTitle = (modeKey: string) => {
-	const normalized = modeKey.toLowerCase();
-	const meta =
-		stateMeta.betModeMeta?.[normalized] ??
-		stateMeta.betModeMeta?.[normalized.toUpperCase()];
-	return meta?.text?.title ?? modeKey.toUpperCase();
+	const normalized = normalizeLegacyBetModeKey(modeKey);
+	const meta = stateMeta.betModeMeta?.[normalized];
+	return meta?.text?.title ?? normalized.toUpperCase();
 };
 
 /** Replay shows clean player-facing mode names; cost is already displayed in its own row. */
@@ -234,7 +234,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_gamble: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;
