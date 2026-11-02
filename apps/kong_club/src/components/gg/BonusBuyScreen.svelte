@@ -108,7 +108,7 @@
 					return {
 						x: (slot.wide ? BONUS_BUY.grid.wideX : BONUS_BUY.grid.x)[slot.column],
 						y: BONUS_BUY.grid.y[slot.row],
-						cut: (slot.wide ? 'wide' : 'desktop') as const,
+						cut: slot.wide ? ('wide' as const) : ('desktop' as const),
 					};
 				},
 				dialog: BONUS_BUY.dialog,

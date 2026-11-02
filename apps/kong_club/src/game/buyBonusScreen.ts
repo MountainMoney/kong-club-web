@@ -5,6 +5,7 @@ import {
 	FEATURE_SPIN_BET_MODE_KEY,
 	extraChanceCostLabel,
 	isActivateBetMode,
+	isGambleBuyBetMode,
 } from './betModes';
 import config from './config';
 import {
@@ -90,7 +91,7 @@ const MEASURED_PAYOUT_STD: Record<string, number> = {
 	peak_spin: 1463.12,
 	bonus_see: 398.66,
 	bonus_hear: 546.97,
-	bonus_gamble: 4468.38,
+	bonus_pick: 4468.38,
 };
 
 export const volatilityLabelFromStd = (std: number): string => {
@@ -101,7 +102,7 @@ export const volatilityLabelFromStd = (std: number): string => {
 };
 
 export const volatilityForMode = (mode: string): string =>
-	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode] ?? 0);
+	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode === 'bonus_gamble' ? 'bonus_pick' : mode] ?? 0);
 
 /** GG-style star row: Low 2, Medium 3, High 4, Very High 5. */
 export const volatilityStarCount = (label: string) => {
@@ -164,12 +165,12 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		buttonColor: '#FF8A3D',
 	},
 	{
-		mode: 'bonus_gamble',
-		title: 'GAMBLE',
-		description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).`,
+		mode: 'bonus_pick',
+		title: 'MYSTERY BONUS',
+		description: `Each spin costs ${config.betModes.bonus_pick.cost}× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
-		volatility: volatilityForMode('bonus_gamble'),
+		volatility: volatilityForMode('bonus_pick'),
 		buttonColor: '#FF5AD1',
 	},
 ];
@@ -189,7 +190,7 @@ export { isActivateBetMode };
 
 /** Feature and TRIFECTA stay on. See, Hear, and Gamble are scatter buys. */
 export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
-	if (mode === 'bonus_gamble') return 'buy';
+	if (isGambleBuyBetMode(mode)) return 'buy';
 	return isActivateBetMode(mode) ? 'activate' : 'buy';
 };
 

@@ -1,6 +1,7 @@
 import { waitForTimeout } from 'utils-shared/wait';
 import { stateBet } from 'state-shared';
 
+import { setActiveBetModeKey } from './betModes';
 import { stateFxLab } from './fxLab.svelte';
 import { getGameActor } from './actor';
 import {
@@ -253,7 +254,7 @@ const forceBookAndSpin = async (mode: string, index: number | null, label: strin
 		if (import.meta.env.DEV) console.warn(`[FxLab] No book for ${label}`);
 		return;
 	}
-	stateBet.activeBetModeKey = mode;
+	setActiveBetModeKey(mode);
 	setForcedNextBookIndex(mode, index);
 	if (import.meta.env.DEV) console.info(`[FxLab] ${label} → mode=${mode} book=${index}`);
 	getGameActor().send({ type: 'BET' });
@@ -308,8 +309,10 @@ export const previewForceGambleHearSpin = () =>
 	runFxLabPreview(
 		'Force Gamble Hear book',
 		async () => {
-			const index = await findFirstBookWithModeState('bonus_gamble', 'start_bonus_hear');
-			await forceBookAndSpin('bonus_gamble', index, 'bonus_gamble hear');
+			const index =
+				(await findFirstBookWithModeState('bonus_pick', 'start_bonus_hear')) ??
+				(await findFirstBookWithModeState('bonus_gamble', 'start_bonus_hear'));
+			await forceBookAndSpin('bonus_pick', index, 'bonus_pick hear');
 		},
 		sticky,
 	);

@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { FillGradient } from 'pixi.js';
 	import { Container, Graphics, Rectangle, Sprite, Text } from 'pixi-svelte';
 	import { Tween } from 'svelte/motion';
@@ -126,7 +125,7 @@
 	const holdLabel = isSocialMode() ? 'HOLD TO SKIP' : 'HOLD TO SKIP BONUS';
 </script>
 
-{#snippet panel(width: number, height: number, x: number, children: Snippet)}
+{#snippet panel(width: number, height: number, x: number)}
 	{@const at = place(width, height, x)}
 	<Container x={at.x} y={at.y} scale={{ x: at.scale, y: at.scale }} eventMode="static">
 		<Graphics
@@ -158,7 +157,13 @@
 					.stroke({ width: P.border, fill: border });
 			}}
 		/>
-		{@render children()}
+		{#if popup === 'menu'}
+			{@render menuBody()}
+		{:else if popup === 'auto'}
+			{@render autoBody()}
+		{:else if popup === 'bets'}
+			{@render betsBody()}
+		{/if}
 	</Container>
 {/snippet}
 
@@ -302,9 +307,9 @@
 {/snippet}
 
 {#if popup === 'menu'}
-	{@render panel(M.width, menuHeight, M.x, menuBody)}
+	{@render panel(M.width, menuHeight, M.x)}
 {:else if popup === 'auto'}
-	{@render panel(autoGrid.width, autoGrid.height, A.right - autoGrid.width, autoBody)}
+	{@render panel(autoGrid.width, autoGrid.height, A.right - autoGrid.width)}
 {:else if popup === 'bets'}
-	{@render panel(betGrid.width, betGrid.height, B.right - betGrid.width, betsBody)}
+	{@render panel(betGrid.width, betGrid.height, B.right - betGrid.width)}
 {/if}

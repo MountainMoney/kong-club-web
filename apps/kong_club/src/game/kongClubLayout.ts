@@ -1,6 +1,6 @@
 import type { LayoutMode } from './responsiveManager';
 import { BACKGROUND_RATIO } from './constants';
-import { BOARD_FRAME_INNER } from './uiAssetSizes';
+import { BOARD_FRAME_INNER, INTRO_LOGO_RENDER_SCALE, UI_ASSET_PIXELS } from './uiAssetSizes';
 
 /** Logical 6×5 grid at 80px cells — scale via `MonkeyBoardLayout.scale`. */
 export const MM_BASE_GRID = { w: 480, h: 400 } as const;
@@ -167,28 +167,41 @@ export const MONKEY_MASCOT = {
 	stumpNudge: { x: 8, y: 18 },
 } as const;
 
+/** Keep the square title plate inside the main layout. */
+const TITLE_SCREEN_MARGIN = 16;
+
+const titlePlateSize = (width: number) => {
+	const { w, h } = UI_ASSET_PIXELS.title_art;
+	const displayW = width * INTRO_LOGO_RENDER_SCALE;
+	return { width: displayW, height: displayW * (h / w) };
+};
+
 /**
  * Logo sits on the top beam of the vine frame, centered — wordmark is in the
- * upper portion of the square title plate.
+ * upper portion of the square title plate. The plate is then shifted down so
+ * its top stays inside the viewport.
  */
 export const getMonkeyTitleLayout = (board: MonkeyBoardLayout, portrait = false) => {
 	const frame = getMonkeyUnifiedFrameLayout(board);
 	const centerX = frame.x + frame.width * (0.5 - frame.anchor.x);
 	const topY = frame.y - frame.height * frame.anchor.y;
-	if (portrait) {
-		return {
-			x: centerX,
-			y: topY + frame.height * 0.01,
-			width: Math.round(Math.min(frame.width * 0.42, board.width * (board.scale ?? 1) * 1.15)),
-			anchor: { x: 0.5, y: 0.46 } as const,
-		};
-	}
-	return {
-		x: centerX,
-		y: topY + frame.height * 0.02,
-		width: Math.round(frame.width * 0.36),
-		anchor: { x: 0.5, y: 0.48 } as const,
-	};
+	const placed = portrait
+		? {
+				x: centerX,
+				y: topY + frame.height * 0.01,
+				width: Math.round(Math.min(frame.width * 0.42, board.width * (board.scale ?? 1) * 1.15)),
+				anchor: { x: 0.5, y: 0.46 } as const,
+			}
+		: {
+				x: centerX,
+				y: topY + frame.height * 0.02,
+				width: Math.round(frame.width * 0.36),
+				anchor: { x: 0.5, y: 0.48 } as const,
+			};
+	const plate = titlePlateSize(placed.width);
+	const top = placed.y - placed.anchor.y * plate.height;
+	if (top >= TITLE_SCREEN_MARGIN) return placed;
+	return { ...placed, y: placed.y + (TITLE_SCREEN_MARGIN - top) };
 };
 
 /** Empty / fill bar art shares the board/border canvas (1564×1194). */

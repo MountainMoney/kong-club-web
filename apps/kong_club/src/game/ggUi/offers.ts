@@ -34,6 +34,13 @@ export type BonusOffer = {
 	volatility: string;
 	/** Cost multiplier. Cash price is this times the current bet. */
 	price: number;
+	/** Optional prop drawn behind the hero. No current offer sets this. */
+	prop?: {
+		key: string;
+		spot: Partial<Record<CardCut, ArtSpot>>;
+	};
+	/** Optional title sprite. Offers without it render `title` as text. */
+	lettering?: string;
 };
 
 const artScale = BONUS_BUY.artScale;
@@ -121,11 +128,12 @@ const SEEDS: OfferSeed[] = [
 		id: GAMBLE_BET_MODE_KEY,
 		art: 'speakMonkey',
 		artSize: { width: 819, height: 1024 },
+		// Backdrop keys are ggBg*Gamble. The card title comes from paytableModeLabel.
 		theme: 'Gamble',
-		body: '50% nothing, 40% Hear No Evil, 10% Monkey Madness.',
+		body: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
 		detail:
-			'Each spin costs 380× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).',
-		price: config.betModes.bonus_gamble.cost,
+			'Each spin costs 380× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
+		price: config.betModes.bonus_pick.cost,
 	},
 ];
 

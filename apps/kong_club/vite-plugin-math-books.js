@@ -15,7 +15,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_pick',
 ];
 
 const DEV_BOOK_COUNTS = {
@@ -25,19 +25,31 @@ const DEV_BOOK_COUNTS = {
 	peak_spin: 100,
 	bonus_see: 100,
 	bonus_hear: 100,
-	bonus_gamble: 80,
+	bonus_pick: 80,
 };
+
+/** Prefer bonus_pick files. Read bonus_gamble when that is all that exists. */
+function resolveModeFile(mode, buildPath) {
+	const primary = buildPath(mode);
+	if (fs.existsSync(primary) || mode !== 'bonus_pick') return primary;
+	const legacy = buildPath('bonus_gamble');
+	return fs.existsSync(legacy) ? legacy : primary;
+}
 
 function resolveMathLibraryRoot() {
 	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library');
 }
 
 function booksZstPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `books_${mode}.jsonl.zst`);
+	return resolveModeFile(mode, (name) =>
+		path.join(libraryRoot, 'publish_files', `books_${name}.jsonl.zst`),
+	);
 }
 
 function lutPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `lookUpTable_${mode}_0.csv`);
+	return resolveModeFile(mode, (name) =>
+		path.join(libraryRoot, 'publish_files', `lookUpTable_${name}_0.csv`),
+	);
 }
 
 function cacheBooksPath(appRoot, mode) {
@@ -45,7 +57,9 @@ function cacheBooksPath(appRoot, mode) {
 }
 
 function forcedBooksPath(appRoot, mode) {
-	return path.join(appRoot, 'src', 'stories', 'data', 'math_books', `${mode}_forced.json`);
+	return resolveModeFile(mode, (name) =>
+		path.join(appRoot, 'src', 'stories', 'data', 'math_books', `${name}_forced.json`),
+	);
 }
 
 function cacheMetaPath(appRoot) {
@@ -161,6 +175,10 @@ function ensureBooksJson(mode, libraryRoot, appRoot) {
 	if (fs.existsSync(cached)) {
 		return cached;
 	}
+	const legacyCache = resolveModeFile(mode, (name) => cacheBooksPath(appRoot, name));
+	if (legacyCache !== cached && fs.existsSync(legacyCache)) {
+		return legacyCache;
+	}
 
 	const zst = booksZstPath(libraryRoot, mode);
 	const extracted = extractBooksFromZst(mode, libraryRoot, appRoot);
@@ -206,7 +224,7 @@ function parseLutCsv(text, bookCount) {
 }
 
 function loadLutEntries(mode, libraryRoot, appRoot, bookCount) {
-	const cacheLut = cacheLutPath(appRoot, mode);
+	const cacheLut = resolveModeFile(mode, (name) => cacheLutPath(appRoot, name));
 	if (fs.existsSync(cacheLut)) {
 		return parseLutCsv(fs.readFileSync(cacheLut, 'utf-8'), bookCount);
 	}
@@ -256,7 +274,8 @@ export function mathBooksPlugin() {
 						return;
 					}
 
-					const mode = (booksMatch || lutMatch)[1];
+					const requested = (booksMatch || lutMatch)[1];
+					const mode = requested === 'bonus_gamble' ? 'bonus_pick' : requested;
 					if (!MATH_MODES.includes(mode)) {
 						res.statusCode = 404;
 						res.end(JSON.stringify({ error: `Unknown mode: ${mode}` }));

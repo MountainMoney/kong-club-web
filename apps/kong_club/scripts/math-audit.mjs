@@ -28,13 +28,16 @@ const MODE_COST = {
 	peak_spin: 1400,
 	bonus_see: 115,
 	bonus_hear: 250,
-	bonus_gamble: 380,
+	bonus_pick: 380,
 };
 
 const HARD_FACES = new Set([1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500]);
 
 export function lutPathForMode(mode) {
-	return path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
+	const primary = path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
+	if (fs.existsSync(primary) || mode !== 'bonus_pick') return primary;
+	const legacy = path.join(PUBLISH_DIR, 'lookUpTable_bonus_gamble_0.csv');
+	return fs.existsSync(legacy) ? legacy : primary;
 }
 
 /**
