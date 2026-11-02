@@ -7,6 +7,7 @@
 	import { readCanvasSize, usePortraitDesignSpace } from '../game/desktopLayout';
 	import { getDesignSize, getMainLayoutScale } from '../game/summitToolbarLayout';
 	import { splashFeaturePanels } from '../game/splashCarousel';
+	import { isSocialMode } from '../game/socialCopy';
 	import { splashHeroForPanel, splashHeroTextureKeys } from '../game/splashIntroContent';
 	import './ui/summit/summitType.css';
 
@@ -31,7 +32,10 @@
 	const ready = $derived(context.stateApp.loaded && fontReady);
 	let leaving = $state(false);
 
-	const symbolSrc = (key: string) => assetUrl(`/assets/sprites/monkeySymbols/${key}.png`);
+	const symbolSrc = (key: string) =>
+		assetUrl(
+			`/assets/sprites/monkeySymbols/${key === 'ST' && isSocialMode() ? 'ST_social' : key}.png`,
+		);
 	const maxWinSrc = assetUrl('/assets/monkey/ui/intro_card_10000x.png');
 	const titleSrc = assetUrl('/assets/sprites/monkeySymbols/title_art.png');
 

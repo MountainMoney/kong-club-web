@@ -123,6 +123,8 @@ export default {
 	W: symbolSprite('W.png'),
 	EXPLODED_W: symbolSprite('EXPLODED_W.png'),
 	ST: symbolSprite('ST.png'),
+	/** Social-mode scatter. Same toucan, with the BONUS lettering removed. */
+	STSocial: symbolSprite('ST_social.png'),
 	explosion: spineAsset('symbols3', 'explosion', 'symbols3.atlas'),
 	reelsFrame: sprites('sprites/reelsFrame/reels_frame.json'),
 	payFrame: sprite('sprites/payFrame/payFrame.png'),

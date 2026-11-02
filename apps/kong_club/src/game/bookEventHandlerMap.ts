@@ -246,7 +246,8 @@ const logClusterWins = (wins: BookEventOfType<'winInfo'>['wins']) => {
 	}
 };
 
-const MAX_BOARD_ACTIVATIONS_PER_SPIN = 3;
+/** One coin game per spin. Math `max_board_activations_hear` is 1; the old cap of 3 is unused. */
+const MAX_BOARD_ACTIVATIONS_PER_SPIN = 1;
 
 let skipWinPresentationForTumble = false;
 /** Snap tumble counter when center overlay already presented this activation payout. */
