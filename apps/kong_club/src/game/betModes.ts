@@ -345,10 +345,10 @@ export function initKongClubBetModes() {
 			modeEntry('bonus_gamble', {
 				type: 'activate',
 				costMultiplier: config.betModes.bonus_gamble.cost,
-				title: `Gamble (${config.betModes.bonus_gamble.cost}×)`,
+				title: `Mystery Bonus (${config.betModes.bonus_gamble.cost}×)`,
 				button: 'Activate',
 				parent: 'base',
-				description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% Hear No Evil, 10% Monkey Madness.`,
+				description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 45% Hear No Evil, 5% Monkey Madness.`,
 			}),
 		]);
 		stateMeta.betModeMeta = meta;

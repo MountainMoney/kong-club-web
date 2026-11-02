@@ -163,7 +163,7 @@ export const applySocialCopy = (text: string) => {
 		.replace(/\bpaying\b/gi, 'winning')
 		.replace(/\bpaylines\b/gi, 'win lines')
 		.replace(/\bpayline\b/gi, 'win line')
-		.replace(/\bgamble\b/gi, 'feature pick')
+		.replace(/\bgamble\b/gi, 'mystery bonus')
 		.replace(/\bgambling\b/gi, 'playing')
 		.replace(/\bwinnings\b/gi, 'wins')
 		.replace(/\bcash\b/gi, 'coins')
@@ -234,7 +234,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },
+	bonus_gamble: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;
