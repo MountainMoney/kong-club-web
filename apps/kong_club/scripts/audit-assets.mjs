@@ -64,7 +64,6 @@ const rootLoaderChecks = [
 	{ full: path.join(staticDir, 'trifecta/assets/wave-logo.wav'), label: 'static/trifecta/assets/wave-logo.wav (app.html boot loader)' },
 	{ full: path.join(staticDir, 'trifecta/vendor/xmb/spline.js'), label: 'static/trifecta/vendor/xmb/spline.js (app.html boot loader)' },
 	{ full: path.join(staticDir, 'trifecta/vendor/xmb/spline-reverse.js'), label: 'static/trifecta/vendor/xmb/spline-reverse.js (app.html boot loader)' },
-	{ full: path.join(staticDir, 'stake-engine-loader.gif'), label: 'static/stake-engine-loader.gif (StakeGameRoot)' },
 ];
 
 const reelFrameChecks = [
