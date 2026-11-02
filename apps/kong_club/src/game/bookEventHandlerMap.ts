@@ -65,8 +65,10 @@ import {
 import { clearLastTileLevels, rememberTileLevels } from './lastTileLevels';
 import {
 	beginHeldBoardDismiss,
+	finishHeldBoardDismiss,
 	hasSittingCoinCells,
 	isHeldBoardDismissActive,
+	stateCoinFeatureCover,
 } from './coinFeatureCover.svelte';
 import type { BookEvent, BookEventOfType, BookEventContext } from './typesBookEvent';
 import {
@@ -417,6 +419,27 @@ const flushDeferredFeatureActivation = async () => {
 	}
 };
 
+/** Same cap as waitForTumbleIdle — a dismiss must not stall the book forever. */
+const HELD_BOARD_DISMISS_WAIT_CAP_MS = 8000;
+
+/**
+ * Free-spin reveals do not start this wait. If a dismiss is still flagged with
+ * nothing left to fade (no coins, no plaque fade), or it outlives the cap,
+ * finish it so tumbleBoard can continue.
+ */
+const waitForHeldBoardDismiss = async () => {
+	const started = performance.now();
+	while (isHeldBoardDismissActive()) {
+		const nothingLeftToFade =
+			!stateCoinFeatureCover.tileFadeActive && !hasSittingCoinCells();
+		if (nothingLeftToFade || performance.now() - started > HELD_BOARD_DISMISS_WAIT_CAP_MS) {
+			finishHeldBoardDismiss();
+			return;
+		}
+		await waitForTimeout(16);
+	}
+};
+
 /** Same playback for `kongClubMode` and legacy `monkeyMayhemMode`. */
 const handleModeStateEvent = async (
 	bookEvent: ModeStateBookEvent,
@@ -448,7 +471,11 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		skipWinPresentationForTumble = false;
 		clearClusterConnectMotion();
 		eventEmitter.broadcast({ type: 'paylineWinHide' });
+		// Coins and level-up plaques persist across free spins. The next base spin
+		// leaves that board. Starting a dismiss here never finishes: TileLevelGrid
+		// ignores heldBoardSpinAway during freegame, so tumbleBoard waits forever.
 		if (
+			bookEvent.gameType !== 'freegame' &&
 			hasSittingCoinCells() &&
 			!isHeldBoardDismissActive() &&
 			!isTurboOrFaster() &&
@@ -644,9 +671,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		eventEmitter.broadcast({ type: 'drawerButtonHide' });
 	},
 	tumbleBoard: async (bookEvent: BookEventOfType<'tumbleBoard'>, { bookEvents }: BookEventContext) => {
-		while (isHeldBoardDismissActive()) {
-			await waitForTimeout(16);
-		}
+		await waitForHeldBoardDismiss();
 		if (isPeakSpinBetMode(stateBet.activeBetModeKey)) {
 			const settleBoard =
 				bookEvent.resultBoard && isValidSettleBoard(bookEvent.resultBoard)
