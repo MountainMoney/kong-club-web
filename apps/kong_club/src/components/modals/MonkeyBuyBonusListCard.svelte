@@ -174,13 +174,18 @@
 
 <style lang="scss">
 	.list-card {
-		display: flex;
-		flex-direction: row;
-		align-items: stretch;
-		gap: 10px;
+		display: grid;
+		grid-template-columns: 96px minmax(0, 1fr);
+		grid-template-areas:
+			'icon info'
+			'icon action';
+		align-items: center;
+		gap: 8px 10px;
 		width: 100%;
 		min-height: 76px;
-		padding: 10px 10px 10px 8px;
+		padding: 12px 12px 16px 10px;
+		flex-shrink: 0;
+		overflow: hidden;
 		box-sizing: border-box;
 		background-color: #161616;
 		background-image: none;
@@ -206,6 +211,7 @@
 	}
 
 	.icon-slot {
+		grid-area: icon;
 		flex: 0 0 88px;
 		width: 88px;
 		display: flex;
@@ -287,6 +293,7 @@
 	}
 
 	.info {
+		grid-area: info;
 		flex: 1;
 		min-width: 0;
 		display: flex;
@@ -311,10 +318,9 @@
 	.meta {
 		margin: 2px 0 0;
 		display: flex;
-		flex-direction: row;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 8px;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
 		font-size: 11px;
 		line-height: 1.2;
 	}
@@ -342,11 +348,17 @@
 	}
 
 	.action-btn {
-		flex: 0 0 88px;
-		align-self: stretch;
-		min-height: 44px;
+		grid-area: action;
+		justify-self: end;
+		align-self: end;
+		margin-bottom: 2px;
+		width: auto;
+		max-width: 100%;
+		min-height: 40px;
 		margin: 0;
-		padding: 6px 4px;
+		padding: 0 14px;
+		white-space: nowrap;
+		text-shadow: none;
 		border: none;
 		border-radius: 4px;
 		color: #ffffff;

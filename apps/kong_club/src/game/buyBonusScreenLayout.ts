@@ -127,7 +127,7 @@ export const buyBonusCardHeight = (
 	opts?: BuyBonusCardSizeOpts,
 ): number | undefined => {
 	if (opts?.portraitSheet) return undefined;
-	if (!opts?.compact && !opts?.showDescription) return 228;
+	if (!opts?.compact && !opts?.showDescription) return 248;
 
 	if (opts?.compact) {
 		const m = compactMetrics();

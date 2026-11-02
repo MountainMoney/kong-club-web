@@ -670,28 +670,37 @@
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot {
 		grid-column: 2 / 4;
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-end;
+		gap: 8px;
 		min-width: 0;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .cost {
-		width: auto;
-		flex: 1 1 auto;
-		min-width: 0;
+		flex: 0 0 auto;
+		width: 100%;
 		margin: 0;
 		text-align: left;
 		font-size: 22px;
+		line-height: 1.1;
+		white-space: nowrap;
+		text-shadow: none;
+		-webkit-text-stroke: 0;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .action-btn {
-		flex: 0 0 auto;
+		align-self: flex-end;
 		width: auto;
-		min-width: 118px;
-		min-height: 44px;
+		max-width: 100%;
+		min-width: 0;
+		min-height: 42px;
 		margin: 0;
-		padding: 0 14px;
+		padding: 0 16px;
+		font-size: 16px;
+		letter-spacing: 0.06em;
+		white-space: nowrap;
+		text-shadow: none;
 	}
 
 	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .hero-trophy,
