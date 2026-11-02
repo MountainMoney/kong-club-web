@@ -10,17 +10,27 @@ import { stateGame } from './stateGame.svelte';
 import type { BookEvent, BookEventOfType } from './typesBookEvent';
 import type { RawSymbol } from './types';
 import { rememberBonusSessionWin } from './bonusSessionWin';
+import {
+	findLastModeStateBookEvent,
+	MODE_STATE_EVENT_TYPES,
+	type ModeStateBookEvent,
+} from './modeStateEvent';
 
 /** Book event types folded into createBonusSnapshot before resume playback. */
 export const BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT = [
 	'reveal',
-	'kongClubMode',
+	...MODE_STATE_EVENT_TYPES,
 	'updateLevelUpTiles',
 	'updateGlobalMult',
 	'updateFreeSpin',
 	'setTotalWin',
 	'progressFill',
 ] as const;
+
+const SNAPSHOT_RESERVED_TYPES = new Set<string>(BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT);
+
+export const isSnapshotReservedBookEvent = (event: { type: string }) =>
+	SNAPSHOT_RESERVED_TYPES.has(event.type);
 
 /** Ordered restore phases — board before tiles. */
 export const SNAPSHOT_RESTORE_STEP_ORDER = [
@@ -39,10 +49,7 @@ const awaitRestoreEvent = <T extends Parameters<typeof eventEmitter.broadcastAsy
 	emitterEvent: T,
 ) => eventEmitter.broadcastAsync(emitterEvent);
 
-const findLastBookEvent = <T extends BookEvent['type']>(
-	bookEvents: BookEvent[],
-	type: T,
-) =>
+const findLastBookEvent = <T extends BookEvent['type']>(bookEvents: BookEvent[], type: T) =>
 	_.findLast(bookEvents, (bookEvent) => bookEvent.type === type) as BookEventOfType<T> | undefined;
 
 export const applyFreeSpinCounterState = (
@@ -56,7 +63,7 @@ export const applyFreeSpinCounterState = (
 
 /** Minimal FS chrome for resume — no scatter intro or buy transition replay. */
 export const restoreBonusSnapshotEntry = async (
-	modeEvent: BookEventOfType<'kongClubMode'> | undefined,
+	modeEvent: ModeStateBookEvent | undefined,
 	gameType: 'basegame' | 'freegame' | undefined,
 ) => {
 	await awaitRestoreEvent({ type: 'freeSpinIntroHide' });
@@ -136,7 +143,7 @@ export const buildSnapshotRestorePlan = (bookEvents: BookEvent[]): SnapshotResto
 
 /** Restore mid-bonus presentation from reserved book events before resume playback. */
 export const runBonusSnapshotRestore = async (bookEvents: BookEvent[]) => {
-	const lastKongClubModeEvent = findLastBookEvent(bookEvents, 'kongClubMode');
+	const lastKongClubModeEvent = findLastModeStateBookEvent(bookEvents);
 	const lastRevealEvent = findLastBookEvent(bookEvents, 'reveal');
 	const lastUpdateFreeSpinEvent = findLastBookEvent(bookEvents, 'updateFreeSpin');
 	const lastSetTotalWinEvent = findLastBookEvent(bookEvents, 'setTotalWin');

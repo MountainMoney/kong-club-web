@@ -29,9 +29,7 @@ export const playBet = async (bet: Bet) => {
 	eventEmitter.broadcast({ type: 'stopButtonEnable' });
 };
 
-import {
-	BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT,
-} from './bonusSnapshotRestore';
+import { isSnapshotReservedBookEvent } from './bonusSnapshotRestore';
 
 // resume bet
 export const convertTorResumableBet = (betToResume: Bet) => {
@@ -46,9 +44,7 @@ export const convertTorResumableBet = (betToResume: Bet) => {
 	const bookEventToCreateSnapshot: BookEventOfType<'createBonusSnapshot'> = {
 		index: 0,
 		type: 'createBonusSnapshot',
-		bookEvents: bookEventsBeforeResume.filter((bookEvent) =>
-			BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT.includes(bookEvent.type),
-		),
+		bookEvents: bookEventsBeforeResume.filter(isSnapshotReservedBookEvent),
 	};
 
 	const stateToResume = [bookEventToCreateSnapshot, ...bookEventsAfterResume];

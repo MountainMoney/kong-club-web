@@ -26,3 +26,4 @@ export const CoinSeed = Story(templateArgs(events.coinSeed));
 export const ScatterPayout = Story(templateArgs(events.scatterPayout));
 export const StickyWilds = Story(templateArgs(events.stickyWilds));
 export const KongClubMode = Story(templateArgs(events.kongClubMode));
+export const MonkeyMayhemMode = Story(templateArgs(events.monkeyMayhemMode));
