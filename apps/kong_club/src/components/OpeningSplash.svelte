@@ -118,8 +118,8 @@
 						</div>
 					</div>
 					<button type="button" class="opening-splash-cta" disabled={!ready || leaving} onclick={continueSplash}>
-						<span class="opening-splash-cta-spacer">PRESS TO CONTINUE</span>
-						<span class="opening-splash-cta-label continue">{ready ? 'PRESS TO CONTINUE' : 'LOADING'}</span>
+						<span class="opening-splash-cta-spacer">CLICK TO CONTINUE!</span>
+						<span class="opening-splash-cta-label continue">{ready ? 'CLICK TO CONTINUE!' : 'LOADING'}</span>
 					</button>
 				</div>
 			</div>

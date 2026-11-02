@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import {
-		AUTO_SPINS_TEXT_OPTION_MAP,
 		stateBet,
 		stateBetDerived,
 		stateConfig,
@@ -43,12 +42,9 @@
 	import { getSummitToolbarLayout, isShortLandscape } from '../../game/summitToolbarLayout';
 	import { readCanvasSize } from '../../game/desktopLayout';
 	import {
-		autoSpinsActiveMenuLabel,
 		autoSpinsMenuLabel,
-		autoplayPopupTitle,
 		betControlDecreaseAria,
 		betControlIncreaseAria,
-		buyBonusLabel,
 		freeSpinProgressLabel,
 		freeSpinsToolbarLabel,
 		isSocialMode,
@@ -130,12 +126,6 @@
 			(inFreegame || !holdHudWinForCenterPopup) &&
 			!(featOrSummitActive && !idle),
 	);
-	const winChipLeft = $derived(
-		layout.portrait
-			? layout.toolbarLeftX + layout.winX + layout.winW / 2
-			: layout.designWidth / 2,
-	);
-	const winChipTop = $derived(Math.round(layout.toolbarTopY + layout.winY));
 	const toolbarLabelSize = $derived(layout.labelSize);
 	const balanceFitValueSize = $derived(
 		roundFitFontSize(fitValueFontSize(balanceValue, layout.balanceW, layout.valueSize)),
@@ -144,18 +134,6 @@
 		roundFitFontSize(fitValueFontSize(betValue, layout.betW, layout.valueSize)),
 	);
 	const winChipLabel = $derived(inFreegame ? toolbarLabel('totalWin') : toolbarLabel('win'));
-	const winChipLabelSize = $derived(
-		Math.max(12, Math.round(toolbarLabelSize * (layout.portrait ? 1.28 : 0.92 * layout.winPopupScale))),
-	);
-	const winPopupChipW = $derived(layout.winW);
-	const winPopupChipValueSize = $derived.by(() => {
-		const base = Math.round(layout.valueSize * (layout.portrait ? 1 : layout.winPopupScale));
-		const gap = Math.round(0.45 * winChipLabelSize);
-		const labelW = Math.ceil(winChipLabel.length * winChipLabelSize * 0.65);
-		const pad = Math.round(16 * layout.uiScale);
-		const lane = Math.max(48, layout.winW - labelW - gap - pad);
-		return roundFitFontSize(fitValueFontSize(winPopupAmount, lane, base));
-	});
 	const spinsProgress = $derived(
 		freeSpinProgressLabel(stateUi.freeSpinCounterCurrent || 0, stateUi.freeSpinCounterTotal || 0),
 	);
@@ -217,46 +195,32 @@
 		return String(n);
 	});
 	const autoChipCount = $derived(autoSpinsText === '∞' ? '∞' : autoSpinsRemainingDisplay);
-	const autoChipLabel = $derived(isSocialMode() ? 'PLAYS' : 'AUTO');
-	const autoChipCountSize = $derived.by(() => {
-		const t = autoChipCount;
-		if (t === '∞') return 28;
-		if (t.length >= 4) return 16;
-		if (t.length === 3) return 20;
-		return 26;
-	});
 
 	const speedTier = $derived(getSpinSpeedDisplayTier());
 	const speedMode = $derived(speedTier === 'superTurbo' ? 2 : speedTier === 'turbo' ? 1 : 0);
 
-	const toolbarTurboSrc = $derived(
-		inFreegame && !layout.portrait
-			? speedMode === 2
-				? summitSrc('turbo-on2.svg')
-				: speedMode === 1
-					? summitSrc('turbo-on1.svg')
-					: summitSrc('bonus-turbo.svg')
-			: speedMode === 2
-				? summitSrc('base-turbo-on2.svg')
-				: speedMode === 1
-					? summitSrc('base-turbo-on1.svg')
-					: summitSrc('base-turbo.svg'),
-	);
-
-	const betAccentClass = $derived(
-		peakSpinActive ? 'peak' : featureSpinActive ? 'feature' : anteActive ? 'ante' : '',
+	const betAccentClass = $derived(featureToggleActive ? 'mode-on' : '');
+	const activeModeHudLabel = $derived(
+		anteActive
+			? 'EXTRA CHANCE'
+			: featureSpinActive
+				? isSocialMode()
+					? 'FEATURE PLAY'
+					: 'FEATURE SPIN'
+				: peakSpinActive
+					? isSocialMode()
+						? 'TRIFECTA PLAY'
+						: 'TRIFECTA SPIN'
+					: gambleActive
+						? isSocialMode()
+							? 'FEATURE PICK'
+							: 'GAMBLE'
+						: toolbarLabel('bet'),
 	);
 
 	const biggestBet = $derived(stateConfig.betAmountOptions[stateConfig.betAmountOptions.length - 1]);
 	const smallestBet = $derived(stateConfig.betAmountOptions[0]);
 	const sortedBetLadder = $derived([...stateConfig.betAmountOptions]);
-	const betSliderIndex = $derived(
-		Math.max(0, sortedBetLadder.findIndex((v) => v === stateBet.betAmount)),
-	);
-	const betSliderPct = $derived(
-		sortedBetLadder.length < 2 ? 0 : (betSliderIndex / (sortedBetLadder.length - 1)) * 100,
-	);
-
 	const canIncreaseBet = $derived(
 		idle && stateBet.betAmount !== biggestBet && !isToolbarBetUpBlockedByAffordability(),
 	);
@@ -266,15 +230,25 @@
 	let hamburgerOpen = $state(false);
 	let autoPopupOpen = $state(false);
 	let betSliderOpen = $state(false);
-	let betSliderDragging = $state(false);
-	let betSliderTrackEl = $state<HTMLDivElement | undefined>(undefined);
 	let toolbarBarEl = $state<HTMLElement | undefined>(undefined);
 	let hamburgerBtnEl = $state<HTMLButtonElement | undefined>(undefined);
 	let autoBtnEl = $state<HTMLButtonElement | undefined>(undefined);
 	let sfxVolume = $state(stateSound.volumeValueSoundEffect);
 	let musicVolume = $state(stateSound.volumeValueMusic);
 
-	const autoSpinOptions = ['∞', '10', '25', '50', '75', '100', '500', '1000'] as const;
+	const autoSpinOptions = ['∞', '10', '25', '50', '100', '200', '300', '500', '1000'] as const;
+	const autoRoundCount: Record<string, number> = {
+		'∞': Infinity,
+		'10': 10,
+		'25': 25,
+		'50': 50,
+		'100': 100,
+		'200': 200,
+		'300': 300,
+		'500': 500,
+		'1000': 1000,
+	};
+	let autoPick = $state('10');
 
 	const playUi = (type: 'soundPressGeneral' | 'soundPressBet' = 'soundPressGeneral') => {
 		context.eventEmitter.broadcast({ type });
@@ -286,7 +260,6 @@
 
 	const closeBetSlider = () => {
 		betSliderOpen = false;
-		betSliderDragging = false;
 	};
 
 	const closeAutoplayPanel = () => {
@@ -316,41 +289,14 @@
 		}
 	};
 
-	const applyBetFromLadderIndex = (index: number) => {
-		const ladder = sortedBetLadder;
-		if (!ladder.length) return;
-		const next = ladder[Math.max(0, Math.min(ladder.length - 1, index))];
-		if (next === stateBet.betAmount) return;
-		stateBetDerived.setBetAmount(next);
-	};
-
-	const betIndexFromClientX = (clientX: number) => {
-		const ladder = sortedBetLadder;
-		if (!betSliderTrackEl || ladder.length < 2) return 0;
-		const rect = betSliderTrackEl.getBoundingClientRect();
-		if (rect.width <= 0) return 0;
-		const t = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-		return Math.round(t * (ladder.length - 1));
-	};
-
-	const onBetSliderPointerDown = (event: PointerEvent) => {
-		if (!canOpenBetSlider) return;
-		event.stopPropagation();
-		betSliderDragging = true;
-		(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-		applyBetFromLadderIndex(betIndexFromClientX(event.clientX));
-	};
-
-	const onBetSliderPointerMove = (event: PointerEvent) => {
-		if (!betSliderDragging) return;
-		event.stopPropagation();
-		applyBetFromLadderIndex(betIndexFromClientX(event.clientX));
-	};
-
-	const onBetSliderPointerUp = (event: PointerEvent) => {
-		if (!betSliderDragging) return;
-		event.stopPropagation();
-		betSliderDragging = false;
+	const pickBetAmount = (amount: number) => {
+		if (!canOpenBetSlider || amount === stateBet.betAmount) {
+			closeBetSlider();
+			return;
+		}
+		playUi();
+		stateBetDerived.setBetAmount(amount);
+		closeBetSlider();
 	};
 
 	const onBetIncreasePress = () => {
@@ -409,15 +355,28 @@
 
 	const armAutoplay = (option: string) => {
 		if (autoplayDisabledByJurisdiction) return;
-		const count = AUTO_SPINS_TEXT_OPTION_MAP[option as keyof typeof AUTO_SPINS_TEXT_OPTION_MAP];
+		const count = autoRoundCount[option];
 		if (count === undefined) return;
 		playUi();
+		autoPick = option;
 		stateUi.autoSpinsText = option as never;
 		stateBet.autoSpinsCounter = count;
 		if (stateBetDerived.activeBetMode().type === 'buy') {
 			stateBet.activeBetModeKey = FOOTBALL_DEFAULT_BET_MODE_KEY;
 		}
-		if (layout.auxInMenu) autoPopupOpen = false;
+	};
+
+	const activateSelectedAutoplay = () => {
+		if (autoplayDisabledByJurisdiction || !idle) return;
+		armAutoplay(autoPick);
+		if (!stateBetDerived.isBetCostAvailable()) {
+			showInsufficientBalanceModal();
+			return;
+		}
+		invalidateWinPresentation();
+		context.eventEmitter.broadcast({ type: 'paylineWinHide' });
+		requestAutoBet();
+		autoPopupOpen = false;
 	};
 
 	const onSpinPress = () => {
@@ -483,7 +442,7 @@
 	const handleGlobalPointerDown = (event: PointerEvent) => {
 		const target = event.target;
 		if (!(target instanceof Element)) return;
-		if (betSliderOpen && !target.closest('.bet-slider, .bet-copy-hit, .bet-chevron, .amount.bet')) {
+		if (betSliderOpen && !target.closest('.bet-grid, .bet-copy-hit, .bet-chevron, .amount.bet')) {
 			closeBetSlider();
 		}
 		if (
@@ -561,26 +520,7 @@
 		const leftEdge = Math.min(ham.left, bar.left);
 		return `left:${leftEdge - shell.left}px;bottom:${shell.bottom - bar.top + toolbarShellPopoverGap}px`;
 	});
-	const toolbarAutoPopoverStyle = $derived.by(() => {
-		void viewport.width;
-		void viewport.height;
-		void autoPopupOpen;
-		void autoBtnEl;
-		void toolbarBarEl;
-		if (!toolbarBarEl) return `--menu-scale:${toolbarShellMenuScale}`;
-		const shell = toolbarBarEl.closest('.game-shell')?.getBoundingClientRect();
-		if (!shell) return `--menu-scale:${toolbarShellMenuScale}`;
-		const bar = toolbarBarEl.getBoundingClientRect();
-		const bottom = `bottom:${shell.bottom - bar.top + toolbarShellPopoverGap}px;--menu-scale:${toolbarShellMenuScale}`;
-		if (layout.auxInMenu && autoBtnEl) {
-			const auto = autoBtnEl.getBoundingClientRect();
-			return `left:${auto.left + auto.width / 2 - shell.left}px;${bottom}`;
-		}
-		return `right:${shell.right - bar.right}px;${bottom}`;
-	});
 
-	const betSliderLeft = $derived(layout.betX);
-	const betSliderW = $derived(Math.max(layout.betW, 180 * layout.uiScale));
 	const spinning = $derived(!idle);
 	const spinButtonDisabled = $derived(
 		inFreegame ||
@@ -608,289 +548,340 @@
 	>
 		<section
 			bind:this={toolbarBarEl}
-			class="toolbar summit-bar"
+			class="toolbar summit-bar gg-hud"
 			class:bonus-mode={inFreegame}
 			class:portrait-hud={layout.portrait}
-			style={`left:${layout.toolbarLeftX}px; top:${layout.toolbarTopY}px; width:${layout.toolbarWidth}px; height:${layout.toolbarHeight}px; --ui-scale:${layout.uiScale}; --safe-bottom:${layout.bottomInset}px; --ham-slot:${layout.menuX + layout.menuW + Math.round(12 * layout.uiScale)}px`}
+			class:gg-portrait={layout.portrait}
+			style={`left:${layout.toolbarLeftX}px; top:${layout.toolbarTopY}px; width:${layout.toolbarWidth}px; height:${layout.toolbarHeight}px; --ui-scale:${layout.uiScale}; --safe-bottom:${layout.bottomInset}px; --spin-d:${layout.spinD}px; --spin-overlap:${Math.round(layout.spinD * 0.58)}px`}
 		>
-			<button
-				bind:this={hamburgerBtnEl}
-				class="hamburger"
-				class:portrait-lg={layout.portrait}
-				style={`left:${layout.menuX}px; top:${layout.menuY}px; width:${layout.menuW}px; height:${layout.menuH}px`}
-				aria-label="menu"
-				onclick={toggleHamburger}
-			>
-				{#if hamburgerOpen}
-					<svg class="hamburger-x" viewBox="0 0 61 61" aria-hidden="true" focusable="false">
-						<g transform="translate(30.5 30.5)">
-							<rect fill="#000" x="-30.5" y="-7" width="61" height="14" rx="7" transform="rotate(45)" />
-							<rect fill="#000" x="-30.5" y="-7" width="61" height="14" rx="7" transform="rotate(-45)" />
-							<rect fill="#fff" x="-27.5" y="-4" width="55" height="8" rx="4" transform="rotate(45)" />
-							<rect fill="#fff" x="-27.5" y="-4" width="55" height="8" rx="4" transform="rotate(-45)" />
-						</g>
-					</svg>
-				{:else}
-					<span></span><span></span><span></span>
-				{/if}
-			</button>
-
-			{#if !inFreegame}
-				<button
-					class="bonus-button"
-					class:ante={featureToggleActive}
-					aria-label="Bonus"
-					style={`left:${layout.bonusX}px; top:${layout.bonusY}px; width:${layout.bonusD}px; height:${layout.bonusD}px`}
-					onclick={onBonusPress}
-					disabled={spinning || autoPlayRunning}
-				>
-					<svg class="bonus-art bonus-idle" viewBox="14.1735 29.3174 91.2175 50.4809" aria-hidden="true" focusable="false">
-						<path
-							d="M33.9327 52.7308L14.1735 78.9863L33.9327 65.3172L31.632 73.0314L46.2485 63.8285L78.1881 79.7983L64.7897 47.4526L87.6617 73.0314V65.3172L105.391 79.7983L84.8196 52.7308L79.1355 55.9789L59.3762 29.3174L40.1583 55.9789L33.9327 52.7308Z"
-						/>
-					</svg>
-					<svg class="bonus-art bonus-x" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-						<g transform="translate(16 16)">
-							<rect x="-11" y="-1.5" width="22" height="3" rx="1.5" transform="rotate(45)" />
-							<rect x="-11" y="-1.5" width="22" height="3" rx="1.5" transform="rotate(-45)" />
-						</g>
-					</svg>
-				</button>
-			{/if}
-
-			<div
-				class="toolbar-meter"
-				style={`left:${layout.meterX}px; top:${layout.meterY}px; width:${layout.meterW}px; height:${layout.meterH}px`}
-			>
-				<div
-					class="amount balance"
-					style={`--label-size:${toolbarLabelSize}px; --value-size:${balanceFitValueSize}px`}
-				>
-					<span>{toolbarLabel('balance')}</span>
-					<strong>{balanceValue}</strong>
-				</div>
-				<div
-					class="amount bet {betAccentClass}"
-					style={`--label-size:${toolbarLabelSize}px; --value-size:${betFitValueSize}px`}
-				>
-					{#if inFreegame}
-						<div class="bet-copy">
-							<span>{toolbarLabel('bet')}</span>
-							<strong>{betValue}</strong>
-						</div>
-					{:else if layout.portrait}
-						<span>{toolbarLabel('bet')}</span>
-						<div class="bet-amount-row">
+			{#if layout.portrait}
+				<div class="portrait-stack">
+					<div class="portrait-controls">
+						{#if !inFreegame}
 							<button
-								class="bet-chevron down"
-								aria-label={betControlDecreaseAria()}
-								disabled={!canDecreaseBet}
-								onclick={onBetDecreasePress}
-								><img src={summitSrc('chevrondown.svg')} alt="" aria-hidden="true" /></button
+								class="bonus-button"
+								class:ante={featureToggleActive}
+								aria-label={featureToggleActive ? 'Disable mode' : 'Bonus'}
+								onclick={onBonusPress}
+								disabled={spinning || autoPlayRunning}
 							>
-							<strong>{betValue}</strong>
-							<button
-								class="bet-chevron up"
-								aria-label={betControlIncreaseAria()}
-								disabled={!canIncreaseBet}
-								onclick={onBetIncreasePress}
-								><img src={summitSrc('chevronup.svg')} alt="" aria-hidden="true" /></button
-							>
-						</div>
-					{:else}
+								{#if featureToggleActive}
+									<span class="disable-x" aria-hidden="true">×</span>
+									<span class="disable-word">DISABLE</span>
+								{:else}
+									<svg class="buy-mark" viewBox="0 0 48 42" aria-hidden="true">
+										<path d="M24 4 L44 38 H4 Z" />
+									</svg>
+								{/if}
+							</button>
+						{/if}
 						<button
-							type="button"
-							class="bet-copy bet-copy-hit"
-							aria-label="Select bet amount"
-							aria-expanded={betSliderOpen}
-							disabled={!canOpenBetSlider}
-							onclick={toggleBetSlider}
+							class:active={speedMode > 0}
+							class:turbo-1={speedMode === 1}
+							class:turbo-2={speedMode === 2}
+							class="sprite turbo"
+							onclick={toggleTurbo}
+							disabled={turboDisabled}
+							aria-label={speedModeLabel}
 						>
-							<span>{toolbarLabel('bet')}</span>
-							<strong>{betValue}</strong>
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 L4 14 h6 l-1 8 9-12 h-6 z" /></svg>
 						</button>
-						<div class="bet-chevron-stack">
+						{#if !inFreegame}
 							<button
-								class="bet-chevron up"
-								aria-label={betControlIncreaseAria()}
-								disabled={!canIncreaseBet}
-								onclick={onBetIncreasePress}
-								><img src={summitSrc('chevronup.svg')} alt="" aria-hidden="true" /></button
-							>
-							<button
-								class="bet-chevron down"
+								class="bet-step"
 								aria-label={betControlDecreaseAria()}
 								disabled={!canDecreaseBet}
 								onclick={onBetDecreasePress}
-								><img src={summitSrc('chevrondown.svg')} alt="" aria-hidden="true" /></button
 							>
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 l7 7" /></svg>
+							</button>
+						{/if}
+						{#if !inFreegame}
+							<button
+								class="sprite spin"
+								class:stopping={spinning && !autoPlayRunning}
+								class:fs-chip={autoPlayRunning}
+								class:auto-remaining={autoPlayRunning}
+								onclick={onSpinPress}
+								disabled={spinButtonDisabled && !spinning && !autoPlayRunning}
+								aria-label={autoPlayRunning
+									? 'Stop autoplay after this spin'
+									: spinning
+										? 'Skip spin'
+										: 'Spin'}
+							>
+								{#if autoPlayRunning}
+									<span>{autoSpinsMenuLabel()}</span>
+									<strong>{autoSpinsText === '∞' ? '∞' : autoSpinsRemainingDisplay}</strong>
+								{:else if spinning}
+									<span class="spin-face" aria-hidden="true"><i class="spin-stop"></i></span>
+								{:else}
+									<svg class="spin-arrows" viewBox="0 0 64 64" aria-hidden="true">
+										<path d="M46 18a18 18 0 1 0 4 16" />
+										<path d="M46 10 v12 h-12" />
+										<path d="M18 46a18 18 0 1 0-4-16" />
+										<path d="M18 54 v-12 h12" />
+									</svg>
+								{/if}
+							</button>
+						{:else}
+							<div class="sprite spin fs-chip" aria-label={`${freeSpinsToolbarLabel()} ${spinsProgress}`}>
+								<span>{freeSpinsToolbarLabel()}</span>
+								<strong>{spinsProgress}</strong>
+							</div>
+						{/if}
+						{#if !inFreegame}
+							<button
+								class="bet-step"
+								aria-label={betControlIncreaseAria()}
+								disabled={!canIncreaseBet}
+								onclick={onBetIncreasePress}
+							>
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 l7 7 -7 7" /></svg>
+							</button>
+							<button
+								bind:this={autoBtnEl}
+								class:active={autoPlayRunning || autoPlayArmed}
+								class:menu-open={autoPopupOpen}
+								class="sprite auto"
+								onclick={toggleAutoplay}
+								disabled={autoplayDisabledByJurisdiction}
+								aria-label={autoPlayRunning || autoPlayArmed ? 'Clear autoplay' : 'Autoplay'}
+							>
+								{#if autoPlayRunning || autoPlayArmed}
+									<strong>{autoChipCount}</strong>
+								{:else}
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M19 8a7 7 0 1 0 1.2 6" />
+										<path d="M19 4 v5 h-5" />
+									</svg>
+								{/if}
+							</button>
+						{/if}
+						<button
+							bind:this={hamburgerBtnEl}
+							class="hamburger"
+							aria-label="menu"
+							onclick={toggleHamburger}
+						>
+							{#if hamburgerOpen}
+								<span class="ham-x" aria-hidden="true"></span>
+							{:else}
+								<span></span><span></span><span></span>
+							{/if}
+						</button>
+					</div>
+					<div class="portrait-meters">
+						<div class="amount balance" style={`--label-size:${toolbarLabelSize}px; --value-size:${balanceFitValueSize}px`}>
+							<span>{toolbarLabel('balance')}</span>
+							<strong>{balanceValue}</strong>
 						</div>
-					{/if}
-				</div>
-			</div>
-
-			{#if betSliderOpen && !inFreegame && !layout.portrait}
-				<div
-					class="bet-slider"
-					style={`left:${betSliderLeft}px; top:${Math.max(0, layout.meterY - Math.round(42 * layout.uiScale))}px; width:${betSliderW}px`}
-					role="dialog"
-					aria-label="Select bet"
-				>
-					<div
-						class="bet-slider-hit"
-						bind:this={betSliderTrackEl}
-						onpointerdown={onBetSliderPointerDown}
-						onpointermove={onBetSliderPointerMove}
-						onpointerup={onBetSliderPointerUp}
-						onpointercancel={onBetSliderPointerUp}
-						role="slider"
-						aria-valuemin={0}
-						aria-valuemax={Math.max(0, sortedBetLadder.length - 1)}
-						aria-valuenow={betSliderIndex}
-						aria-valuetext={betValue}
-						tabindex="0"
-					>
-						<div class="bet-slider-track">
-							<div class="bet-slider-fill" style={`width:${betSliderPct}%`}></div>
+						<div class="amount win-inline" class:on={winPopupOpen}>
+							<span>{winChipLabel}</span>
+							<strong>{winPopupOpen ? winPopupAmount : '—'}</strong>
 						</div>
-						<div class="bet-slider-thumb" style={`left:${betSliderPct}%`}></div>
+						<div class="amount bet {betAccentClass}" style={`--label-size:${toolbarLabelSize}px; --value-size:${betFitValueSize}px`}>
+							<span>{inFreegame ? toolbarLabel('bet') : activeModeHudLabel}</span>
+							<strong>{betValue}</strong>
+						</div>
 					</div>
 				</div>
-			{/if}
-
-			{#if !inFreegame}
-				<button
-					class="sprite spin"
-					class:stopping={spinning && !autoPlayRunning}
-					class:fs-chip={autoPlayRunning}
-					class:auto-remaining={autoPlayRunning}
-					style={`left:${layout.spinX}px; top:${layout.spinY}px; width:${layout.spinD}px; height:${layout.spinD}px`}
-					onclick={onSpinPress}
-					disabled={spinButtonDisabled && !spinning && !autoPlayRunning}
-					aria-label={autoPlayRunning
-						? 'Stop autoplay after this spin'
-						: spinning
-							? 'Skip spin'
-							: autoPlayArmed
-								? 'Start autoplay'
-								: 'Spin'}
-				>
-					{#if autoPlayRunning}
-						<span>{autoSpinsMenuLabel()}</span>
-						<strong>{autoSpinsText === '∞' ? '∞' : autoSpinsRemainingDisplay}</strong>
-					{:else if spinning}
-						<span class="spin-face" aria-hidden="true"><i class="spin-stop"></i></span>
-					{:else}
-						<img src={summitSrc('base-spin.svg')} alt="" aria-hidden="true" />
-					{/if}
-				</button>
 			{:else}
+				{#if !inFreegame}
+					<button
+						class="bonus-button"
+						class:ante={featureToggleActive}
+						aria-label={featureToggleActive ? 'Disable mode' : 'Bonus'}
+						style={`left:${layout.bonusX}px; top:${layout.bonusY}px; width:${Math.round(layout.bonusD * 1.24)}px; height:${layout.bonusD}px`}
+						onclick={onBonusPress}
+						disabled={spinning || autoPlayRunning}
+					>
+						{#if featureToggleActive}
+							<span class="disable-x" aria-hidden="true">×</span>
+							<span class="disable-word">DISABLE</span>
+						{:else}
+							<svg class="buy-mark" viewBox="0 0 48 42" aria-hidden="true">
+								<path d="M24 4 L44 38 H4 Z" />
+							</svg>
+						{/if}
+					</button>
+				{/if}
+
 				<div
-					class="sprite spin fs-chip"
-					style={`left:${layout.spinX}px; top:${layout.spinY}px; width:${layout.spinD}px; height:${layout.spinD}px`}
-					aria-label={`${freeSpinsToolbarLabel()} ${spinsProgress}`}
+					class="slab balance-slab"
+					style={`left:${layout.meterX}px; top:${layout.meterY}px; width:${layout.meterW}px; height:${layout.meterH}px`}
 				>
-					<span>{freeSpinsToolbarLabel()}</span>
-					<strong>{spinsProgress}</strong>
+					<button
+						bind:this={hamburgerBtnEl}
+						class="hamburger"
+						aria-label="menu"
+						onclick={toggleHamburger}
+					>
+						{#if hamburgerOpen}
+							<span class="ham-x" aria-hidden="true"></span>
+						{:else}
+							<span></span><span></span><span></span>
+						{/if}
+					</button>
+					<div class="amount balance" style={`--label-size:${toolbarLabelSize}px; --value-size:${balanceFitValueSize}px`}>
+						<span>{toolbarLabel('balance')}</span>
+						<strong>{balanceValue}</strong>
+					</div>
+					<div
+						class="amount win-inline"
+						class:on={winPopupOpen}
+						style={`--label-size:${Math.round(toolbarLabelSize * 1.05)}px; --value-size:${Math.round(layout.valueSize * 1.15)}px`}
+					>
+						<span>{winChipLabel}</span>
+						<strong>{winPopupOpen ? winPopupAmount : ''}</strong>
+					</div>
 				</div>
-			{/if}
 
-			{#if !inFreegame}
-				<button
-					bind:this={autoBtnEl}
-					class:active={autoPlayRunning || autoPlayArmed}
-					class:menu-open={autoPopupOpen}
-					class:fs-chip={autoPlayRunning || autoPlayArmed}
-					class="sprite auto"
-					style={`left:${layout.autoX}px; top:${layout.autoY}px; width:${layout.autoD}px; height:${layout.autoD}px; --auto-count-size:${autoChipCountSize}px`}
-					onclick={toggleAutoplay}
-					disabled={autoplayDisabledByJurisdiction}
-					aria-label={autoPlayRunning || autoPlayArmed ? 'Clear autoplay' : 'Autoplay'}
+				<div
+					class="slab bet-slab"
+					style={`left:${layout.betX}px; top:${layout.meterY}px; width:${layout.betW}px; height:${layout.meterH}px`}
 				>
-					{#if autoPlayRunning || autoPlayArmed}
-						<span>{autoChipLabel}</span>
-						<strong>{autoChipCount}</strong>
-					{:else}
-						<img src={summitSrc('base-auto.svg')} alt="" aria-hidden="true" />
+					{#if !inFreegame}
+						<div class="bet-chevron-stack">
+							<button class="bet-chevron up" aria-label={betControlIncreaseAria()} disabled={!canIncreaseBet} onclick={onBetIncreasePress}>
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14 l6-7 6 7" /></svg>
+							</button>
+							<button class="bet-chevron down" aria-label={betControlDecreaseAria()} disabled={!canDecreaseBet} onclick={onBetDecreasePress}>
+								<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10 l6 7 6-7" /></svg>
+							</button>
+						</div>
 					{/if}
-				</button>
-			{/if}
+					<button
+						type="button"
+						class="bet-copy bet-copy-hit {betAccentClass}"
+						aria-label="Select bet amount"
+						aria-expanded={betSliderOpen}
+						disabled={!canOpenBetSlider || inFreegame}
+						onclick={toggleBetSlider}
+					>
+						<span>{inFreegame ? toolbarLabel('bet') : activeModeHudLabel}</span>
+						<strong>{betValue}</strong>
+					</button>
+					<div class="utility-stack">
+						{#if !inFreegame}
+							<button
+								bind:this={autoBtnEl}
+								class:active={autoPlayRunning || autoPlayArmed}
+								class:menu-open={autoPopupOpen}
+								class="sprite auto"
+								onclick={toggleAutoplay}
+								disabled={autoplayDisabledByJurisdiction}
+								aria-label={autoPlayRunning || autoPlayArmed ? 'Clear autoplay' : 'Autoplay'}
+							>
+								{#if autoPlayRunning || autoPlayArmed}
+									<strong>{autoChipCount}</strong>
+								{:else}
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M19 8a7 7 0 1 0 1.2 6" />
+										<path d="M19 4 v5 h-5" />
+									</svg>
+								{/if}
+							</button>
+						{/if}
+						<button
+							class:active={speedMode > 0}
+							class:turbo-1={speedMode === 1}
+							class:turbo-2={speedMode === 2}
+							class="sprite turbo"
+							onclick={toggleTurbo}
+							disabled={turboDisabled}
+							aria-label={speedModeLabel}
+						>
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 L4 14 h6 l-1 8 9-12 h-6 z" /></svg>
+						</button>
+					</div>
+				</div>
 
-			<button
-				class:active={speedMode > 0}
-				class:turbo-1={speedMode === 1}
-				class:turbo-2={speedMode === 2}
-				class:tall={inFreegame && !layout.portrait}
-				class="sprite turbo"
-				style={`left:${layout.turboX}px; top:${layout.turboY}px; width:${layout.turboW}px; height:${layout.turboH}px`}
-				onclick={toggleTurbo}
-				disabled={turboDisabled}
-				aria-label={speedModeLabel}
-			>
-				<img src={toolbarTurboSrc} alt="" aria-hidden="true" />
-			</button>
+				{#if !inFreegame}
+					<button
+						class="sprite spin"
+						class:stopping={spinning && !autoPlayRunning}
+						class:fs-chip={autoPlayRunning}
+						class:auto-remaining={autoPlayRunning}
+						style={`left:${layout.spinX}px; top:${layout.spinY}px; width:${layout.spinD}px; height:${layout.spinD}px`}
+						onclick={onSpinPress}
+						disabled={spinButtonDisabled && !spinning && !autoPlayRunning}
+						aria-label={autoPlayRunning
+							? 'Stop autoplay after this spin'
+							: spinning
+								? 'Skip spin'
+								: 'Spin'}
+					>
+						{#if autoPlayRunning}
+							<span>{autoSpinsMenuLabel()}</span>
+							<strong>{autoSpinsText === '∞' ? '∞' : autoSpinsRemainingDisplay}</strong>
+						{:else if spinning}
+							<span class="spin-face" aria-hidden="true"><i class="spin-stop"></i></span>
+						{:else}
+							<svg class="spin-arrows" viewBox="0 0 64 64" aria-hidden="true">
+								<path d="M46 18a18 18 0 1 0 4 16" />
+								<path d="M46 10 v12 h-12" />
+								<path d="M18 46a18 18 0 1 0-4-16" />
+								<path d="M18 54 v-12 h12" />
+							</svg>
+						{/if}
+					</button>
+				{:else}
+					<div
+						class="sprite spin fs-chip"
+						style={`left:${layout.spinX}px; top:${layout.spinY}px; width:${layout.spinD}px; height:${layout.spinD}px`}
+						aria-label={`${freeSpinsToolbarLabel()} ${spinsProgress}`}
+					>
+						<span>{freeSpinsToolbarLabel()}</span>
+						<strong>{spinsProgress}</strong>
+					</div>
+				{/if}
+
+				{#if betSliderOpen && !inFreegame}
+					<div
+						class="bet-grid"
+						style={`left:${layout.betX}px; width:${Math.max(layout.betW, 280)}px; bottom:${layout.toolbarHeight - layout.meterY + 10}px`}
+						role="dialog"
+						aria-label="Select bet"
+					>
+						{#each sortedBetLadder as amount (amount)}
+							<button
+								type="button"
+								class:selected={amount === stateBet.betAmount}
+								onclick={() => pickBetAmount(amount)}
+							>
+								{formatMoney(amount, 'bet')}
+							</button>
+						{/each}
+					</div>
+				{/if}
+			{/if}
 		</section>
-		<div
-			class="win-popup"
-			class:show={winPopupOpen}
-			style={`left:${winChipLeft}px; top:${winChipTop}px; width:${winPopupChipW}px; height:${layout.winH}px; --label-size:${winChipLabelSize}px; --value-size:${winPopupChipValueSize}px`}
-		>
-			<span>{winChipLabel}</span>
-			<strong class="money-amount toolbar-money">{winPopupAmount}</strong>
-		</div>
 	</div>
 
-	{#if hamburgerOpen && !layout.portrait}
-		<div class="toolbar-menu-anchor toolbar-shell-popover" style={toolbarMenuPopoverStyle}>
-			<ToolbarSettingsMenu
-				scale={menuScale}
-				nativeRange={phonePlayHost}
-				bind:sfxVolume
-				bind:musicVolume
-				onInfo={openInfo}
-				onSfxChange={setVolumeSfx}
-				onMusicChange={setVolumeMusic}
-				soundSrc={summitSrc('sound.svg')}
-				musicSrc={summitSrc('music.svg')}
-			/>
-		</div>
-	{/if}
-
-	{#if hamburgerOpen && layout.portrait}
+	{#if hamburgerOpen}
 		<div
 			class="settings-overlay"
+			class:anchored={!layout.portrait}
 			role="presentation"
 			onclick={closeHamburgerMenu}
 			onkeydown={(e) => e.key === 'Escape' && closeHamburgerMenu()}
 		>
 			<div
 				class="settings-menu-modal"
+				class:anchored={!layout.portrait}
 				role="presentation"
+				style={layout.portrait ? '' : toolbarMenuPopoverStyle}
 				onclick={(e) => e.stopPropagation()}
 			>
 				<ToolbarSettingsMenu
-					scale={Math.max(1, menuScale)}
+					scale={Math.max(layout.portrait ? 1 : 0.85, menuScale)}
 					nativeRange={phonePlayHost}
 					bind:sfxVolume
 					bind:musicVolume
 					onInfo={openInfo}
 					onSfxChange={setVolumeSfx}
 					onMusicChange={setVolumeMusic}
-					showBonusRow={!inFreegame}
-					onBonusPress={onBonusPress}
-					bonusDisabled={spinning || autoPlayRunning}
-					bonusAnteActive={featureToggleActive}
-					bonusLabel={buyBonusLabel()}
-					showAutoSpinRow={!inFreegame}
-					onAutoSpin={toggleAutoplay}
-					autoSpinDisabled={autoplayDisabledByJurisdiction}
-					autoSpinActive={autoPlayRunning || autoPlayArmed}
-					autoSpinLabel={autoPlayRunning || autoPlayArmed
-						? autoSpinsActiveMenuLabel(stateBet.autoSpinsCounter)
-						: autoSpinsMenuLabel()}
-					showSpeedRow={true}
-					onSpeedPress={toggleTurbo}
-					speedLabel={speedModeLabel}
 					soundSrc={summitSrc('sound.svg')}
 					musicSrc={summitSrc('music.svg')}
 				/>
@@ -898,34 +889,32 @@
 		</div>
 	{/if}
 
-	{#if autoPopupOpen && !inFreegame && !layout.auxInMenu}
-		<div class="auto-popup toolbar-shell-popover" style={toolbarAutoPopoverStyle}>
-			<div class="auto-popup-title">{autoplayPopupTitle()}</div>
-			<div class="auto-popup-subtitle">SELECT ROUNDS — THEN PRESS SPIN</div>
-			{#each autoSpinOptions as option (option)}
-				<button
-					class:active={autoSpinsText === option && autoPlayArmed}
-					onclick={() => armAutoplay(option)}>{option}</button
-				>
-			{/each}
+	{#if betSliderOpen && !inFreegame && layout.portrait}
+		<div class="settings-overlay" role="presentation" onclick={closeBetSlider}>
+			<div class="bet-grid bet-grid-modal" role="dialog" aria-label="Select bet" onclick={(e) => e.stopPropagation()}>
+				{#each sortedBetLadder as amount (amount)}
+					<button
+						type="button"
+						class:selected={amount === stateBet.betAmount}
+						onclick={() => pickBetAmount(amount)}
+					>
+						{formatMoney(amount, 'bet')}
+					</button>
+				{/each}
+			</div>
 		</div>
 	{/if}
 
-	{#if autoPopupOpen && !inFreegame && layout.auxInMenu}
-		<div
-			class="settings-overlay"
-			role="presentation"
-			onclick={closeAutoplayPanel}
-		>
-			<div class="auto-popup auto-popup-modal" role="presentation" onclick={(e) => e.stopPropagation()}>
-				<div class="auto-popup-title">{autoplayPopupTitle()}</div>
-				<div class="auto-popup-subtitle">SELECT ROUNDS — THEN PRESS SPIN</div>
-				{#each autoSpinOptions as option (option)}
-					<button
-						class:active={autoSpinsText === option && autoPlayArmed}
-						onclick={() => armAutoplay(option)}>{option}</button
-					>
-				{/each}
+	{#if autoPopupOpen && !inFreegame}
+		<div class="settings-overlay" role="presentation" onclick={closeAutoplayPanel}>
+			<div class="auto-popup auto-popup-modal" role="dialog" aria-label="Autoplay" onclick={(e) => e.stopPropagation()}>
+				<div class="auto-popup-title">AUTOPLAY ROUNDS</div>
+				<div class="auto-rounds">
+					{#each autoSpinOptions as option (option)}
+						<button type="button" class:active={autoPick === option} onclick={() => (autoPick = option)}>{option}</button>
+					{/each}
+				</div>
+				<button type="button" class="auto-activate" onclick={activateSelectedAutoplay}>ACTIVATE</button>
 			</div>
 		</div>
 	{/if}
@@ -938,7 +927,8 @@
 		z-index: 40;
 		pointer-events: none;
 		overflow: hidden;
-		font-family: 'Fredoka One', Inter, sans-serif;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
 		font-synthesis: none;
 		visibility: hidden;
 	}
@@ -1773,6 +1763,514 @@
 	.game-shell.phone-budget .bet-slider {
 		-webkit-backdrop-filter: none;
 		backdrop-filter: none;
+	}
+
+	.gg-hud {
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
+		color: #fff;
+	}
+
+	.gg-hud .slab {
+		position: absolute;
+		display: flex;
+		align-items: center;
+		box-sizing: border-box;
+		background: linear-gradient(180deg, #1c1c1c 0%, #141414 100%);
+		border: 2px solid #3c3c3c;
+		border-radius: 18px;
+		box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+		overflow: hidden;
+		z-index: 3;
+	}
+
+	.gg-hud .balance-slab {
+		padding: 0 18px 0 12px;
+		gap: 12px;
+	}
+
+	.gg-hud .bet-slab {
+		padding: 0 var(--spin-overlap) 0 8px;
+		gap: 4px;
+		z-index: 4;
+	}
+
+	.gg-hud .bonus-button {
+		position: absolute;
+		z-index: 6;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0;
+		padding: 0;
+		background: #141414;
+		color: #fff;
+		border: 2px solid #ffd500;
+		border-radius: 16px;
+		box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
+		transform: skewX(-14deg);
+		overflow: hidden;
+		filter: none;
+	}
+
+	.gg-hud .bonus-button > * {
+		transform: skewX(14deg);
+	}
+
+	.gg-hud .buy-mark {
+		width: 42%;
+		height: auto;
+	}
+
+	.gg-hud .buy-mark path {
+		fill: none;
+		stroke: #ffd500;
+		stroke-width: 3.5;
+		stroke-linejoin: round;
+	}
+
+	.gg-hud .disable-x {
+		font-size: calc(28px * var(--ui-scale, 1));
+		line-height: 0.85;
+		font-weight: 700;
+	}
+
+	.gg-hud .disable-word {
+		font-size: calc(11px * var(--ui-scale, 1));
+		letter-spacing: 0.08em;
+		font-weight: 800;
+	}
+
+	.gg-hud .balance-slab .hamburger,
+	.gg-portrait .hamburger {
+		position: relative;
+		left: auto;
+		top: auto;
+		width: 36px;
+		height: 28px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		background: transparent;
+		border: 0;
+		padding: 0;
+	}
+
+	.gg-hud .hamburger span {
+		display: block;
+		width: 22px;
+		height: 3px;
+		background: #fff;
+		border-radius: 2px;
+		box-shadow: none;
+	}
+
+	.gg-hud .ham-x {
+		position: relative;
+		width: 22px;
+		height: 22px;
+		background: transparent !important;
+	}
+
+	.gg-hud .ham-x::before,
+	.gg-hud .ham-x::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 10px;
+		height: 3px;
+		background: #fff;
+		border-radius: 2px;
+	}
+
+	.gg-hud .ham-x::before {
+		transform: rotate(45deg);
+	}
+
+	.gg-hud .ham-x::after {
+		transform: rotate(-45deg);
+	}
+
+	.gg-hud .amount {
+		align-items: flex-start;
+	}
+
+	.gg-hud .amount span {
+		color: #b8b8b8;
+		font-size: var(--label-size, 14px);
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		opacity: 1;
+	}
+
+	.gg-hud .amount strong {
+		color: #fff;
+		font-size: var(--value-size, 26px);
+		font-weight: 800;
+		letter-spacing: 0;
+	}
+
+	.gg-hud .win-inline {
+		margin-left: auto;
+		min-width: 30%;
+		text-align: right;
+		align-items: flex-end;
+		opacity: 0;
+		transform: translateY(8px) scale(0.96);
+		transition: opacity 180ms ease, transform 180ms ease;
+	}
+
+	.gg-hud .win-inline.on {
+		opacity: 1;
+		transform: none;
+	}
+
+	.gg-hud .win-inline span,
+	.gg-hud .win-inline strong {
+		color: #ffd500;
+	}
+
+	.gg-hud .bet-copy,
+	.gg-hud .bet-copy-hit {
+		flex: 1;
+		align-items: center;
+		text-align: center;
+		background: transparent;
+		border: 0;
+		color: inherit;
+		cursor: pointer;
+	}
+
+	.gg-hud .mode-on span,
+	.gg-hud .mode-on strong {
+		color: #ffd500;
+	}
+
+	.gg-hud .bet-chevron-stack {
+		position: relative;
+		right: auto;
+		top: auto;
+		transform: none;
+		gap: 2px;
+	}
+
+	.gg-hud .bet-chevron,
+	.gg-hud .bet-step {
+		width: 32px;
+		height: 24px;
+		background: transparent;
+		border: 0;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	.gg-hud .bet-chevron svg,
+	.gg-hud .bet-step svg,
+	.gg-hud .sprite.auto svg,
+	.gg-hud .sprite.turbo svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	.gg-hud .bet-chevron svg path,
+	.gg-hud .bet-step svg path,
+	.gg-hud .sprite.auto svg path {
+		fill: none;
+		stroke: #e8e8e8;
+		stroke-width: 2.4;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.gg-hud .sprite.turbo svg path {
+		fill: #e8e8e8;
+		stroke: none;
+	}
+
+	.gg-hud .sprite.turbo.active svg path,
+	.gg-hud .sprite.turbo.turbo-1 svg path,
+	.gg-hud .sprite.turbo.turbo-2 svg path {
+		fill: #ffd500;
+	}
+
+	.gg-hud .utility-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin-left: auto;
+	}
+
+	.gg-hud .utility-stack .sprite,
+	.gg-hud .bet-slab .sprite.auto,
+	.gg-hud .bet-slab .sprite.turbo {
+		position: relative;
+		left: auto;
+		top: auto;
+		width: 32px;
+		height: 32px;
+		border: 0;
+		border-radius: 8px;
+		background: transparent;
+		box-shadow: none;
+	}
+
+	.gg-hud .sprite.spin {
+		z-index: 8;
+		border-radius: 50%;
+		border: 3px solid rgba(255, 255, 255, 0.88);
+		background: radial-gradient(circle at 40% 32%, #2c2c2c, #0c0c0c 68%);
+		box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55);
+		filter: none;
+	}
+
+	.gg-hud .spin-arrows {
+		width: 58%;
+		height: 58%;
+	}
+
+	.gg-hud .spin-arrows path {
+		fill: none;
+		stroke: #fff;
+		stroke-width: 5;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.gg-hud .spin-stop {
+		width: 26%;
+		height: 26%;
+		border: 0;
+		border-radius: 4px;
+		background: #fff;
+		box-shadow: none;
+	}
+
+	.gg-hud .sprite.spin.fs-chip {
+		border-radius: 50%;
+		background: radial-gradient(circle at 40% 32%, #2c2c2c, #0c0c0c 68%);
+		font-family: Fredoka, Inter, sans-serif;
+	}
+
+	.gg-portrait .portrait-stack {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		height: 100%;
+		padding-bottom: var(--safe-bottom, 12px);
+		box-sizing: border-box;
+	}
+
+	.gg-portrait .portrait-controls {
+		display: grid;
+		grid-template-columns: 1.05fr 0.92fr 0.78fr 1.28fr 0.78fr 0.92fr 0.92fr;
+		gap: 10px;
+		align-items: center;
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
+		padding: 8px 18px 0;
+		height: auto;
+	}
+
+	.gg-portrait .portrait-controls > .sprite,
+	.gg-portrait .portrait-controls > .bonus-button,
+	.gg-portrait .portrait-controls > .hamburger,
+	.gg-portrait .portrait-controls > .bet-step {
+		position: relative;
+		left: auto !important;
+		top: auto !important;
+		width: 100% !important;
+		height: auto !important;
+		aspect-ratio: 1;
+		min-width: 0;
+		max-height: 200px;
+		box-sizing: border-box;
+	}
+
+	.gg-portrait .bet-step {
+		display: grid;
+		place-items: center;
+		background: #1a1a1a;
+		border: 2px solid #6a6a6a;
+		border-radius: 16px;
+	}
+
+	.gg-portrait .bet-step svg {
+		width: 62%;
+		height: 62%;
+	}
+
+	.gg-portrait .bet-step svg path {
+		stroke: #ffffff;
+		stroke-width: 3.4;
+	}
+
+	.gg-portrait .hamburger {
+		display: grid;
+		place-items: center;
+		background: #1a1a1a;
+		border: 2px solid #6a6a6a;
+		border-radius: 16px;
+	}
+
+	.gg-portrait .sprite.turbo,
+	.gg-portrait .sprite.auto {
+		background: #1a1a1a;
+		border: 2px solid #3a3a3a;
+		border-radius: 16px;
+	}
+
+	.gg-portrait .portrait-meters {
+		display: grid;
+		grid-template-columns: 1fr 1fr 1fr;
+		align-items: end;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 10px 18px 6px;
+	}
+
+	.gg-portrait .portrait-meters .amount {
+		align-items: center;
+		text-align: center;
+	}
+
+	.gg-portrait .portrait-meters .amount span {
+		font-size: 26px;
+		color: #b8b8b8;
+		letter-spacing: 0.12em;
+	}
+
+	.gg-portrait .portrait-meters .amount strong {
+		font-size: 44px;
+		color: #ffffff;
+	}
+
+	.gg-portrait .portrait-meters .win-inline span,
+	.gg-portrait .portrait-meters .win-inline strong {
+		color: #ffd500;
+	}
+
+	.gg-portrait .portrait-meters .win-inline {
+		margin: 0;
+		opacity: 0.28;
+		transform: none;
+		align-items: center;
+		text-align: center;
+	}
+
+	.gg-portrait .portrait-meters .win-inline.on {
+		opacity: 1;
+	}
+
+	.bet-grid {
+		position: absolute;
+		z-index: 40;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+		padding: 12px;
+		box-sizing: border-box;
+		background: #141414;
+		border: 2px solid #3a3a3a;
+		border-radius: 16px;
+		pointer-events: auto;
+		animation: gg-pop 180ms ease;
+	}
+
+	.bet-grid button {
+		min-height: 46px;
+		border-radius: 10px;
+		border: 2px solid transparent;
+		background: #1e1e1e;
+		color: #fff;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 800;
+		font-size: 16px;
+		cursor: pointer;
+	}
+
+	.bet-grid button.selected {
+		border-color: #ffd500;
+		color: #ffd500;
+	}
+
+	.bet-grid-modal {
+		position: relative;
+		width: min(440px, 92vw);
+	}
+
+	.settings-overlay.anchored {
+		display: block;
+		background: transparent;
+		pointer-events: none;
+	}
+
+	.settings-menu-modal.anchored {
+		position: absolute;
+		pointer-events: auto;
+	}
+
+	.auto-popup-modal {
+		width: min(520px, 94vw);
+		padding: 22px 18px 16px;
+		background: #141414;
+		border: 2px solid #3a3a3a;
+		border-radius: 18px;
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+		animation: gg-pop 200ms ease;
+		font-family: Fredoka, Inter, sans-serif;
+	}
+
+	.auto-rounds {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+		margin: 14px 0 12px;
+	}
+
+	.auto-rounds button {
+		min-height: 48px;
+		border-radius: 10px;
+		border: 2px solid #2c2c2c;
+		background: #1a1a1a;
+		color: #fff;
+		font-family: inherit;
+		font-weight: 800;
+		font-size: 18px;
+		cursor: pointer;
+	}
+
+	.auto-rounds button.active {
+		border-color: #ffd500;
+		color: #ffd500;
+	}
+
+	.auto-activate {
+		width: 100%;
+		min-height: 50px;
+		border: 0;
+		border-radius: 12px;
+		background: #fff;
+		color: #111;
+		font-family: inherit;
+		font-weight: 800;
+		letter-spacing: 0.12em;
+		cursor: pointer;
+	}
+
+	@keyframes gg-pop {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(0.97);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 
 	.sprite.spin:active:not(:disabled) {

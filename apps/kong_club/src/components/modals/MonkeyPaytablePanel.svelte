@@ -154,7 +154,7 @@
 		</tbody>
 	</table>
 
-	<h3 class="mm-paytable__subtitle">Special symbols</h3>
+	<h3 class="mm-paytable__subtitle">SPECIAL SYMBOLS</h3>
 	<ul class="mm-paytable__specials">
 		{#each specials as special (special.copy)}
 			<li>

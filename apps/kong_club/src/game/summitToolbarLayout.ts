@@ -8,51 +8,24 @@ import {
 import { readSafeAreaInsets, type SafeAreaInsets } from './safeArea';
 import { isMobileLandscapeViewport } from './layoutUi';
 
-const TOOLBAR_W = 1233;
-const SM_FRAME_W = 1233;
-const SM_FRAME_H = 172;
-const SM_PILL_X = 194;
-const SM_PILL_Y = 37;
-const SM_PILL_W = 975;
-const SM_PILL_H = 119;
-const SM_PILL_BONUS_X = 70;
-const SM_PILL_BONUS_W = 1099;
-const SM_HAM_X = 0;
-const SM_HAM_Y = 63;
-const SM_HAM_W = 55;
-const SM_HAM_H = 68;
-const SM_BONUS_X = 70;
-const SM_BONUS_Y = 37;
-const SM_BONUS_D = 119;
-const SM_SPIN_X = 997;
-const SM_SPIN_Y = 18;
-const SM_SPIN_D = 156;
-const SM_AUTO_X = 1177;
-const SM_AUTO_Y = 37;
-const SM_AUTO_D = 56;
-const SM_TURBO_Y = 101;
-const SM_TURBO_BONUS_Y = 37;
-const SM_TURBO_BONUS_H = 119;
-const SM_WIN_W = 237;
-const SM_WIN_H = 52;
-const SM_LABEL = 19;
-const SM_VALUE = 35;
+/** GG-style landscape HUD, design px inside the 1920×1080 stage. */
+const GG_TRI_W = 124;
+const GG_TRI_H = 100;
+const GG_SLAB_H = 100;
+const GG_SLAB_Y = 34;
+const GG_GAP = 14;
+const GG_BAL_W = 620;
+const GG_BET_W = 400;
+const GG_SPIN_D = 158;
+const GG_ICON = 40;
+const GG_HAM_W = 42;
+const GG_HAM_H = 34;
+const GG_LABEL = 15;
+const GG_VALUE = 28;
+const GG_WIN_W = 220;
+const GG_WIN_H = 52;
 const DESKTOP_LOCK_MIN_W = 1200;
-const DESKTOP_TOOLBAR_MIN_W = TOOLBAR_W + 8 * 2;
-
-const PORTRAIT_SPIN_D = 156;
-const PORTRAIT_BONUS_D = 119;
-const PORTRAIT_AUTO_D = 66;
-const PORTRAIT_HAM_W = 55;
-const PORTRAIT_HAM_H = 68;
-const PORTRAIT_WIN_W = 237;
-const PORTRAIT_WIN_H = 52;
-const PORTRAIT_LABEL = 19;
-const PORTRAIT_VALUE = 35;
-const PORTRAIT_CHROME = 0.86;
-const PORTRAIT_HUD_REF_W = 390;
-const PORTRAIT_WIN_SCALE_W = 1.48;
-const PORTRAIT_WIN_SCALE_H = 1.82;
+const DESKTOP_TOOLBAR_MIN_W = 1100;
 
 const ZERO_SAFE: SafeAreaInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -169,94 +142,54 @@ export const computePortraitHud = (
 	inBonus = false,
 	safeBottom = 0,
 ): PortraitHudLayout => {
-	const screenW = Math.max(displayScale, 0.08) * PORTRAIT_REF_W;
-	const uiScale = PORTRAIT_CHROME * (PORTRAIT_REF_W / Math.max(screenW, PORTRAIT_HUD_REF_W));
-	const footerScale = 0.94;
-	const hamScale = uiScale * footerScale;
+	void displayScale;
+	void inBonus;
 	const r = (value: number) => Math.round(value);
+	const uiScale = 1;
 	const toolbarWidth = designWidth;
-	const pad = 16 * uiScale;
-	const gap = 10 * uiScale;
-	const spinD = PORTRAIT_SPIN_D * uiScale;
-	const bonusD = PORTRAIT_BONUS_D * uiScale * 0.82;
-	const autoD = PORTRAIT_AUTO_D * uiScale * 0.84;
-	const hamW = PORTRAIT_HAM_W * hamScale;
-	const hamH = PORTRAIT_HAM_H * hamScale;
-	const labelSize = PORTRAIT_LABEL * uiScale * 0.84 * footerScale;
-	const valueSize = PORTRAIT_VALUE * uiScale * footerScale;
-	const winH = Math.max(
-		PORTRAIT_WIN_H * uiScale * PORTRAIT_WIN_SCALE_H,
-		valueSize * 1.75 + 12 * uiScale,
-	);
-	const winW = Math.max(PORTRAIT_WIN_W * uiScale * PORTRAIT_WIN_SCALE_W, valueSize * 12);
-	const turboW = autoD;
-	const barLift = 24 * uiScale;
-	const barTop = spinD / 2 - barLift;
-	const spinX = (toolbarWidth - spinD) / 2;
-	const spinY = 0;
-	const bonusX = pad;
-	const bonusY = barTop - bonusD / 2;
-	const turboX = toolbarWidth - pad - turboW;
-	const autoX = inBonus ? turboX : turboX - gap - autoD;
-	const autoY = barTop - autoD / 2;
-	const contentH = Math.max(
-		PORTRAIT_HAM_H * uiScale,
-		PORTRAIT_LABEL * uiScale * 0.84 + PORTRAIT_VALUE * uiScale + 6 * uiScale,
-	);
-	const hang = (PORTRAIT_BONUS_D * uiScale * 0.95) / 2;
-	const bottomPad = Math.max(26 * uiScale, safeBottom + 14 * uiScale);
-	const barVisible = hang + contentH + 18 * uiScale;
-	const meterY = barTop;
-	const meterX = 0;
-	const meterW = toolbarWidth;
-	const meterH = barVisible + bottomPad + barLift;
-	const toolbarHeight = barTop + meterH;
-	// Portrait: turbo stays the compact base plate in bonus — the tall desktop asset is landscape-only.
-	const turboH = autoD;
-	const turboY = barTop - turboH / 2;
-	const menuX = pad;
-	const menuY = meterY + meterH - bottomPad - hamH;
-	const hamSlot = menuX + hamW + 12 * uiScale;
-	const innerW = Math.max(80 * uiScale, meterW - hamSlot - pad);
-	const balanceW = innerW * 0.48;
-	const betW = innerW * 0.52;
-	const winX = spinX + (spinD - winW) / 2;
-	const winGap = 12 * uiScale;
-	const winY = spinY - winH - winGap;
+	const spinD = 168;
+	const bonusD = 112;
+	const autoD = 96;
+	const controlH = 252;
+	const meterH = 112;
+	const bottomPad = Math.max(36, safeBottom + 18);
+	const toolbarHeight = controlH + 12 + meterH + bottomPad;
+	const labelSize = 22;
+	const valueSize = 36;
 	return {
 		uiScale,
 		toolbarWidth: r(toolbarWidth),
 		toolbarHeight: r(toolbarHeight),
-		barTop: r(barTop),
-		bonusX: r(bonusX),
-		bonusY: r(bonusY),
+		barTop: 0,
+		bonusX: 0,
+		bonusY: 0,
 		bonusD: r(bonusD),
-		spinX: r(spinX),
-		spinY: r(spinY),
+		spinX: 0,
+		spinY: 0,
 		spinD: r(spinD),
-		autoX: r(autoX),
-		autoY: r(autoY),
+		autoX: 0,
+		autoY: 0,
 		autoD: r(autoD),
-		turboX: r(turboX),
-		turboY: r(turboY),
-		turboW: r(turboW),
-		turboH: r(turboH),
-		menuX: r(menuX),
-		menuY: r(menuY),
-		menuW: r(hamW),
-		menuH: r(hamH),
-		meterX: r(meterX),
-		meterY: r(meterY),
-		meterW: r(meterW),
+		turboX: 0,
+		turboY: 0,
+		turboW: r(autoD),
+		turboH: r(autoD),
+		menuX: 0,
+		menuY: 0,
+		menuW: r(autoD),
+		menuH: r(autoD),
+		meterX: 0,
+		meterY: r(controlH + 8),
+		meterW: r(toolbarWidth),
 		meterH: r(meterH),
-		balanceX: r(hamSlot),
-		balanceW: r(balanceW),
-		betX: r(meterW - pad - betW),
-		betW: r(betW),
-		winW: r(winW),
-		winH: r(winH),
-		winX: r(winX),
-		winY: r(winY),
+		balanceX: 24,
+		balanceW: r(toolbarWidth * 0.32),
+		betX: r(toolbarWidth * 0.66),
+		betW: r(toolbarWidth * 0.3),
+		winW: r(toolbarWidth * 0.34),
+		winH: r(meterH),
+		winX: r(toolbarWidth * 0.33),
+		winY: 0,
 		labelSize,
 		valueSize,
 		bottomPad: r(bottomPad),
@@ -347,7 +280,7 @@ export const getSummitToolbarLayout = (
 		return {
 			mode,
 			portrait,
-			auxInMenu: true,
+			auxInMenu: false,
 			designWidth: layoutWidth,
 			designHeight: layoutHeight,
 			sceneScale,
@@ -395,45 +328,50 @@ export const getSummitToolbarLayout = (
 		};
 	}
 
-	const uiScale = isCompact ? 0.82 : shortLandscape ? Math.min(1, (layoutWidth * 0.94) / SM_FRAME_W) : 1;
-	const toolbarWidth = SM_FRAME_W * uiScale;
-	const toolbarHeight = SM_FRAME_H * uiScale;
-	const toolbarLeftX = (layoutWidth - toolbarWidth) / 2;
-	const bottomInset = isDesktopLocked ? 24 : isCompact ? 28 : 24;
-	const pillBottom = (SM_PILL_Y + SM_PILL_H) * uiScale;
-	const toolbarTopY = layoutHeight - bottomInset - pillBottom - 2;
+	const uiScale = isCompact ? 0.86 : shortLandscape ? 0.72 : 1;
 	const s = uiScale;
-	const meterX = (inBonus ? SM_PILL_BONUS_X : SM_PILL_X) * s;
-	const meterY = SM_PILL_Y * s;
-	const meterW = (inBonus ? SM_PILL_BONUS_W : SM_PILL_W) * s;
-	const meterH = SM_PILL_H * s;
-	const spinX = SM_SPIN_X * s;
-	const spinY = SM_SPIN_Y * s;
-	const spinD = SM_SPIN_D * s;
-	const autoX = SM_AUTO_X * s;
-	const autoY = SM_AUTO_Y * s;
-	const autoD = SM_AUTO_D * s;
-	const turboX = SM_AUTO_X * s;
-	const turboY = (inBonus ? SM_TURBO_BONUS_Y : SM_TURBO_Y) * s;
-	const turboW = SM_AUTO_D * s;
-	const turboH = (inBonus ? SM_TURBO_BONUS_H : SM_AUTO_D) * s;
-	const bonusX = SM_BONUS_X * s;
-	const bonusY = SM_BONUS_Y * s;
-	const bonusD = SM_BONUS_D * s;
-	const menuX = SM_HAM_X * s;
-	const menuY = SM_HAM_Y * s;
-	const menuW = SM_HAM_W * s;
-	const menuH = SM_HAM_H * s;
-	const spinReserve = Math.max(48 * s, meterX + meterW - spinX + 12 * s);
-	const innerW = Math.max(80 * s, meterW - 32 * s - spinReserve);
-	const balanceW = innerW * 0.52;
-	const betW = innerW * 0.48;
+	const triW = GG_TRI_W * s;
+	const slabH = GG_SLAB_H * s;
+	const slabY = GG_SLAB_Y * s;
+	const gap = GG_GAP * s;
+	const balW = (inBonus ? GG_BAL_W + GG_BET_W * 0.42 : GG_BAL_W) * s;
+	const betW = (inBonus ? GG_BET_W * 0.72 : GG_BET_W) * s;
+	const spinD = GG_SPIN_D * s;
+	const icon = GG_ICON * s;
+	const bonusX = 0;
+	const bonusY = slabY;
+	const bonusD = GG_TRI_H * s;
+	const meterX = inBonus ? bonusX : triW + gap;
+	const meterY = slabY;
+	const meterW = balW;
+	const meterH = slabH;
+	const betPanelX = meterX + meterW + gap;
+	const spinX = betPanelX + betW - spinD * 0.56;
+	const spinY = slabY + slabH / 2 - spinD / 2;
+	const iconX = spinX - icon - 12 * s;
+	const autoX = iconX;
+	const autoY = slabY + 10 * s;
+	const autoD = icon;
+	const turboX = iconX;
+	const turboY = inBonus ? slabY + (slabH - icon) / 2 : slabY + slabH - icon - 10 * s;
+	const turboW = icon;
+	const turboH = inBonus ? slabH - 16 * s : icon;
+	const menuX = meterX + 16 * s;
+	const menuY = slabY + (slabH - GG_HAM_H * s) / 2;
+	const menuW = GG_HAM_W * s;
+	const menuH = GG_HAM_H * s;
+	const balanceX = menuX + menuW + 14 * s;
+	const balanceW = Math.max(120 * s, meterW * 0.42);
+	const toolbarWidth = Math.max(spinX + spinD, betPanelX + betW);
+	const toolbarHeight = Math.max(slabY + slabH, spinY + spinD) + 6 * s;
+	const toolbarLeftX = (layoutWidth - toolbarWidth) / 2;
+	const bottomInset = isDesktopLocked ? 18 : isCompact ? 12 : 16;
+	const toolbarTopY = layoutHeight - bottomInset - toolbarHeight;
 	const winPopupScale = winPopupHostScale(canvasWidth, canvasHeight);
-	const winW = SM_WIN_W * s * winPopupScale;
-	const winH = SM_WIN_H * s * winPopupScale;
-	const winX = meterX + (meterW - winW) / 2;
-	const winGap = 8 * s;
-	const winY = meterY - winH - winGap;
+	const winW = GG_WIN_W * s;
+	const winH = GG_WIN_H * s;
+	const winX = balanceX + balanceW;
+	const winY = meterY;
 
 	return {
 		mode,
@@ -462,9 +400,9 @@ export const getSummitToolbarLayout = (
 		meterY: px(meterY),
 		meterW: px(meterW),
 		meterH: px(meterH),
-		balanceX: px(meterX + 16 * s),
+		balanceX: px(balanceX),
 		balanceW: px(balanceW),
-		betX: px(meterX + meterW - spinReserve - betW),
+		betX: px(betPanelX),
 		betW: px(betW),
 		winW: px(winW),
 		winX: px(winX),
@@ -481,8 +419,8 @@ export const getSummitToolbarLayout = (
 		turboW: px(turboW),
 		turboH: px(turboH),
 		autoD: px(autoD),
-		labelSize: SM_LABEL * s,
-		valueSize: SM_VALUE * s,
+		labelSize: GG_LABEL * s,
+		valueSize: GG_VALUE * s,
 	};
 };
 

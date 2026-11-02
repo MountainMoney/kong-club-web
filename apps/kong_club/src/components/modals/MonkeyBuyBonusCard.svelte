@@ -13,6 +13,7 @@
 	} from '../../game/buyBonusScatterLayout';
 	import { ensurePrizeNumberFont } from '../../game/introFont';
 	import { GOLD_COIN_3CHAR_FONT_RATIO } from '../../game/prizeNumberFont';
+	import { volatilityCaps, volatilityStarCount } from '../../game/buyBonusScreen';
 	import {
 		BUY_BONUS_BODY_COLOR,
 		BUY_BONUS_CARD_CONFIRM_W,
@@ -80,11 +81,19 @@
 		props.portraitSheet ? 1 : props.compact ? width / BUY_BONUS_CARD_W : styleVars.scale,
 	);
 	/** Icon cluster scale — separate from typography on portrait sheet. */
-	const artScale = $derived(
-		props.portraitSheet
-			? styleVars.imageH / BUY_BONUS_IMAGE_H
-			: cardScale,
-	);
+	const artScale = $derived.by(() => {
+		if (props.portraitSheet) return styleVars.imageH / BUY_BONUS_IMAGE_H;
+		if (props.confirmed || props.compact) return cardScale;
+		const cluster =
+			props.card.iconLayout.kind === 'scatter'
+				? buyBonusScatterLayout(props.card.iconLayout.count as 3 | 4 | 5)
+				: props.card.iconLayout.kind === 'featureSpin'
+					? buyBonusCoinTriangleLayout()
+					: null;
+		if (!cluster) return cardScale;
+		const box = props.confirmed ? 220 : 168;
+		return Math.min(box / cluster.clusterWidth, box / cluster.clusterHeight);
+	});
 
 	const priceText = $derived(
 		formatMoney(stateBet.betAmount * buyBonusModeCostMultiplier(props.card.mode), 'bet'),
@@ -181,12 +190,14 @@
 			{/if}
 		</div>
 
-		<p class="volatility bonus-card-volatility">{props.card.volatility}</p>
-		<p class="cost bonus-card-cost">{priceText}</p>
-
+		<p class="volatility bonus-card-volatility">
+			{volatilityCaps(props.card.volatility)}
+			<span class="stars" aria-hidden="true">{'★'.repeat(volatilityStarCount(props.card.volatility))}</span>
+		</p>
 		<div class="btn-accent" aria-hidden="true"></div>
 
 		{#if props.confirmed && props.onback}
+			<p class="cost bonus-card-cost">{priceText}</p>
 			<div class="btn-row" data-bonus-action>
 				<button
 					type="button"
@@ -195,30 +206,33 @@
 				>BACK</button>
 				<button
 					type="button"
-					class="action-btn"
-					style={`background-color: ${props.card.buttonColor};`}
+					class="action-btn confirm-btn"
 					disabled={props.disabled}
 					onclick={(event) => { event.stopPropagation(); props.onaction?.(event); }}
-				>OK</button>
+				>CONFIRM</button>
 			</div>
 		{:else}
-			<button
-				type="button"
-				class="action-btn"
-				style={`background-color: ${props.card.buttonColor};`}
-				disabled={props.disabled}
-				data-bonus-action
-				onclick={(event) => {
-					event.stopPropagation();
-					if (props.confirmed) {
-						props.onaction?.(event);
-					} else {
-						props.onselect?.();
-					}
-				}}
-			>
-				{props.actionLabel}
-			</button>
+			<div class="card-foot">
+				<p class="cost bonus-card-cost">{priceText}</p>
+				<button
+					type="button"
+					class="action-btn"
+					class:buy={props.actionLabel === 'BUY'}
+					class:activate={props.actionLabel === 'ACTIVATE'}
+					disabled={props.disabled}
+					data-bonus-action
+					onclick={(event) => {
+						event.stopPropagation();
+						if (props.confirmed) {
+							props.onaction?.(event);
+						} else {
+							props.onselect?.();
+						}
+					}}
+				>
+					{props.actionLabel}
+				</button>
+			</div>
 		{/if}
 	</div>
 </div>
@@ -535,7 +549,178 @@
 	}
 
 	.back-btn {
-		background-color: #888888;
-		flex: 0 0 40%;
+		background-color: #2a2a2a;
+		color: #fff;
+		flex: 0 0 34%;
+		border-radius: 12px;
+	}
+
+	.bonus-card {
+		background: #161616;
+		background-image: none;
+		border: 2px solid #3a3a3a;
+		border-radius: 18px;
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+		font-family: Fredoka, Inter, sans-serif;
+		overflow: hidden;
+		animation: gg-card-in 220ms ease both;
+	}
+
+	.title {
+		color: var(--card-accent, #ffd500);
+		font-weight: 800;
+		letter-spacing: 0.02em;
+		-webkit-text-stroke: 1px #1a1208;
+		paint-order: stroke fill;
+		text-shadow: none;
+	}
+
+	.description {
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: #f2f2f2;
+		text-shadow: none;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
+	}
+
+	.volatility,
+	.cost {
+		text-shadow: none;
+		font-family: Fredoka, Inter, sans-serif;
+		font-weight: 700;
+	}
+
+	.volatility {
+		color: #b8b8b8;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.stars {
+		color: #ffd500;
+		letter-spacing: 0.12em;
+		font-size: 0.85em;
+	}
+
+	.btn-accent {
+		display: none;
+	}
+
+	.action-btn.activate {
+		background: transparent;
+		color: #ffd500;
+		border: 2px solid #ffd500;
+		border-radius: 12px;
+		text-shadow: none;
+		font-weight: 800;
+	}
+
+	.action-btn.buy {
+		background: #ffd500;
+		color: #161616;
+		border-radius: 12px;
+		text-shadow: none;
+		font-weight: 800;
+	}
+
+	.confirm-btn {
+		background: #fff;
+		color: #111;
+		border-radius: 12px;
+		text-shadow: none;
+		font-weight: 800;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .bonus-card-inner {
+		display: grid;
+		grid-template-columns: 38% minmax(0, 1fr) auto;
+		grid-template-areas:
+			'art title title'
+			'art vol vol'
+			'art price btn';
+		align-items: center;
+		column-gap: 12px;
+		row-gap: 4px;
+		text-align: left;
+		height: 100%;
+		box-sizing: border-box;
+		padding: 14px 16px 16px 8px;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .image-wrap {
+		grid-area: art;
+		width: 100%;
+		height: 168px;
+		margin: 0;
+		overflow: hidden;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .title {
+		grid-area: title;
+		text-align: left;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .volatility {
+		grid-area: vol;
+		align-items: flex-start;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot {
+		grid-column: 2 / 4;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-end;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .cost {
+		flex: 0 0 auto;
+		width: 100%;
+		margin: 0;
+		text-align: left;
+		font-size: 22px;
+		line-height: 1.1;
+		white-space: nowrap;
+		text-shadow: none;
+		-webkit-text-stroke: 0;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .card-foot .action-btn {
+		align-self: flex-end;
+		width: auto;
+		max-width: 100%;
+		min-width: 0;
+		min-height: 42px;
+		margin: 0;
+		padding: 0 16px;
+		font-size: 16px;
+		letter-spacing: 0.06em;
+		white-space: nowrap;
+		text-shadow: none;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .hero-trophy,
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .bonus-image {
+		width: 160px;
+		height: 160px;
+	}
+
+	.bonus-card:not(.confirmed):not(.compact):not(.portrait-sheet) .icon-cluster--scatter {
+		transform: none;
+	}
+
+	@keyframes gg-card-in {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 </style>

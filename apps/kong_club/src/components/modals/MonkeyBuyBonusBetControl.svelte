@@ -102,11 +102,10 @@
 		gap: 8px;
 		text-align: center;
 		user-select: none;
-		background-color: rgba(28, 28, 28, 0.78);
-		background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1.2px);
-		background-size: 8px 8px;
-		border: 3px solid #fff;
-		border-radius: 12px;
+		background-color: transparent;
+		background-image: none;
+		border: 0;
+		border-radius: 0;
 		padding: 10px 16px;
 		box-shadow: none;
 		color: #fff;

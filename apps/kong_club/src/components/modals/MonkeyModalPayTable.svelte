@@ -28,7 +28,7 @@
 			<div class="info-scroll">
 				<div class="info-column">
 					<header class="info-header">
-						<h2>Kong Club</h2>
+						<h2>GAME INFO</h2>
 					</header>
 					<MonkeyPaytablePanel />
 					<section class="mm-info-modal__rules info-section">
