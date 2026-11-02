@@ -63,6 +63,8 @@ const replayStateWithFullBookFallback = async (
 	const mode = normalizeLegacyBetModeKey(query.mode);
 	const bookIndex = Number(query.event);
 
+	if (!import.meta.env.DEV) return rgsState;
+
 	if (!Number.isInteger(bookIndex) || bookIndex < 0) {
 		return rgsState;
 	}

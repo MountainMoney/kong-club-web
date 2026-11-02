@@ -47,9 +47,16 @@
 	};
 
 	onMount(() => {
-		void ensureFredokaOneFont().then(() => {
+		// A failed or stalled font must not leave the splash stuck on LOADING.
+		const fontGate = window.setTimeout(() => {
 			fontReady = true;
-		});
+		}, 8000);
+		void ensureFredokaOneFont()
+			.catch(() => undefined)
+			.finally(() => {
+				window.clearTimeout(fontGate);
+				fontReady = true;
+			});
 		const sync = () => {
 			viewport = readCanvasSize();
 		};
@@ -57,6 +64,7 @@
 		window.addEventListener('resize', sync);
 		window.visualViewport?.addEventListener('resize', sync);
 		return () => {
+			window.clearTimeout(fontGate);
 			if (leaveTimer !== undefined) window.clearTimeout(leaveTimer);
 			window.removeEventListener('resize', sync);
 			window.visualViewport?.removeEventListener('resize', sync);

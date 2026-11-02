@@ -1,8 +1,10 @@
 import { Howl } from 'howler';
 import { stateSoundDerived } from 'state-shared';
 
+import { assetUrl } from './assetUrl';
+
 /** Standalone base loop — Tropical Morning (Cole 2026-09-11). */
-const SRC = '/assets/audio/bgm_main.mp3?v=tropical-morning';
+const SRC_PATH = '/assets/audio/bgm_main.mp3?v=tropical-morning';
 
 let howl: Howl | null = null;
 let soundId: number | undefined;
@@ -10,7 +12,7 @@ let soundId: number | undefined;
 const ensureHowl = () => {
 	if (!howl) {
 		howl = new Howl({
-			src: [SRC],
+			src: [assetUrl(SRC_PATH)],
 			html5: true,
 			loop: true,
 			preload: true,
