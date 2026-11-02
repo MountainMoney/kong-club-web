@@ -105,4 +105,12 @@ export default {
 		mode: 'bonus_hear',
 		gameType: 'freegame',
 	},
+	/** Same payload as kongClubMode. Compressed publish books still use this name. */
+	monkeyMayhemMode: {
+		index: 6,
+		type: 'monkeyMayhemMode',
+		state: 'start_bonus_hear',
+		mode: 'bonus_hear',
+		gameType: 'freegame',
+	},
 };

@@ -175,12 +175,23 @@ type BookEventStickyWilds = {
 	positions: Position[];
 };
 
-type BookEventKongClubMode = {
+/**
+ * Mode-state payload. `kongClubMode` is the current name.
+ * Compressed publish books still emit `monkeyMayhemMode` with the same fields.
+ */
+type BookEventModeStateFields = {
 	index: number;
-	type: 'kongClubMode';
 	state: string;
 	mode: string;
 	gameType: GameType;
+};
+
+type BookEventKongClubMode = BookEventModeStateFields & {
+	type: 'kongClubMode';
+};
+
+type BookEventMonkeyMayhemMode = BookEventModeStateFields & {
+	type: 'monkeyMayhemMode';
 };
 
 type BookEventWincap = {
@@ -226,6 +237,7 @@ export type BookEvent =
 	| BookEventScatterPayout
 	| BookEventStickyWilds
 	| BookEventKongClubMode
+	| BookEventMonkeyMayhemMode
 	| BookEventWincap
 	| BookEventCreateBonusSnapshot
 	| BookEventUpdateGlobalMult

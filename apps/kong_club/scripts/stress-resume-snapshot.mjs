@@ -10,6 +10,7 @@ const assert = (cond, msg) => {
 const BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT = [
 	'reveal',
 	'kongClubMode',
+	'monkeyMayhemMode',
 	'updateLevelUpTiles',
 	'updateGlobalMult',
 	'updateFreeSpin',
@@ -208,6 +209,40 @@ console.log('stress-resume-snapshot: no scatter intro replay step');
 	]);
 	assert(!plan.includes('freeSpinTrigger'), 'snapshot must not replay scatter intro');
 	assert(plan.includes('bonusEntry'), 'minimal bonus entry only');
+}
+
+console.log('stress-resume-snapshot: legacy monkeyMayhemMode is reserved for resume');
+{
+	const events = [
+		{
+			type: 'monkeyMayhemMode',
+			state: 'start_bonus_hear',
+			mode: 'bonus_hear',
+			gameType: 'freegame',
+		},
+		{ type: 'reveal', board: [[{ name: 'T' }]], gameType: 'freegame' },
+		{ type: 'updateFreeSpin', amount: 3, total: 10 },
+		{ type: 'setTotalWin', amount: 900 },
+	];
+	const { snapshotEvents, eventsAfter } = convertToResumableBet(events, events.length);
+	assert(
+		snapshotEvents.some((event) => event.type === 'monkeyMayhemMode'),
+		'resume snapshot must keep monkeyMayhemMode',
+	);
+	assert(
+		snapshotEvents.some((event) => event.type === 'reveal'),
+		'resume snapshot must keep reveal alongside the legacy mode event',
+	);
+	assert(eventsAfter.length === 0, 'full-prefix resume leaves no events after the snapshot');
+
+	const mixed = [
+		{ type: 'kongClubMode', state: 'start_bonus_see', mode: 'bonus_see', gameType: 'basegame' },
+		{ type: 'monkeyMayhemMode', state: 'organic_bonus_hear', mode: 'base', gameType: 'freegame' },
+	];
+	const lastMode = [...mixed]
+		.reverse()
+		.find((event) => event.type === 'kongClubMode' || event.type === 'monkeyMayhemMode');
+	assert(lastMode?.state === 'organic_bonus_hear', 'last mode event of either name wins');
 }
 
 console.log('stress-resume-snapshot: all passed');

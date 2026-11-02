@@ -69,6 +69,11 @@ import {
 	isHeldBoardDismissActive,
 } from './coinFeatureCover.svelte';
 import type { BookEvent, BookEventOfType, BookEventContext } from './typesBookEvent';
+import {
+	findLastModeStateBookEvent,
+	isModeStateBookEvent,
+	type ModeStateBookEvent,
+} from './modeStateEvent';
 import type { Position } from './types';
 import { uniqueSymbolPositions } from './boardPositions';
 import { scatterPositionsFromBoard, slamFromReelAfterFifthScatter } from './scatterAnticipation';
@@ -133,7 +138,7 @@ const scatterPositionsFromRevealBoard = (board: BookEventOfType<'reveal'>['board
 	scatterPositionsFromBoard(board);
 
 const presentBonusIntroFromMode = async (
-	bookEvent: BookEventOfType<'kongClubMode'>,
+	bookEvent: ModeStateBookEvent,
 	bookEvents: BookEvent[],
 ) => {
 	const isBonusStart =
@@ -215,7 +220,7 @@ const bookHasPendingBonusStart = (bookEvents: BookEvent[], fromEvent: BookEvent)
 	const rest = start >= 0 ? bookEvents.slice(start + 1) : bookEvents;
 	return rest.some(
 		(event) =>
-			event.type === 'kongClubMode' &&
+			isModeStateBookEvent(event) &&
 			(event.state.startsWith('start_bonus_') || event.state.startsWith('organic_bonus_')),
 	);
 };
@@ -412,6 +417,21 @@ const flushDeferredFeatureActivation = async () => {
 	}
 };
 
+/** Same playback for `kongClubMode` and legacy `monkeyMayhemMode`. */
+const handleModeStateEvent = async (
+	bookEvent: ModeStateBookEvent,
+	{ bookEvents }: BookEventContext,
+) => {
+	eventEmitter.broadcast({ type: 'monkeyModeState', payload: bookEvent });
+	const isBonusStart =
+		bookEvent.state.startsWith('start_bonus_') || bookEvent.state.startsWith('organic_bonus_');
+	if (isBonusStart) {
+		clearDeferredCoinSeeds();
+		eventEmitter.broadcast({ type: 'monkeyTilesClear' });
+	}
+	await presentBonusIntroFromMode(bookEvent, bookEvents);
+};
+
 export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContext> = {
 	reveal: async (bookEvent: BookEventOfType<'reveal'>, { bookEvents }: BookEventContext) => {
 		boardActivationPlayedThisSpin = false;
@@ -556,9 +576,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	},
 	freeSpinTrigger: async (bookEvent: BookEventOfType<'freeSpinTrigger'>, { bookEvents }: BookEventContext) => {
 		if (bonusIntroPresentedThisRound) return;
-		const lastMode = _.findLast(bookEvents, (event) => event.type === 'kongClubMode') as
-			| BookEventOfType<'kongClubMode'>
-			| undefined;
+		const lastMode = findLastModeStateBookEvent(bookEvents);
 		clearDeferredCoinSeeds();
 		eventEmitter.broadcast({ type: 'monkeyTilesClear' });
 		await presentScatterFreeSpinIntro({
@@ -803,17 +821,6 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	stickyWilds: async (bookEvent: BookEventOfType<'stickyWilds'>) => {
 		eventEmitter.broadcast({ type: 'monkeyStickyWilds', payload: bookEvent });
 	},
-	kongClubMode: async (
-		bookEvent: BookEventOfType<'kongClubMode'>,
-		{ bookEvents }: BookEventContext,
-	) => {
-		eventEmitter.broadcast({ type: 'monkeyModeState', payload: bookEvent });
-		const isBonusStart =
-			bookEvent.state.startsWith('start_bonus_') || bookEvent.state.startsWith('organic_bonus_');
-		if (isBonusStart) {
-			clearDeferredCoinSeeds();
-			eventEmitter.broadcast({ type: 'monkeyTilesClear' });
-		}
-		await presentBonusIntroFromMode(bookEvent, bookEvents);
-	},
+	kongClubMode: handleModeStateEvent,
+	monkeyMayhemMode: handleModeStateEvent,
 };

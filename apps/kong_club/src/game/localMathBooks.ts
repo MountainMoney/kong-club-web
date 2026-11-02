@@ -1,4 +1,5 @@
 import type { BookEvent } from './typesBookEvent';
+import { isModeStateBookEvent } from './modeStateEvent';
 import { normalizeLegacyBetModeKey } from './betModes';
 import { scatterPositionsFromBoard } from './scatterAnticipation';
 import { startMathBooksLoading, stopMathBooksLoading } from './stateMathBooksLoading.svelte';
@@ -148,19 +149,14 @@ export async function findFirstBookWithCoinKind(
 	return null;
 }
 
-/** Find first book with a kongClubMode.state (e.g. start_bonus_hear). */
+/** Find first book with a mode-state event (`kongClubMode` or `monkeyMayhemMode`). */
 export async function findFirstBookWithModeState(
 	mode: string,
 	stateIncludes: string,
 ): Promise<number | null> {
 	const { books } = await loadModeData(mode);
 	const idx = books.findIndex((book) =>
-		book.events.some(
-			(e) =>
-				e.type === 'kongClubMode' &&
-				typeof (e as { state?: string }).state === 'string' &&
-				(e as { state: string }).state.includes(stateIncludes),
-		),
+		book.events.some((event) => isModeStateBookEvent(event) && event.state.includes(stateIncludes)),
 	);
 	return idx >= 0 ? idx : null;
 }
@@ -186,8 +182,8 @@ const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');
 	if (!reveal || reveal.type !== 'reveal' || reveal.gameType !== 'basegame') return false;
 	if (scatterPositionsFromBoard(reveal.board).length < 5) return false;
-	const modeEvent = book.events.find((event) => event.type === 'kongClubMode');
-	if (!modeEvent || modeEvent.type !== 'kongClubMode') return false;
+	const modeEvent = book.events.find(isModeStateBookEvent);
+	if (!modeEvent) return false;
 	return MADNESS_TRIGGER_STATES.has(modeEvent.state);
 };
 

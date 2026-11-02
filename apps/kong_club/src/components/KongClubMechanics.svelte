@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import type { BookEventOfType } from '../game/typesBookEvent';
+	import type { ModeStateBookEvent } from '../game/modeStateEvent';
 	import type { Position } from '../game/types';
 
 	export type EmitterEventKongClub =
@@ -11,7 +12,7 @@
 		| { type: 'monkeyCoinSeed'; payload: BookEventOfType<'coinSeed'> }
 		| { type: 'monkeyScatterPayout'; payload: BookEventOfType<'scatterPayout'> }
 		| { type: 'monkeyStickyWilds'; payload: BookEventOfType<'stickyWilds'> }
-		| { type: 'monkeyModeState'; payload: BookEventOfType<'kongClubMode'> }
+		| { type: 'monkeyModeState'; payload: ModeStateBookEvent }
 		| { type: 'peakBarTease'; hit: boolean }
 		| { type: 'peakBarSpinReset' }
 		| { type: 'monkeyMechanicsReset'; instant?: boolean }
