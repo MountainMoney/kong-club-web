@@ -22,7 +22,7 @@ const DELTAS = [
 const MIN_CLUSTER = 5;
 const PLAY_ROWS = 5;
 
-const MODES = ['base', 'base_ante', 'feature_spin', 'bonus_see', 'bonus_hear', 'bonus_gamble'];
+const MODES = ['base', 'base_ante', 'feature_spin', 'bonus_see', 'bonus_hear', 'bonus_pick'];
 
 const cellName = (cell) => (cell && typeof cell === 'object' ? String(cell.name || '') : '');
 
@@ -88,8 +88,11 @@ const tumbleStops = (events) => {
 
 const readCache = (mode) => {
 	const file = path.join(CACHE, `books_${mode}.json`);
-	if (!fs.existsSync(file)) return null;
-	return JSON.parse(fs.readFileSync(file, 'utf-8'));
+	const legacy =
+		mode === 'bonus_pick' ? path.join(CACHE, 'books_bonus_gamble.json') : null;
+	const chosen = fs.existsSync(file) ? file : legacy && fs.existsSync(legacy) ? legacy : null;
+	if (!chosen) return null;
+	return JSON.parse(fs.readFileSync(chosen, 'utf-8'));
 };
 
 const typesOf = (book) => (book.events ?? []).map((event) => event.type);

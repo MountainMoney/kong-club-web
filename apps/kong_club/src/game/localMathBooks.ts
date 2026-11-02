@@ -176,7 +176,7 @@ export async function findFirstBookWithScatterCount(
 }
 
 const MADNESS_TRIGGER_STATES = new Set(['start_bonus_madness', 'organic_bonus_madness']);
-const MADNESS_TRIGGER_MODES = ['bonus_gamble', 'base', 'base_ante'] as const;
+const MADNESS_TRIGGER_MODES = ['bonus_pick', 'bonus_gamble', 'base', 'base_ante'] as const;
 
 const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');
@@ -193,9 +193,13 @@ export async function findFirstMadnessTriggerBook(): Promise<{
 	index: number;
 } | null> {
 	for (const mode of MADNESS_TRIGGER_MODES) {
-		const { books } = await loadModeData(mode);
-		const index = books.findIndex(isMadnessTriggerBook);
-		if (index >= 0) return { mode, index };
+		try {
+			const { books } = await loadModeData(mode);
+			const index = books.findIndex(isMadnessTriggerBook);
+			if (index >= 0) return { mode, index };
+		} catch {
+			/* bonus_pick may be absent until the legacy bonus_gamble books are loaded */
+		}
 	}
 	return null;
 }
