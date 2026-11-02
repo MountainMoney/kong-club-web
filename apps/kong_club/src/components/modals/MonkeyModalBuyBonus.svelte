@@ -2,13 +2,9 @@
 	import { onMount } from 'svelte';
 
 	import { PUBLIC_LOCAL_DEV } from 'envs';
-	import { stateModal } from 'state-shared';
 
-	import {
-		BUY_BONUS_PREFETCH_MODES,
-	} from '../../game/stateMathBooksLoading.svelte';
+	import { BUY_BONUS_PREFETCH_MODES } from '../../game/stateMathBooksLoading.svelte';
 	import { prefetchMathBooksMode } from '../../game/localMathBooks';
-	import MonkeyBuyBonusScreen from './MonkeyBuyBonusScreen.svelte';
 
 	onMount(() => {
 		if (!PUBLIC_LOCAL_DEV) return;
@@ -20,6 +16,4 @@
 	});
 </script>
 
-{#if stateModal.modal?.name === 'buyBonus'}
-	<MonkeyBuyBonusScreen onclose={() => (stateModal.modal = null)} />
-{/if}
+<!-- Buy menu is the Pixi BonusBuyScreen. This node only prefetches math books. -->

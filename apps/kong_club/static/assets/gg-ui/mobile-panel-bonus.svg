@@ -1,0 +1,39 @@
+<svg width="461" height="85" viewBox="0 0 461 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg x="0" y="0" preserveAspectRatio="none" overflow="visible" style="display: block;" width="461" height="85" viewBox="0 0 461 85" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="l0_Subtract" d="M450.5 1.25C455.609 1.25 459.75 5.39137 459.75 10.5V74.5C459.75 79.6086 455.609 83.75 450.5 83.75H10.5C5.39137 83.75 1.25 79.6086 1.25 74.5V10.5C1.25 5.39137 5.39137 1.25 10.5 1.25H450.5Z" fill="url(#l0_paint0_linear_0_10)" stroke="black" stroke-width="2.5" stroke-linejoin="round"/>
+<defs>
+<linearGradient id="l0_paint0_linear_0_10" x1="10.4864" y1="80.8256" x2="-4.33083" y2="80.8256" gradientUnits="userSpaceOnUse">
+<stop stop-color="#010101"/>
+<stop offset="1" stop-color="#010101"/>
+</linearGradient>
+</defs>
+</svg>
+
+<svg x="2.5" y="2.5" preserveAspectRatio="none" overflow="visible" style="display: block;" width="456" height="74" viewBox="0 0 456 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="l1_Union" opacity="0.5" d="M8 1.5H448C451.59 1.5 454.5 4.41015 454.5 8V66C454.5 69.5899 451.59 72.5 448 72.5H8C4.41015 72.5 1.5 69.5899 1.5 66V8C1.5 4.41015 4.41015 1.5 8 1.5Z" stroke="url(#l1_paint0_linear_0_7)" stroke-opacity="0.2" stroke-width="3"/>
+<defs>
+<linearGradient id="l1_paint0_linear_0_7" x1="13.7974" y1="8" x2="9.94152" y2="73.774" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.4"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
+
+<svg x="2.5" y="2.5" preserveAspectRatio="none" overflow="visible" style="display: block;" width="456" height="72" viewBox="0 0 456 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="l2_Rectangle 161128652">
+<path d="M0 8C0 3.58172 3.58172 0 8 0H448C452.418 0 456 3.58172 456 8V64C456 68.4183 452.418 72 448 72H8C3.58172 72 0 68.4183 0 64V8Z" fill="url(#l2_paint0_linear_0_4)"/>
+<path d="M8 1H448C451.866 1 455 4.13401 455 8V64C455 67.866 451.866 71 448 71H8C4.13401 71 1 67.866 1 64V8C1 4.13401 4.13401 1 8 1Z" stroke="url(#l2_paint1_linear_0_4)" stroke-opacity="0.2" stroke-width="2"/>
+</g>
+<defs>
+<linearGradient id="l2_paint0_linear_0_4" x1="32" y1="72" x2="32" y2="8" gradientUnits="userSpaceOnUse">
+<stop stop-color="#101010"/>
+<stop offset="1" stop-color="#1A1A1A"/>
+</linearGradient>
+<linearGradient id="l2_paint1_linear_0_4" x1="2.59769" y1="8" x2="-2.00492" y2="71.6673" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.4"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
+
+</svg>

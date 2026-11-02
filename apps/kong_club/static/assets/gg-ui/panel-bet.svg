@@ -1,0 +1,49 @@
+<svg width="426" height="138" viewBox="0 0 426 138" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg x="0" y="0" preserveAspectRatio="none" overflow="visible" style="display: block;" width="426" height="138" viewBox="0 0 426 138" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="l0_Subtract" d="M424.5 135C424.5 135.828 423.828 136.5 423 136.5H13.0049C6.49476 136.5 1.50005 131.18 1.5 125.021V113.021C1.5 112.095 1.61307 111.152 1.84863 110.21L25.7119 14.7549C27.6598 6.96481 34.6596 1.50006 42.6895 1.5H419.814C420.643 1.5 421.314 2.17157 421.314 3V13C421.314 13.5022 421.063 13.971 420.645 14.249C402.959 26.0079 391.246 45.5488 389.676 68.0049C391.34 91.751 404.391 112.239 423.765 123.709C424.221 123.979 424.5 124.47 424.5 125V135Z" fill="url(#l0_paint0_linear_0_9)" stroke="black" stroke-width="3" stroke-linejoin="round"/>
+<defs>
+<linearGradient id="l0_paint0_linear_0_9" x1="45.5837" y1="131.93" x2="-33.4222" y2="131.93" gradientUnits="userSpaceOnUse">
+<stop stop-color="#010101"/>
+<stop offset="1" stop-color="#010101"/>
+</linearGradient>
+</defs>
+</svg>
+
+<svg x="3" y="3" preserveAspectRatio="none" overflow="visible" style="display: block;" width="420" height="122" viewBox="0 0 420 122" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="l1_m" opacity="0.5" d="M39.6895 1.5H412.133C394.544 14.9326 383.5 36.1463 383.5 60C383.5 85.0767 395.741 107.233 414.889 120.5H10.0049C5.20033 120.5 1.50005 116.573 1.5 112.021V110.021C1.5 109.34 1.58293 108.642 1.75879 107.938L25.6221 12.4834C27.1854 6.23036 32.6776 1.78541 39.0684 1.51367L39.6895 1.5Z" stroke="url(#l1_paint0_linear_0_10)" stroke-opacity="0.2" stroke-width="3"/>
+<defs>
+<linearGradient id="l1_paint0_linear_0_10" x1="25.1893" y1="8.86014e-09" x2="22.5541" y2="121.943" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.4"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
+
+<svg x="3" y="3" preserveAspectRatio="none" overflow="visible" style="display: block;" width="420" height="120" viewBox="0 0 420 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="l2_Subtract">
+<path d="M420 0C400.598 12.8989 388 34.9557 388 60C388 85.0443 400.598 107.101 420 120H10.0047C3.49897 120 -1.27435 113.886 0.303513 107.574L24.1668 12.1191C25.9476 4.9966 32.3475 0 39.6893 0H420Z" fill="url(#l2_paint0_linear_0_7)"/>
+<path d="M39.6895 1.25H416.062C398.174 14.606 386.75 35.9514 386.75 60C386.75 84.0486 398.174 105.394 416.062 118.75H10.0049C4.31249 118.75 0.135942 113.4 1.5166 107.877L25.3799 12.4219C27.0217 5.85609 32.9214 1.25 39.6895 1.25Z" stroke="url(#l2_paint1_linear_0_7)" stroke-opacity="0.2" stroke-width="2.5"/>
+</g>
+<defs>
+<linearGradient id="l2_paint0_linear_0_7" x1="210" y1="120" x2="210" y2="0" gradientUnits="userSpaceOnUse">
+<stop stop-color="#101010"/>
+<stop offset="1" stop-color="#1A1A1A"/>
+</linearGradient>
+<linearGradient id="l2_paint1_linear_0_7" x1="81.0883" y1="-2.24037e-06" x2="77.7839" y2="119.909" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0.4"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+</defs>
+</svg>
+
+<svg x="379" y="3" preserveAspectRatio="none" overflow="visible" style="display: block;" width="44" height="132" viewBox="0 0 44 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="l3_Vector" opacity="0.4" d="M12.243 66C14.0772 43.4563 26.164 23.8583 44 12V0H23.626C8.96862 15.719 0 36.8121 0 60V72C0 95.1879 8.96862 116.281 23.626 132H44V120C26.164 108.142 14.0772 88.5437 12.243 66Z" fill="url(#l3_paint0_linear_0_13)"/>
+<defs>
+<linearGradient id="l3_paint0_linear_0_13" x1="9.64477" y1="129.209" x2="0.844109" y2="129.209" gradientUnits="userSpaceOnUse">
+<stop stop-color="#010101"/>
+<stop offset="1" stop-color="#010101"/>
+</linearGradient>
+</defs>
+</svg>
+
+</svg>

@@ -100,7 +100,7 @@ export const volatilityLabelFromStd = (std: number): string => {
 	return 'Volatility: Very High';
 };
 
-const volatilityForMode = (mode: string): string =>
+export const volatilityForMode = (mode: string): string =>
 	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode] ?? 0);
 
 /** GG-style star row: Low 2, Medium 3, High 4, Very High 5. */
@@ -112,7 +112,10 @@ export const volatilityStarCount = (label: string) => {
 };
 
 export const volatilityCaps = (label: string) =>
-	`${label.replace(/^volatility:\s*/i, '').trim().toUpperCase()} VOLATILITY`;
+	`${label
+		.replace(/^volatility:\s*/i, '')
+		.trim()
+		.toUpperCase()} VOLATILITY`;
 
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
@@ -175,8 +178,7 @@ export const BUY_BONUS_GRID_COLS = 3;
 export const BUY_BONUS_GROUP_W =
 	BUY_BONUS_CARD_W * BUY_BONUS_GRID_COLS + BUY_BONUS_CARD_GAP * (BUY_BONUS_GRID_COLS - 1);
 export const BUY_BONUS_GROUP_H =
-	(buyBonusCardHeight(BUY_BONUS_CARD_W, { showDescription: false }) ?? 0) * 2 +
-	BUY_BONUS_CARD_GAP;
+	(buyBonusCardHeight(BUY_BONUS_CARD_W, { showDescription: false }) ?? 0) * 2 + BUY_BONUS_CARD_GAP;
 
 export const buyBonusCardByMode = (mode: string) => BUY_BONUS_CARDS.find((c) => c.mode === mode);
 

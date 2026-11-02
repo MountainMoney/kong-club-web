@@ -9,7 +9,8 @@
 	import { GameVersion } from 'components-ui-html';
 
 	import MonkeyModals from './MonkeyModals.svelte';
-	import SummitToolbar from './ui/SummitToolbar.svelte';
+	import BonusBuyScreen from './gg/BonusBuyScreen.svelte';
+	import GaiaBar from './gg/GaiaBar.svelte';
 	import OpeningSplash from './OpeningSplash.svelte';
 	import './ui/summit/summitType.css';
 
@@ -98,7 +99,8 @@
 
 		if (!canvas) return;
 
-		canvas.style.pointerEvents = stateModal.modal ? 'none' : 'auto';
+		const htmlModal = Boolean(stateModal.modal) && stateModal.modal?.name !== 'buyBonus';
+		canvas.style.pointerEvents = htmlModal ? 'none' : 'auto';
 	});
 
 	const showSplash = $derived(context.stateLayout.showLoadingScreen && !isReplayUrl());
@@ -107,9 +109,7 @@
 	const showPlayfield = $derived(!showSplash || splashHandoff);
 	const showCornerCredits = $derived(!isShortLandscape(canvasSizes.width, canvasSizes.height));
 
-	const playfieldAlpha = $derived(
-		stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha,
-	);
+	const playfieldAlpha = $derived(stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha);
 
 	const beginSplashHandoff = () => {
 		splashHandoff = true;
@@ -127,7 +127,11 @@
 
 	onMount(() => {
 		let mounted = true;
-		void ensureFredokaOneFont().then(() => {
+		void Promise.all([
+			ensureFredokaOneFont(),
+			document.fonts.load('600 32px Rubik'),
+			document.fonts.load('700 40px Rubik'),
+		]).then(() => {
 			if (mounted) summitFontReady = true;
 		});
 		syncSpinSpeedToBet();
@@ -166,99 +170,97 @@
 </script>
 
 <div class="mm-game-root">
-<App>
-	<EnableSound />
-	{#if !isReplayUrl()}
-		<EnableHotkey />
-	{/if}
-	<EnableGameActor />
-	<EnablePixiExtension />
-
-	<Background />
-
-	{#if showPlayfield}
+	<App>
+		<EnableSound />
 		{#if !isReplayUrl()}
-			<ResumeBet />
+			<EnableHotkey />
 		{/if}
-		<Sound />
+		<EnableGameActor />
+		<EnablePixiExtension />
 
-		<MainContainer>
-			<Container
-				alpha={playfieldAlpha}
-				sortableChildren={true}
-				x={stateSummitTease.shakeX}
-				y={stateSummitTease.shakeY}
-			>
-				<!-- Back → front: board bg → symbols → vine border → title -->
-				<BoardFrame />
-				<TileLevelGrid />
-				<MultiplierGrid />
-				<Board />
-				<TumbleBoard />
-				<KongClubMechanics />
-				{#if !stateSummitTease.active}
-					<MonkeyMascot />
-					<BoardBorderOverlay />
-				{/if}
-				<PlayfieldTitle />
-				<CoinFeatureDim />
-				<CoinFeatureReveal />
-				<ClusterWinAmounts />
-				<PaylineWinHighlight />
-			</Container>
-		</MainContainer>
+		<Background />
 
-		<SummitTeaseOverlay />
-		{#if stateSummitTease.active}
-			<Container
-				zIndex={zIndexes.summitTeaseFront}
-				eventMode="none"
-				sortableChildren={true}
-			>
-				<MainContainer>
-					<Container
-						sortableChildren={true}
-						x={stateSummitTease.shakeX}
-						y={stateSummitTease.shakeY}
-					>
-						<MonkeyProgressBar />
-						<BoardBorderOverlay />
+		{#if showPlayfield}
+			{#if !isReplayUrl()}
+				<ResumeBet />
+			{/if}
+			<Sound />
+
+			<MainContainer>
+				<Container
+					alpha={playfieldAlpha}
+					sortableChildren={true}
+					x={stateSummitTease.shakeX}
+					y={stateSummitTease.shakeY}
+				>
+					<!-- Back → front: board bg → symbols → vine border → title -->
+					<BoardFrame />
+					<TileLevelGrid />
+					<MultiplierGrid />
+					<Board />
+					<TumbleBoard />
+					<KongClubMechanics />
+					{#if !stateSummitTease.active}
 						<MonkeyMascot />
-					</Container>
-				</MainContainer>
-			</Container>
+						<BoardBorderOverlay />
+					{/if}
+					<PlayfieldTitle />
+					<CoinFeatureDim />
+					<CoinFeatureReveal />
+					<ClusterWinAmounts />
+					<PaylineWinHighlight />
+				</Container>
+			</MainContainer>
+
+			<SummitTeaseOverlay />
+			{#if stateSummitTease.active}
+				<Container zIndex={zIndexes.summitTeaseFront} eventMode="none" sortableChildren={true}>
+					<MainContainer>
+						<Container
+							sortableChildren={true}
+							x={stateSummitTease.shakeX}
+							y={stateSummitTease.shakeY}
+						>
+							<MonkeyProgressBar />
+							<BoardBorderOverlay />
+							<MonkeyMascot />
+						</Container>
+					</MainContainer>
+				</Container>
+			{/if}
+
+			{#if summitFontReady}
+				<GaiaBar replay={isReplayUrl()} />
+			{/if}
+			<ClickToSkip />
+			<SpinWinOverlay />
+			<MonkeyFreeSpinIntro />
+			<FreeSpinOutro />
+			<BlackScreenFade />
+			<Transition />
+			{#if summitFontReady}
+				<BonusBuyScreen />
+			{/if}
 		{/if}
 
-		<ClickToSkip />
-		<SpinWinOverlay />
-		<MonkeyFreeSpinIntro />
-		<FreeSpinOutro />
-		<BlackScreenFade />
-		<Transition />
+		<ReplayMode />
+	</App>
+
+	{#if summitFontReady && showSplash}
+		<OpeningSplash onleavestart={beginSplashHandoff} oncontinue={revealPlayfield} />
 	{/if}
 
-	<ReplayMode />
-</App>
-
-{#if summitFontReady && showSplash}
-	<OpeningSplash onleavestart={beginSplashHandoff} oncontinue={revealPlayfield} />
-{/if}
-
-{#if summitFontReady && showPlayfield}
-	<SummitToolbar replayMode={isReplayUrl()} />
-{/if}
-
-{#if summitFontReady && showCornerCredits}
-	<div
-		class="corner-credits summit-ui-type"
-		class:behind-overlay={!!stateModal.modal}
-		style={`opacity:${playfieldAlpha}`}
-		aria-hidden="true"
-	>
-		<span class="corner-credits-left">KONG CLUB</span>
-		<span class="corner-credits-right">TRIFECTA</span>
-	</div>
-{/if}
+	{#if summitFontReady && showCornerCredits}
+		<div
+			class="corner-credits summit-ui-type"
+			class:behind-overlay={!!stateModal.modal}
+			style={`opacity:${playfieldAlpha}`}
+			aria-hidden="true"
+		>
+			<span class="corner-credits-left">KONG CLUB</span>
+			<span class="corner-credits-right">TRIFECTA</span>
+		</div>
+	{/if}
 </div>
 
 {#if summitFontReady && stateUi.config.mode !== 'replay'}
