@@ -189,7 +189,7 @@ const PAYTABLE_COPY = {
 		default:
 			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 		social:
-			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
+			'Scatter (stone tablet): does not win. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 	},
 	levelUpTiles: {
 		default:

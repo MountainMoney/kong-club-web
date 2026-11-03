@@ -92,9 +92,9 @@ const buildProgressBarSection = (): GameRuleData =>
 	ruleSection(
 		'PROGRESS BAR & BOARD ACTIVATION',
 		isSocialMode()
-			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
+			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear wins at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
 
-On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
+On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and win when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
 
 Coin values are play-amount multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`
 			: `On regular spins, each winning tumble fills the Progress Bar by one step. In See and Hear free spins, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free spin. When the bar fills (5 steps), Board Activation starts the coin collect.
@@ -132,7 +132,7 @@ const buildScatterSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'SCATTER & FREE GAMES' : 'SCATTER & FREE SPINS',
 		isSocialMode()
-			? `Stone tablet scatters do not pay. They start a bonus:
+			? `Stone tablet scatters do not win. They start a bonus:
 • 1–2 scatters do not start a bonus
 • 3 scatters → See No Evil (${RULES_FREE_SPINS} free games; board clears; each winning cluster fills the Progress Bar; threshold 5)
 • 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free games, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free game)
@@ -140,7 +140,7 @@ const buildScatterSection = (): GameRuleData =>
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 plays to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate ${modeLabel('bonus_mystery')} (${config.betModes.bonus_mystery.cost}×): 50% dead play, 45% Hear, 5% Monkey Madness.
+You can play See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate ${modeLabel('bonus_mystery')} (${config.betModes.bonus_mystery.cost}×): 50% dead play, 45% Hear, 5% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
 			: `Stone tablet scatters do not pay. They start a bonus:
