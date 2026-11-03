@@ -168,7 +168,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: GAMBLE_BET_MODE_KEY,
 		title: 'GAMBLE',
-		description: `Each spin costs ${config.betModes.bonus_mystery.cost}× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).`,
+		description: `Each spin costs ${config.betModes.bonus_mystery.cost}× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
 		volatility: volatilityForMode(GAMBLE_BET_MODE_KEY),

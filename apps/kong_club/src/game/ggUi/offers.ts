@@ -126,9 +126,9 @@ const SEEDS: OfferSeed[] = [
 		art: 'ST',
 		artSize: { width: 512, height: 512 },
 		theme: 'Gamble',
-		body: '50% nothing, 40% Hear No Evil, 10% Monkey Madness.',
+		body: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
 		detail:
-			'Each spin costs 380× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).',
+			'Each spin costs 380× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
 		price: config.betModes.bonus_mystery.cost,
 	},
 ];

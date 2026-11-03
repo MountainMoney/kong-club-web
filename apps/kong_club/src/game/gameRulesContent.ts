@@ -140,7 +140,7 @@ const buildScatterSection = (): GameRuleData =>
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 plays to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_mystery.cost}×): 50% dead play, 40% Hear, 10% Monkey Madness.
+You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_mystery.cost}×): 50% dead play, 45% Hear, 5% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
 			: `Stone tablet scatters do not pay. They start a bonus:
@@ -151,7 +151,7 @@ Level-Up Tiles reset on bonus entry, then carry across free games within that bo
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 spins to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_mystery.cost}×): 50% dead spin, 40% Hear, 10% Monkey Madness.
+You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_mystery.cost}×): 50% dead spin, 45% Hear, 5% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free spins within that bonus.`,
 	);
