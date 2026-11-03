@@ -5,32 +5,21 @@
 		SMALL_CLUSTER_TIERS,
 		type SmallClusterPayTierValues,
 	} from '../../game/clusterPaytable';
-	import { paytableCopy, paytableModeLabel } from '../../game/socialCopy';
+	import { mathModes, modeLabel } from '../../game/mathProfile';
+	import { paytableCopy } from '../../game/socialCopy';
 	import { shouldDisplayRtp } from '../../game/jurisdiction';
 	import { symbolSrc } from '../../assets/resolve';
 
 	const showRtp = $derived(shouldDisplayRtp());
 
-	type BetModeKey = keyof typeof config.betModes;
-
-	const modeRtpLine = (modeKey: BetModeKey, label: string) => {
-		const mode = config.betModes[modeKey];
+	const modeRtpLine = (modeKey: string, label: string) => {
+		const mode = config.betModes[modeKey as keyof typeof config.betModes];
 		if (!showRtp) return label;
 		return `${label} — RTP ${(mode.rtp * 100).toFixed(2)}% · Max win ${mode.max_win.toLocaleString('en-US')}×`;
 	};
 
 	const modeRtpLines = $derived(
-		showRtp
-			? [
-					modeRtpLine('base', paytableModeLabel('base')),
-					modeRtpLine('base_ante', paytableModeLabel('base_ante')),
-					modeRtpLine('feature_spin', paytableModeLabel('feature_spin')),
-					modeRtpLine('peak_spin', paytableModeLabel('peak_spin')),
-					modeRtpLine('bonus_see', paytableModeLabel('bonus_see')),
-					modeRtpLine('bonus_hear', paytableModeLabel('bonus_hear')),
-					modeRtpLine('bonus_pick', paytableModeLabel('bonus_pick')),
-				]
-			: [],
+		showRtp ? mathModes.map((mode) => modeRtpLine(mode.id, modeLabel(mode.id))) : [],
 	);
 
 	const SYMBOL_NAMES: Record<string, string> = {

@@ -1,21 +1,27 @@
 import { buildClusterPaytable, SMALL_CLUSTER_TIERS } from './clusterPaytable';
+import { mathModes, mathProfile } from './mathProfile';
+
+const betModes = Object.fromEntries(
+	mathModes.map((mode) => [
+		mode.id,
+		{
+			cost: mode.cost,
+			feature: mode.feature,
+			buyBonus: mode.buyBonus,
+			rtp: mode.rtp,
+			max_win: mode.maxWin,
+		},
+	]),
+);
 
 export default {
 	providerName: 'Trifecta',
 	gameName: 'Kong Club',
 	gameID: 'kong-club',
-	rtp: 0.965,
+	rtp: mathProfile.rtp,
 	numReels: 6,
 	numRows: [5, 5, 5, 5, 5, 5],
-	betModes: {
-		base: { cost: 1.0, feature: true, buyBonus: false, rtp: 0.965, max_win: 25000.0 },
-		base_ante: { cost: 1.4, feature: true, buyBonus: false, rtp: 0.965, max_win: 25000.0 },
-		feature_spin: { cost: 65.0, feature: true, buyBonus: false, rtp: 0.965, max_win: 25000.0 },
-		peak_spin: { cost: 1400.0, feature: true, buyBonus: false, rtp: 0.965, max_win: 25000.0 },
-		bonus_see: { cost: 115.0, feature: true, buyBonus: true, rtp: 0.965, max_win: 25000.0 },
-		bonus_hear: { cost: 250.0, feature: true, buyBonus: true, rtp: 0.965, max_win: 25000.0 },
-		bonus_pick: { cost: 380.0, feature: true, buyBonus: false, rtp: 0.965, max_win: 25000.0 },
-	},
+	betModes,
 	symbols: {
 		MW: { paytable: null, special_properties: ['wild'] },
 		ST: { paytable: null, special_properties: ['scatter'] },

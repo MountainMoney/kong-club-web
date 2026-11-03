@@ -8,6 +8,7 @@ import {
 	isGambleBuyBetMode,
 } from './betModes';
 import config from './config';
+import { formatMathCost, modeLabel, oddsText } from './mathProfile';
 import {
 	BUY_BONUS_CARD_GAP,
 	BUY_BONUS_CARD_W,
@@ -121,7 +122,7 @@ export const volatilityCaps = (label: string) =>
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
-		title: 'EXTRA CHANCE',
+		title: modeLabel(ANTE_BET_MODE_KEY).toUpperCase(),
 		description: `Double the base bonus chance: about 1 in 130 spins instead of about 1 in 260, for ${extraChanceCostLabel()} base bet.`,
 		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'extraChance' },
@@ -130,7 +131,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'feature_spin',
-		title: 'FEATURE SPIN',
+		title: modeLabel('feature_spin').toUpperCase(),
 		description: `Each spin costs ${config.betModes.feature_spin.cost}× bet with the Progress Bar filled. Every spin lands a 5+ cluster, then the coin game after tumbles stop.`,
 		imageKey: 'symbol_CG',
 		iconLayout: { kind: 'featureSpin' },
@@ -139,7 +140,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'peak_spin',
-		title: 'TRIFECTA SPIN',
+		title: modeLabel('peak_spin').toUpperCase(),
 		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
 		imageKey: 'symbol_CG',
 		iconLayout: { kind: 'summitSpin' },
@@ -148,7 +149,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'bonus_see',
-		title: 'SEE NO EVIL',
+		title: modeLabel('bonus_see').toUpperCase(),
 		description: `Buy the See No Evil bonus for ${config.betModes.bonus_see.cost}× bet. 3 scatters. The board clears, then 10 free spins.`,
 		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 3 },
@@ -157,7 +158,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'bonus_hear',
-		title: 'HEAR NO EVIL',
+		title: modeLabel('bonus_hear').toUpperCase(),
 		description: `Buy the Hear No Evil bonus for ${config.betModes.bonus_hear.cost}× bet. 4 scatters. The board stays, then 10 free spins.`,
 		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 4 },
@@ -166,8 +167,8 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	},
 	{
 		mode: 'bonus_pick',
-		title: 'MYSTERY BONUS',
-		description: `Each spin costs ${config.betModes.bonus_pick.cost}× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).`,
+		title: modeLabel('bonus_pick').toUpperCase(),
+		description: `Each spin costs ${formatMathCost(config.betModes.bonus_pick.cost)}× bet. ${oddsText('bonus_pick')}.`,
 		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 5 },
 		volatility: volatilityForMode('bonus_pick'),

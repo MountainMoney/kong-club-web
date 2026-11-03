@@ -46,10 +46,23 @@ To drop in a new logo, replace `title_art.png` or set `logo.src` to the new png.
 | music or one-shot wav    | `static/assets/placeholders/silent.wav`                  |
 | CSS font                 | no file; the face is skipped and the next family is used |
 
+## Math profile
+
+Mode names, costs, RTP, max win, and Mystery Bonus odds are not hardcoded. They come from [`src/stories/data/math_books/index.json`](src/stories/data/math_books/index.json). `node scripts/generate-math-profile.mjs` writes [`src/game/mathProfile.json`](src/game/mathProfile.json), and the rules, paytable, and buy screen read that file.
+
+The dev server and `pnpm build` regenerate the profile before the app bundles. A book file is measured only when it has at least `minBooksToMeasure` books (1000) or the mode sets `measureFromBooks`. The short local cache does not replace the declared numbers. The final 250k publish does.
+
+Drop-in steps, with no source edits:
+
+1. Replace `index.json` with the publish index (mode id, label, cost, and the odds labels for `bonus_pick`).
+2. Put each mode's books at `src/stories/data/math_books/books_<mode>.json` or `.cache/math-books/books_<mode>.json`. `bonus_pick` also accepts `books_bonus_gamble.json`.
+3. Optional: `lookUpTable_<mode>_0.csv` (`id,weight,payout`) so RTP is measured. Payouts are base-bet multiples, and RTP is the weighted payout divided by the mode cost. Without a lookup table, RTP stays the value in `index.json`.
+4. Run `pnpm --dir apps/kong_club math:profile` (or `pnpm build`). Max win becomes the highest `payoutMultiplier` in the books. Mystery Bonus odds are the share of books whose `kongClubMode` state matches the `odds` entries (`noBonus`, `start_bonus_hear`, `start_bonus_madness`).
+
 ## Check
 
 ```bash
 pnpm --dir apps/kong_club test:assets
 ```
 
-That checks every key resolves, then boots the dev server with `?assetPlaceholders=1` and waits until the game reports loaded.
+That checks every asset key resolves, checks the math profile matches `index.json` and that a book sample rewrites odds, RTP, and max win, then boots the dev server with `?assetPlaceholders=1` and waits until the game reports loaded.

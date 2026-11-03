@@ -1,6 +1,7 @@
 import { stateBet, stateMeta, type BetModeMeta } from 'state-shared';
 
 import config from './config';
+import { formatMathCost, oddsText } from './mathProfile';
 import { eventEmitter } from './eventEmitter';
 
 const assets = {
@@ -356,7 +357,7 @@ export function initKongClubBetModes() {
 				title: `Mystery Bonus (${config.betModes.bonus_pick.cost}×)`,
 				button: 'Activate',
 				parent: 'base',
-				description: `Each spin costs ${config.betModes.bonus_pick.cost}× bet. 50% dead spin, 45% Hear No Evil, 5% Monkey Madness.`,
+				description: `Each spin costs ${formatMathCost(config.betModes.bonus_pick.cost)}× bet. ${oddsText('bonus_pick')}.`,
 			}),
 		]);
 		stateMeta.betModeMeta = meta;

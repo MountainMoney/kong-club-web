@@ -1,10 +1,85 @@
 {
-  "modes": [
-    "base",
-    "base_ante",
-    "feature_spin",
-    "bonus_hear",
-    "max_win_spin"
-  ],
-  "outputDir": "C:\\Users\\Cole\\Desktop\\Slots\\Monkey Mayhem\\web-sdk\\apps\\kong_club\\src\\stories\\data\\math_books"
+	"outputDir": "apps/kong_club/src/stories/data/math_books",
+	"minBooksToMeasure": 1000,
+	"rtp": 0.965,
+	"maxWin": 25000,
+	"modes": [
+		{
+			"id": "base",
+			"label": "Base game",
+			"socialLabel": "Base game",
+			"cost": 1,
+			"feature": true,
+			"buyBonus": false
+		},
+		{
+			"id": "base_ante",
+			"label": "Extra Chance",
+			"socialLabel": "Extra Chance",
+			"cost": 1.4,
+			"feature": true,
+			"buyBonus": false
+		},
+		{
+			"id": "feature_spin",
+			"label": "Feature Spin",
+			"socialLabel": "Feature Play",
+			"cost": 65,
+			"feature": true,
+			"buyBonus": false
+		},
+		{
+			"id": "peak_spin",
+			"label": "TRIFECTA Spin",
+			"socialLabel": "TRIFECTA Play",
+			"cost": 1400,
+			"feature": true,
+			"buyBonus": false
+		},
+		{
+			"id": "bonus_see",
+			"label": "See No Evil",
+			"socialLabel": "See No Evil",
+			"cost": 115,
+			"feature": true,
+			"buyBonus": true
+		},
+		{
+			"id": "bonus_hear",
+			"label": "Hear No Evil",
+			"socialLabel": "Hear No Evil",
+			"cost": 250,
+			"feature": true,
+			"buyBonus": true
+		},
+		{
+			"id": "bonus_pick",
+			"label": "Mystery Bonus",
+			"socialLabel": "Mystery Bonus",
+			"cost": 380,
+			"feature": true,
+			"buyBonus": false,
+			"odds": [
+				{
+					"id": "dead",
+					"when": "noBonus",
+					"label": "dead spin",
+					"socialLabel": "dead play",
+					"percent": 50
+				},
+				{
+					"id": "hear",
+					"state": ["start_bonus_hear", "organic_bonus_hear"],
+					"label": "4 scatters (Hear No Evil)",
+					"percent": 45
+				},
+				{
+					"id": "madness",
+					"state": ["start_bonus_madness", "organic_bonus_madness"],
+					"label": "5 scatters (Monkey Madness)",
+					"percent": 5
+				}
+			]
+		}
+	]
 }

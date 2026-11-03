@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 
+	import { MAX_WIN_MULTIPLIER } from '../game/winCountTier';
+
 	import { stateFxLab, setPacingPreset, setCoinFacePreset, setCoinFaceFillLook, setCoinFaceMidCrease, resetCoinArtNudge, resetCoinFaceGradient, resetMultiFaceGradient, resetBagFaceGradient, setCoinDigitLab, setCoinCharLab, setMascotClip, resetMascotNudge, setBackgroundLook, MASCOT_CLIPS } from '../game/fxLab.svelte';
 	import type { BackgroundLook } from '../game/fxLab.svelte';
 	import {
@@ -918,7 +920,7 @@
 						500×
 					</button>
 					<button type="button" disabled={busy} onclick={() => previewCenterCountUpMax()}>
-						25000×
+						{MAX_WIN_MULTIPLIER.toLocaleString('en-US')}×
 					</button>
 					<button type="button" disabled={busy} onclick={() => previewToolbarPulse()}>
 						Toolbar flash
