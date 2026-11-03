@@ -12,6 +12,7 @@
 		"audit:assets": "node scripts/audit-assets.mjs",
 		"math:profile": "node scripts/generate-math-profile.mjs",
 		"test:assets": "node scripts/generate-math-profile.mjs && node --experimental-strip-types --test src/assets/manifest.test.ts src/game/mathProfile.test.ts && node scripts/verify-asset-placeholders.mjs",
+		"test:mascot": "node --experimental-strip-types --test src/game/mascotDirector.test.ts",
 		"import:art": "python scripts/import-art-pack.py",
 		"verify:books": "node scripts/verify-dev-books-super-cascade.mjs",
 		"verify:loops": "node scripts/verify-dev-books-loops.mjs",

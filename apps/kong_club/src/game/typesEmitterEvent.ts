@@ -14,6 +14,7 @@ import type { EmitterEventKongClub } from '../components/KongClubMechanics.svelt
 import type { EmitterEventTileLevelGrid } from '../components/TileLevelGrid.svelte';
 import type { EmitterEventPaylineWin } from '../components/PaylineWinHighlight.svelte';
 import type { EmitterEventBlackScreen } from '../components/BlackScreenFade.svelte';
+import type { EmitterEventMascot } from './mascotDirector';
 
 export type EmitterEventSpinSkip =
 	| { type: 'winSkip' }
@@ -36,4 +37,5 @@ export type EmitterEventGame =
 	| EmitterEventTileLevelGrid
 	| EmitterEventPaylineWin
 	| EmitterEventBlackScreen
-	| EmitterEventSpinSkip;
+	| EmitterEventSpinSkip
+	| EmitterEventMascot;
