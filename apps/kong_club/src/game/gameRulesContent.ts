@@ -108,12 +108,12 @@ const buildFeatureSpinSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'FEATURE PLAY' : 'FEATURE SPIN',
 		isSocialMode()
-			? `Toggle Feature Play from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× play amount per play). The Progress Bar starts full. Every play lands a 5+ cluster, then the coin game after tumbles stop.
+			? `Toggle Feature Play from the bonus menu (${config.betModes.feature_spin.cost}× play amount per play). The Progress Bar starts full. Every play lands a 5+ cluster, then the coin game after tumbles stop.
 
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`
-			: `Toggle Feature Spin from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× bet per spin). The Progress Bar starts full. Every spin lands a 5+ cluster, then the coin game after tumbles stop.
+Toggle off from the bonus button or the bonus menu.`
+			: `Toggle Feature Spin from the bonus menu (${config.betModes.feature_spin.cost}× bet per spin). The Progress Bar starts full. Every spin lands a 5+ cluster, then the coin game after tumbles stop.
 
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`,
+Toggle off from the bonus button or the bonus menu.`,
 	);
 
 const buildPeakSpinSection = (): GameRuleData =>
@@ -178,6 +178,30 @@ Banana, Grape, Orange, Coconut, Lemon — see paytable for exact multiples by cl
 Cluster pay = base pay × the sum of lit tile multipliers (Bronze 2×, Silver 5×, Gold 10×).`,
 	);
 
+const buildControlsSection = (): GameRuleData =>
+	ruleSection(
+		'CONTROLS',
+		isSocialMode()
+			? `• Play — starts a play. Space does the same when no menu or modal is open, a bonus round is not running, and a play can start.
+• Play − and Play + — step the play amount. The play-amount readout opens the amount list.
+• Auto Play — opens a list of round counts. Choosing a number starts Auto Play. The first press only opens the list.
+• Turbo — cycles play speed: normal, turbo, then super.
+• Bonus (logo) — opens the bonus menu, or turns an active mode off.
+• Menu — music, sound effects, and Game Info.
+• Game Info — opens these rules and the win table.
+• Bonus menu — each offer shows PLAY or ACTIVATE. PLAY opens a confirm step that shows the amount. ACTIVATE switches that mode on for the next play and shows the new amount. Close leaves the menu. − and + change the play amount.
+• During a bonus, the menu includes Hold to skip.`
+			: `• Spin — places a bet. Space does the same when no menu or modal is open, a bonus round is not running, and a bet can be placed.
+• Bet − and Bet + — step the bet. The bet readout opens the bet list.
+• Autoplay — opens a round picker. Choosing a number starts autoplay. The first press only opens the picker.
+• Turbo — cycles spin speed: normal, turbo, then super.
+• Bonus (logo) — opens the bonus menu, or turns an active mode off.
+• Menu — music, sound effects, and Game Info.
+• Game Info — opens these rules and the paytable.
+• Bonus menu — each offer shows BUY or ACTIVATE. BUY opens a confirm step that shows the cost. ACTIVATE switches that mode on for the next spin and shows the new cost. Close leaves the menu. − and + change the bet.
+• During a bonus, the menu includes Hold to skip.`,
+	);
+
 const buildOfficialDisclaimerSection = (): GameRuleData =>
 	ruleSection('GENERAL GAME DISCLAIMER', stakeGameDisclaimer());
 
@@ -190,5 +214,6 @@ export const buildKongClubGameRules = (): GameRuleData[] => [
 	buildScatterSection(),
 	buildWildsSection(),
 	buildSymbolPaysSection(),
+	buildControlsSection(),
 	buildOfficialDisclaimerSection(),
 ];
