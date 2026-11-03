@@ -22,7 +22,16 @@
 	const board = $derived(context.stateGameDerived.boardLayout());
 	const visible = $derived(isMonkeyMascotVisible(context.stateLayoutDerived.layoutType()));
 	const mascotLayout = $derived(getMonkeyMascotLayout(mainLayout, board, canvasSizes));
-	const z = $derived(stateSummitTease.active ? zIndexes.summitTeaseMascot : zIndexes.mascot);
+	const portrait = $derived(canvasSizes.height > canvasSizes.width * 1.05);
+	/** Stump nudge seats the desktop pose. Portrait is centered in the pocket, like GG. */
+	const seatNudge = $derived(portrait ? { x: 0, y: 0 } : MONKEY_MASCOT.spineNudge);
+	const z = $derived(
+		stateSummitTease.active
+			? zIndexes.summitTeaseMascot
+			: portrait
+				? zIndexes.boardBorder + 15
+				: zIndexes.mascot,
+	);
 	const RANDOM_IDLE_ODDS = 20;
 
 	const spineReady = $derived(Boolean(stateApp.loadedAssets?.mmMascot));
@@ -34,9 +43,9 @@
 	const nudge = $derived(getMascotNudge());
 	/** Uniform scale from skeleton height only — do not set Spine width/height (that stretches). */
 	const spineScale = $derived((mascotLayout.height / MONKEY_MASCOT.spineSize.h) * nudge.scale);
-	const spineX = $derived(mascotLayout.x + MONKEY_MASCOT.spineNudge.x + nudge.x);
+	const spineX = $derived(mascotLayout.x + seatNudge.x + nudge.x);
 	const spineY = $derived(
-		mascotLayout.y - MONKEY_MASCOT.spineBoundsMinY * spineScale + MONKEY_MASCOT.spineNudge.y + nudge.y,
+		mascotLayout.y - MONKEY_MASCOT.spineBoundsMinY * spineScale + seatNudge.y + nudge.y,
 	);
 
 	const onClipComplete = {
