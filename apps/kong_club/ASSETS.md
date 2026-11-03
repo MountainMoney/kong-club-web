@@ -1,0 +1,55 @@
+# Kong Club asset swaps
+
+All art, sound, animation, logo, and font paths live in [`src/assets/manifest.ts`](src/assets/manifest.ts). Game code asks for a logical key such as `logo` or `sfx_btn_spin`. It does not contain file paths.
+
+Paths are relative (`/assets/...`) and are resolved with the Vite base, including a relative `./` base. There is no Stake Engine loader in this table.
+
+Each entry has a typed fallback under `static/assets/placeholders/`. If a file 404s or times out, the loader substitutes that placeholder and continues. A missing file does not crash the spine or sprite view, and font loads give up after 2.5 seconds.
+
+Open the game with `?assetPlaceholders=1` to boot entirely on placeholders.
+
+## Swap a file
+
+1. Find the logical key in `src/assets/manifest.ts`.
+2. Either replace the file at the current `src`, or change that one `src` to the new relative path.
+3. Do not edit components. Pixi still loads the same runtime key (`title_art`, `LE`, `sound`, …).
+
+| What you are swapping       | Key                                                                             | Current file                                                       |
+| --------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Logo                        | `logo`                                                                          | `static/assets/sprites/monkeySymbols/title_art.png`                |
+| Symbol                      | `symbol_*` (`symbol_ST`, `symbol_LE`, …)                                        | `static/assets/sprites/monkeySymbols/<NAME>.png`                   |
+| Base background             | `bg_base`                                                                       | `static/assets/sprites/background/jungle_bg.png`                   |
+| See bonus screen            | `bg_bonus_see`                                                                  | `static/assets/gg-ui/bg-desktop-see.png`                           |
+| Hear bonus screen           | `bg_bonus_hear`                                                                 | `static/assets/gg-ui/bg-desktop-hear.png`                          |
+| Mystery Bonus (pick) screen | `bg_bonus_pick`                                                                 | `static/assets/gg-ui/bg-desktop-gamble.png`                        |
+| Sound pack                  | `sfx_sprite`                                                                    | `static/assets/audio/sounds.json` plus `sounds.ogg` / `sounds.mp3` |
+| One cue                     | `sfx_*` or `music_freespin`                                                     | sprite name inside the pack                                        |
+| Base music                  | `music_base`                                                                    | `static/assets/audio/bgm_main.mp3`                                 |
+| Feature Spin music          | `music_feature_spin`                                                            | `static/assets/audio/bgm_feature_spin.mp3`                         |
+| Max-win music               | `music_win_max`                                                                 | `static/assets/audio/bgm_winlevel_max.mp3`                         |
+| Coin tick                   | `sfx_coin_tick`                                                                 | `static/assets/audio/coin_tick.wav`                                |
+| Big-win spine               | `win_anim_bigwin`                                                               | `static/assets/spines/bigwin/`                                     |
+| Big-win plate               | `win_anim_big` (also `_super`, `_mega`, `_epic`)                                | `static/assets/monkey/ui/win_popup_*.png`                          |
+| UI font                     | `font_fredoka_one`, `font_fredoka`, `font_inter`, `font_lilita`, `font_rubik_*` | `static/assets/fonts/`                                             |
+
+To drop in a new logo, replace `title_art.png` or set `logo.src` to the new png. To drop in a new sound pack, replace `sounds.ogg` and `sounds.mp3`, or point `sfx_sprite.src` at the new howler JSON. Cue keys match the sprite names in that JSON. Standalone music is read from `music_base`, `music_feature_spin`, and `music_win_max` when playback starts.
+
+## Fallbacks
+
+| Kind                     | Placeholder                                              |
+| ------------------------ | -------------------------------------------------------- |
+| texture (png, svg, webp) | `static/assets/placeholders/pixel.png`                   |
+| spritesheet              | `static/assets/placeholders/sheet.json`                  |
+| spine                    | `static/assets/placeholders/spine/`                      |
+| bitmap font              | `static/assets/placeholders/font.xml`                    |
+| sound pack               | `static/assets/placeholders/sounds.json`                 |
+| music or one-shot wav    | `static/assets/placeholders/silent.wav`                  |
+| CSS font                 | no file; the face is skipped and the next family is used |
+
+## Check
+
+```bash
+pnpm --dir apps/kong_club test:assets
+```
+
+That checks every key resolves, then boots the dev server with `?assetPlaceholders=1` and waits until the game reports loaded.

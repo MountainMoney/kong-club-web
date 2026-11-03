@@ -1,8 +1,9 @@
 import { Howl } from 'howler';
 import { stateSoundDerived } from 'state-shared';
 
-/** Standalone max-win song — not the 8s sprite slice in sounds.mp3. */
-const SRC = '/assets/audio/bgm_winlevel_max.mp3';
+import { assetSrc } from '../assets/resolve';
+
+/** Standalone max-win song. Path is `music_win_max` in the asset manifest. */
 
 let howl: Howl | null = null;
 let soundId: number | undefined;
@@ -10,7 +11,7 @@ let soundId: number | undefined;
 const ensureHowl = () => {
 	if (!howl) {
 		howl = new Howl({
-			src: [SRC],
+			src: [assetSrc('music_win_max')],
 			html5: true,
 			loop: true,
 			preload: true,

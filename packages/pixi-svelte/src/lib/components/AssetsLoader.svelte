@@ -86,28 +86,53 @@
 		}
 	};
 
+	const loadRaw = async (key: string, asset: Asset, src: Asset['src']) => {
+		const url = Array.isArray(src)
+			? src.join(', ')
+			: typeof src === 'string'
+				? src
+				: [src.atlas, src.skeleton].join(', ');
+		const loadSrc =
+			asset.type === 'spine' && typeof src !== 'string'
+				? [src.atlas, src.skeleton]
+				: src;
+		return (await loadWithTimeout(PIXI.Assets.load<RawAsset>(loadSrc), key, url)) as RawAsset;
+	};
+
+	const storeProcessed = (key: string, asset: Asset, rawAsset: RawAsset, src: Asset['src']) => {
+		const processed = getProcessed({ key, rawAsset, type: asset.type, src }) ?? {};
+		loadedCount += 1;
+		context.stateApp.loadedAssets = {
+			...context.stateApp.loadedAssets,
+			...processed,
+		};
+		return processed;
+	};
+
 	const loadSingleAsset = async (key: string, phase: 'preload' | 'postload') => {
 		const asset = context.stateApp.assets![key];
 		const url = resolveLogUrl(asset);
 		bumpProgress(phase, `Loading ${key}…`);
 
 		try {
-			const loadSrc = resolveLoadSrc(asset);
-			const rawAsset = (await loadWithTimeout(
-				PIXI.Assets.load<RawAsset>(loadSrc),
-				key,
-				url,
-			)) as RawAsset;
-			const processed = getProcessed({ key, rawAsset, type: asset.type, src: asset.src }) ?? {};
-			loadedCount += 1;
-			context.stateApp.loadedAssets = {
-				...context.stateApp.loadedAssets,
-				...processed,
-			};
+			const rawAsset = await loadRaw(key, asset, asset.src);
+			const processed = storeProcessed(key, asset, rawAsset, asset.src);
 			bumpProgress(phase, `Loaded ${key}`);
 			return processed;
 		} catch (error) {
-			recordLoadError(key, url, error);
+			if (asset.fallbackSrc) {
+				try {
+					const rawAsset = await loadRaw(key, asset, asset.fallbackSrc);
+					const processed = storeProcessed(key, asset, rawAsset, asset.fallbackSrc);
+					console.warn(`${LOG_PREFIX} Placeholder for "${key}" (${url})`);
+					bumpProgress(phase, `Placeholder for ${key}`);
+					return processed;
+				} catch (fallbackError) {
+					recordLoadError(key, url, fallbackError);
+				}
+			} else {
+				recordLoadError(key, url, error);
+			}
 			loadedCount += 1;
 			bumpProgress(phase, `Skipped ${key} (failed)`);
 			return {};

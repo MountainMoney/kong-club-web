@@ -7,9 +7,7 @@
 	} from '../../game/clusterPaytable';
 	import { paytableCopy, paytableModeLabel } from '../../game/socialCopy';
 	import { shouldDisplayRtp } from '../../game/jurisdiction';
-	import { assetUrl } from '../../game/assetUrl';
-
-	const symbolSrc = (key: string) => assetUrl(`/assets/sprites/monkeySymbols/${key}.png`);
+	import { symbolSrc } from '../../assets/resolve';
 
 	const showRtp = $derived(shouldDisplayRtp());
 

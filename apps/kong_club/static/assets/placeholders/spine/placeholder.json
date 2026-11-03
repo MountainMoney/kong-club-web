@@ -1,0 +1,30 @@
+{
+	"skeleton": {
+		"hash": "placeholder",
+		"spine": "4.1.23",
+		"x": 0,
+		"y": 0,
+		"width": 1,
+		"height": 1,
+		"images": "./",
+		"audio": ""
+	},
+	"bones": [{ "name": "root" }],
+	"slots": [{ "name": "pixel", "bone": "root", "attachment": "pixel" }],
+	"skins": [
+		{
+			"name": "default",
+			"attachments": {
+				"pixel": {
+					"pixel": { "width": 1, "height": 1 }
+				}
+			}
+		}
+	],
+	"animations": {
+		"idle": {},
+		"shu": {},
+		"Shrubbery": {},
+		"payframe": {}
+	}
+}

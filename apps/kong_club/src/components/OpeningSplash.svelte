@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import { getContext } from '../game/context';
-	import { assetUrl } from '../game/assetUrl';
+	import { assetSrc, symbolSrc } from '../assets/resolve';
 	import { ensureFredokaOneFont } from '../game/introFont';
 	import { readCanvasSize, usePortraitDesignSpace } from '../game/desktopLayout';
 	import { getDesignSize, getMainLayoutScale } from '../game/summitToolbarLayout';
@@ -31,9 +31,8 @@
 	const ready = $derived(context.stateApp.loaded && fontReady);
 	let leaving = $state(false);
 
-	const symbolSrc = (key: string) => assetUrl(`/assets/sprites/monkeySymbols/${key}.png`);
-	const maxWinSrc = assetUrl('/assets/monkey/ui/intro_card_10000x.png');
-	const titleSrc = assetUrl('/assets/sprites/monkeySymbols/title_art.png');
+	const maxWinSrc = assetSrc('win_anim_max_card');
+	const titleSrc = assetSrc('logo');
 
 	let leaveTimer: ReturnType<typeof setTimeout> | undefined;
 

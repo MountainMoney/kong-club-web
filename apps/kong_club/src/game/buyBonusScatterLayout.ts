@@ -9,9 +9,7 @@ const OVERLAP_RATIO = 0.38;
 
 /** Match hero cards — clusters fill ~98% of the image band. */
 const CLUSTER_TARGET_W = Math.round(BUY_BONUS_CLUSTER_MAX_W * 0.98);
-const CLUSTER_TARGET_H = Math.round(
-	BUY_BONUS_IMAGE_H * BUY_BONUS_HERO_TROPHY_RATIO * 0.98,
-);
+const CLUSTER_TARGET_H = Math.round(BUY_BONUS_IMAGE_H * BUY_BONUS_HERO_TROPHY_RATIO * 0.98);
 /** ST art has transparent padding — render slightly larger in UI. */
 const TROPHY_VISUAL_BOOST = 1.08;
 
@@ -80,11 +78,7 @@ export const buyBonusScatterLayout = (count: 3 | 4 | 5): ScatterClusterLayout =>
 	layoutOverlappingRow(count);
 
 /** Feature Spin — sack on top, red MULTI eyes bottom-left, gold coin bottom-right. */
-export const FEATURE_COIN_SRCS = [
-	'/assets/sprites/monkeySymbols/CL.png',
-	'/assets/sprites/monkeySymbols/XM_red.png',
-	'/assets/sprites/monkeySymbols/CG.png',
-] as const;
+export const FEATURE_COIN_KEYS = ['symbol_CL', 'symbol_XM_red', 'symbol_CG'] as const;
 
 export const buyBonusCoinTriangleLayout = (): ScatterClusterLayout => {
 	const trophySize = Math.round(CLUSTER_TARGET_H / 2.05);

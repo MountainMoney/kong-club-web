@@ -10,6 +10,7 @@
 		"dev": "cross-env PUBLIC_LOCAL_DEV=true vite dev --host --port 3001",
 		"dev:stake": "cross-env PUBLIC_LOCAL_DEV=false vite dev --host --port 3001",
 		"audit:assets": "node scripts/audit-assets.mjs",
+		"test:assets": "node --experimental-strip-types --test src/assets/manifest.test.ts && node scripts/verify-asset-placeholders.mjs",
 		"import:art": "python scripts/import-art-pack.py",
 		"verify:books": "node scripts/verify-dev-books-super-cascade.mjs",
 		"verify:loops": "node scripts/verify-dev-books-loops.mjs",

@@ -1,10 +1,8 @@
-	import { PUBLIC_LOCAL_DEV } from 'envs';
-	import { stateSoundDerived } from 'state-shared';
+import { PUBLIC_LOCAL_DEV } from 'envs';
+import { stateSoundDerived } from 'state-shared';
 
-import { assetUrl } from './assetUrl';
+import { assetSrc } from '../assets/resolve';
 import { isGameAudioUnlocked } from './audioUnlock.svelte';
-
-const COIN_TICK_URL = '/assets/audio/coin_tick.wav';
 
 let coinTickBuffer: AudioBuffer | null = null;
 let coinTickBufferPromise: Promise<AudioBuffer> | null = null;
@@ -15,7 +13,7 @@ export const getCoinTickBuffer = async (audioCtx: AudioContext): Promise<AudioBu
 	if (coinTickBuffer) return coinTickBuffer;
 
 	if (!coinTickBufferPromise) {
-		coinTickBufferPromise = fetch(assetUrl(COIN_TICK_URL))
+		coinTickBufferPromise = fetch(assetSrc('sfx_coin_tick'))
 			.then((response) => {
 				if (!response.ok) {
 					throw new Error(`coin_tick.wav fetch failed: ${response.status}`);
