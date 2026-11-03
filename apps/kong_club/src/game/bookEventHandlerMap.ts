@@ -14,6 +14,7 @@ import {
 } from './betModes';
 
 import { eventEmitter } from './eventEmitter';
+import { mascotCuesForBookEvent, type MascotBookEvent } from './mascotDirector';
 import { winLevelMap, type WinLevel, type WinLevelData } from './winLevelMap';
 import { stateGame, stateGameDerived } from './stateGame.svelte';
 import {
@@ -418,6 +419,15 @@ const flushDeferredFeatureActivation = async () => {
 	}
 };
 
+/** Fire-and-forget. The book runner must not await the mascot clip. */
+const emitMascotCues = (bookEvent: MascotBookEvent) => {
+	const cues = mascotCuesForBookEvent(bookEvent, {
+		countDeadSpins: stateGame.gameType !== 'freegame',
+		betMode: stateBet.activeBetModeKey,
+	});
+	for (const cue of cues) eventEmitter.broadcast({ type: 'mascotCue', cue });
+};
+
 /** Same playback for `kongClubMode` and legacy `monkeyMayhemMode`. */
 const withCanonicalMode = <T extends { mode: string }>(bookEvent: T): T => {
 	const mode = canonicalizeBookMode(bookEvent.mode);
@@ -429,6 +439,7 @@ const handleModeStateEvent = async (
 	{ bookEvents }: BookEventContext,
 ) => {
 	bookEvent = withCanonicalMode(bookEvent);
+	emitMascotCues(bookEvent);
 	eventEmitter.broadcast({ type: 'monkeyModeState', payload: bookEvent });
 	const isBonusStart =
 		bookEvent.state.startsWith('start_bonus_') || bookEvent.state.startsWith('organic_bonus_');
@@ -441,6 +452,7 @@ const handleModeStateEvent = async (
 
 export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContext> = {
 	reveal: async (bookEvent: BookEventOfType<'reveal'>, { bookEvents }: BookEventContext) => {
+		emitMascotCues(bookEvent);
 		boardActivationPlayedThisSpin = false;
 		boardActivationsThisSpin = 0;
 		lastPresentedSpinWinAmount = 0;
@@ -525,6 +537,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		}
 	},
 	winInfo: async (bookEvent: BookEventOfType<'winInfo'>, { bookEvents }: BookEventContext) => {
+		emitMascotCues(bookEvent);
 		if (isPeakSpinBetMode(stateBet.activeBetModeKey)) return;
 		await waitForTumbleIdle();
 		logClusterWins(bookEvent.wins);
@@ -583,6 +596,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	},
 	freeSpinTrigger: async (bookEvent: BookEventOfType<'freeSpinTrigger'>, { bookEvents }: BookEventContext) => {
 		if (bonusIntroPresentedThisRound) return;
+		emitMascotCues(bookEvent);
 		const lastMode = findLastModeStateBookEvent(bookEvents);
 		clearDeferredCoinSeeds();
 		eventEmitter.broadcast({ type: 'monkeyTilesClear' });
@@ -595,6 +609,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		bonusIntroPresentedThisRound = true;
 	},
 	freeSpinRetrigger: async (bookEvent: BookEventOfType<'freeSpinTrigger'>) => {
+		emitMascotCues(bookEvent);
 		await presentScatterFreeSpinIntro({
 			totalFs: bookEvent.totalFs,
 			positions: bookEvent.positions,
@@ -616,6 +631,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		}
 	},
 	freeSpinEnd: async (bookEvent: BookEventOfType<'freeSpinEnd'>) => {
+		emitMascotCues(bookEvent);
 		if (hasDeferredFeatureActivation()) {
 			await flushDeferredFeatureActivation();
 		}
@@ -768,6 +784,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		eventEmitter.broadcast({ type: 'multiplierGridClear' });
 	},
 	finalWin: async (bookEvent: BookEventOfType<'finalWin'>) => {
+		emitMascotCues(bookEvent);
 		eventEmitter.broadcast({ type: 'multiplierGridClear' });
 		eventEmitter.broadcast({ type: 'multiplierGridHide' });
 		eventEmitter.broadcast({ type: 'tumbleWinAmountHide' });
