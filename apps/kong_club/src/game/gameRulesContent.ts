@@ -160,8 +160,8 @@ const buildWildsSection = (): GameRuleData =>
 	ruleSection(
 		'WILDS',
 		isSocialMode()
-			? `Monkey wild (MW) substitutes for all winning symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`
-			: `Monkey wild (MW) substitutes for all paying symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`,
+			? `Monkey wild (MW) substitutes for all winning symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with up to 4 on the board at once.`
+			: `Monkey wild (MW) substitutes for all paying symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with up to 4 on the board at once.`,
 	);
 
 const buildSymbolPaysSection = (): GameRuleData =>
