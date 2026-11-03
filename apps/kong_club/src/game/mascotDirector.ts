@@ -22,7 +22,33 @@ export const ANGRY_COOLDOWN_MS = 30_000;
 export const DEAD_SPIN_STREAK = 5;
 /** 3 stone tablets start a bonus, so 2 is one short. */
 export const NEAR_MISS_SCATTERS = 2;
-export const BIG_WIN_MULTIPLIER = 20;
+/**
+ * Win multiple that plays celebration, by bet mode.
+ * Base and Extra Chance are 50×. Other modes stay at the previous 20× until each one is tuned.
+ * Mystery Bonus results and a bonus that ends with a win celebrate regardless of this map.
+ */
+export const MASCOT_CELEBRATION_MULTIPLIER = {
+	base: 50,
+	base_ante: 50,
+	feature_spin: 20,
+	peak_spin: 20,
+	bonus_see: 20,
+	bonus_hear: 20,
+	bonus_pick: 20,
+} as const;
+
+export type MascotCelebrationMode = keyof typeof MASCOT_CELEBRATION_MULTIPLIER;
+
+/** Previous global threshold, used when the active mode is not in the map. */
+export const MASCOT_CELEBRATION_DEFAULT_MULTIPLIER = 20;
+
+export const mascotCelebrationMultiplier = (mode: string | undefined) => {
+	const key = mode === 'bonus_gamble' ? 'bonus_pick' : mode;
+	if (key && key in MASCOT_CELEBRATION_MULTIPLIER) {
+		return MASCOT_CELEBRATION_MULTIPLIER[key as MascotCelebrationMode];
+	}
+	return MASCOT_CELEBRATION_DEFAULT_MULTIPLIER;
+};
 export const BANANA_TAP_COUNT = 5;
 export const BANANA_TAP_WINDOW_MS = 3_000;
 
@@ -51,7 +77,7 @@ export type MascotCue =
 	| { type: 'bonusTrigger' }
 	| { type: 'bonusEnded'; won: boolean }
 	| { type: 'mysteryResult' }
-	| { type: 'spinResolved'; winMultiplier: number; countDeadSpins: boolean }
+	| { type: 'spinResolved'; winMultiplier: number; countDeadSpins: boolean; celebrateAt?: number }
 	| { type: 'tap' }
 	| { type: 'tick' }
 	| { type: 'clipComplete'; anim: MascotAnim };
@@ -68,7 +94,7 @@ export type MascotState = {
 	lastAngryAt: number;
 	nextRandomAt: number;
 	tapMarks: number[];
-	/** A 20× celebration already played this base spin. */
+	/** A threshold celebration already played this spin. */
 	celebratedSpin: boolean;
 	/** Mystery Bonus mode event already celebrated this round. */
 	mysteryRound: boolean;
@@ -92,6 +118,8 @@ export type MascotBookEvent = {
 export type MascotCueContext = {
 	/** Base-game rounds count toward the dead-spin streak. Free spins do not. */
 	countDeadSpins: boolean;
+	/** Active bet mode. Selects `MASCOT_CELEBRATION_MULTIPLIER`. */
+	betMode?: string;
 };
 
 const ONE_SHOTS = new Set<MascotAnim>(['randomidle', 'angry', 'bananaphone', 'celebration']);
@@ -235,7 +263,8 @@ export const applyMascotCue = (
 			if (state.mysteryRound) {
 				return { ...state, mysteryRound: false, deadSpins: 0 };
 			}
-			if (cue.winMultiplier >= BIG_WIN_MULTIPLIER) {
+			const celebrateAt = cue.celebrateAt ?? mascotCelebrationMultiplier('base');
+			if (cue.winMultiplier >= celebrateAt) {
 				return celebrate({ ...state, deadSpins: 0 }, now, runtime);
 			}
 			if (cue.winMultiplier > 0) return { ...state, deadSpins: 0 };
@@ -301,7 +330,8 @@ export const mascotCuesForBookEvent = (
 		}
 		return cues;
 	}
-	if (event.type === 'winInfo' && (event.totalWin ?? 0) >= BIG_WIN_MULTIPLIER) {
+	const celebrateAt = mascotCelebrationMultiplier(ctx.betMode);
+	if (event.type === 'winInfo' && (event.totalWin ?? 0) >= celebrateAt) {
 		return [{ type: 'bigWin' }];
 	}
 	if (event.type === 'freeSpinTrigger' || event.type === 'freeSpinRetrigger') {
@@ -319,6 +349,7 @@ export const mascotCuesForBookEvent = (
 				type: 'spinResolved',
 				winMultiplier: event.amount ?? 0,
 				countDeadSpins: ctx.countDeadSpins,
+				celebrateAt,
 			},
 		];
 	}

@@ -5,9 +5,10 @@ import {
 	ANGRY_COOLDOWN_MS,
 	applyMascotCue,
 	BANANA_TAP_COUNT,
-	BIG_WIN_MULTIPLIER,
 	createMascotState,
 	DEAD_SPIN_STREAK,
+	MASCOT_CELEBRATION_MULTIPLIER,
+	mascotCelebrationMultiplier,
 	mascotCuesForBookEvent,
 	mascotPreviewFromSearch,
 	RANDOM_IDLE_GAP_MS,
@@ -130,15 +131,30 @@ test('bonus trigger calls bananaphone and five taps do too', () => {
 	assert.equal(slow.current, 'idle');
 });
 
-test('20x, mystery result, and a winning bonus end celebrate', () => {
-	assert.deepEqual(
-		mascotCuesForBookEvent({ type: 'winInfo', totalWin: BIG_WIN_MULTIPLIER }, { countDeadSpins: true }),
-		[{ type: 'bigWin' }],
-	);
-	assert.deepEqual(
-		mascotCuesForBookEvent({ type: 'winInfo', totalWin: BIG_WIN_MULTIPLIER - 1 }, { countDeadSpins: true }),
-		[],
-	);
+test('celebration threshold is per mode; mystery and bonus-end wins stay', () => {
+	assert.equal(MASCOT_CELEBRATION_MULTIPLIER.base, 50);
+	assert.equal(MASCOT_CELEBRATION_MULTIPLIER.base_ante, 50);
+	for (const mode of ['feature_spin', 'peak_spin', 'bonus_see', 'bonus_hear', 'bonus_pick'] as const) {
+		assert.equal(MASCOT_CELEBRATION_MULTIPLIER[mode], 20);
+	}
+
+	const winCue = (mode: string, totalWin: number) =>
+		mascotCuesForBookEvent({ type: 'winInfo', totalWin }, { countDeadSpins: true, betMode: mode });
+	const finalCue = (mode: string, amount: number) =>
+		mascotCuesForBookEvent({ type: 'finalWin', amount }, { countDeadSpins: true, betMode: mode })[0]!;
+
+	for (const mode of ['base', 'base_ante'] as const) {
+		assert.equal(mascotCelebrationMultiplier(mode), 50);
+		assert.deepEqual(winCue(mode, 49), []);
+		assert.deepEqual(winCue(mode, 50), [{ type: 'bigWin' }]);
+		assert.equal(play(at(0), finalCue(mode, 49), 4).current, 'idle');
+		assert.equal(play(at(0), finalCue(mode, 50), 4).current, 'celebration');
+	}
+	for (const mode of ['feature_spin', 'peak_spin', 'bonus_see', 'bonus_hear', 'bonus_pick'] as const) {
+		assert.deepEqual(winCue(mode, 19), []);
+		assert.deepEqual(winCue(mode, 20), [{ type: 'bigWin' }]);
+		assert.equal(play(at(0), finalCue(mode, 20), 4).current, 'celebration');
+	}
 	assert.equal(play(at(0), { type: 'bigWin' }, 5).current, 'celebration');
 
 	const mystery = mascotCuesForBookEvent(
@@ -163,8 +179,6 @@ test('20x, mystery result, and a winning bonus end celebrate', () => {
 	const lost = mascotCuesForBookEvent({ type: 'freeSpinEnd', amount: 0 }, { countDeadSpins: false });
 	assert.equal(play(at(0), lost[0]!, 3).current, 'idle');
 
-	const finalCue = mascotCuesForBookEvent({ type: 'finalWin', amount: 20 }, { countDeadSpins: true })[0]!;
-	assert.equal(play(at(0), finalCue, 4).current, 'celebration');
 });
 
 test('priority is celebration, then bananaphone, then angry, then randomidle', () => {

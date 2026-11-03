@@ -423,6 +423,7 @@ const flushDeferredFeatureActivation = async () => {
 const emitMascotCues = (bookEvent: MascotBookEvent) => {
 	const cues = mascotCuesForBookEvent(bookEvent, {
 		countDeadSpins: stateGame.gameType !== 'freegame',
+		betMode: stateBet.activeBetModeKey,
 	});
 	for (const cue of cues) eventEmitter.broadcast({ type: 'mascotCue', cue });
 };
