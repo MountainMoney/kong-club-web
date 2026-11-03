@@ -3,7 +3,7 @@ export const BUY_BONUS_PREFETCH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_mystery',
 ] as const;
 
 export const stateMathBooksLoading = $state({

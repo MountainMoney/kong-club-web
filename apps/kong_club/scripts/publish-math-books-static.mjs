@@ -17,8 +17,12 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_mystery',
 ];
+
+const LEGACY_CACHE = {
+	bonus_mystery: ['bonus_pick', 'bonus_gamble'],
+};
 
 const parseLutCsv = (text, bookCount) => {
 	const entries = [];
@@ -46,8 +50,11 @@ fs.writeFileSync(path.join(outRoot, 'meta'), JSON.stringify({ revision: String(D
 
 let written = 0;
 for (const mode of MATH_MODES) {
-	const booksPath = path.join(cacheDir, `books_${mode}.json`);
-	if (!fs.existsSync(booksPath)) {
+	const names = [mode, ...(LEGACY_CACHE[mode] ?? [])];
+	const booksPath = names
+		.map((name) => path.join(cacheDir, `books_${name}.json`))
+		.find((file) => fs.existsSync(file));
+	if (!booksPath || !fs.existsSync(booksPath)) {
 		console.warn(`[publish-math-books] skip ${mode} — no cache`);
 		continue;
 	}
@@ -57,8 +64,10 @@ for (const mode of MATH_MODES) {
 	}
 	fs.writeFileSync(path.join(outRoot, 'books', mode), JSON.stringify(books));
 
-	const csvPath = path.join(cacheDir, `lookUpTable_${mode}_0.csv`);
-	const entries = fs.existsSync(csvPath)
+	const csvPath = names
+		.map((name) => path.join(cacheDir, `lookUpTable_${name}_0.csv`))
+		.find((file) => fs.existsSync(file));
+	const entries = csvPath && fs.existsSync(csvPath)
 		? parseLutCsv(fs.readFileSync(csvPath, 'utf8'), books.length)
 		: books.map((_, index) => ({ index, weight: 1, payout: 0 }));
 	fs.writeFileSync(path.join(outRoot, 'lut', mode), JSON.stringify({ entries, bookCount: books.length }));

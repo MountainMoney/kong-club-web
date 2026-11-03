@@ -28,13 +28,21 @@ const MODE_COST = {
 	peak_spin: 1400,
 	bonus_see: 115,
 	bonus_hear: 250,
-	bonus_gamble: 380,
+	bonus_mystery: 380,
 };
+
+const LEGACY_MYSTERY_FILES = ['bonus_pick', 'bonus_gamble'];
 
 const HARD_FACES = new Set([1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500]);
 
 export function lutPathForMode(mode) {
-	return path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
+	const primary = path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
+	if (fs.existsSync(primary) || mode !== 'bonus_mystery') return primary;
+	for (const legacy of LEGACY_MYSTERY_FILES) {
+		const file = path.join(PUBLISH_DIR, `lookUpTable_${legacy}_0.csv`);
+		if (fs.existsSync(file)) return file;
+	}
+	return primary;
 }
 
 /**
@@ -115,6 +123,11 @@ function loadModeBooks(mode) {
 		path.join(cacheDir, `books_${mode}.json`),
 		path.join(cacheDir, `${mode}.json`),
 	];
+	if (mode === 'bonus_mystery') {
+		for (const legacy of LEGACY_MYSTERY_FILES) {
+			candidates.push(path.join(cacheDir, `books_${legacy}.json`));
+		}
+	}
 	for (const file of candidates) {
 		if (!fs.existsSync(file)) continue;
 		const raw = JSON.parse(fs.readFileSync(file, 'utf8'));

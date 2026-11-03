@@ -234,7 +234,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },
+	bonus_mystery: { default: 'Gamble', social: 'Feature Pick' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;

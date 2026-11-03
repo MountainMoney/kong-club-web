@@ -15,8 +15,12 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_mystery',
 ];
+
+const MYSTERY_MODE = 'bonus_mystery';
+/** Publish files until the math repo finishes the rename. */
+const LEGACY_MYSTERY_MODES = ['bonus_pick', 'bonus_gamble'];
 
 const DEV_BOOK_COUNTS = {
 	base: 500,
@@ -25,19 +29,37 @@ const DEV_BOOK_COUNTS = {
 	peak_spin: 100,
 	bonus_see: 100,
 	bonus_hear: 100,
-	bonus_gamble: 80,
+	bonus_mystery: 80,
 };
+
+function canonicalMathMode(mode) {
+	return LEGACY_MYSTERY_MODES.includes(mode) ? MYSTERY_MODE : mode;
+}
+
+/** Prefer bonus_mystery files; read bonus_pick or bonus_gamble when that is all that exists. */
+function resolveModeFile(mode, buildPath) {
+	if (mode !== MYSTERY_MODE && !LEGACY_MYSTERY_MODES.includes(mode)) return buildPath(mode);
+	for (const name of [MYSTERY_MODE, ...LEGACY_MYSTERY_MODES]) {
+		const candidate = buildPath(name);
+		if (fs.existsSync(candidate)) return candidate;
+	}
+	return buildPath(MYSTERY_MODE);
+}
 
 function resolveMathLibraryRoot() {
 	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library');
 }
 
 function booksZstPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `books_${mode}.jsonl.zst`);
+	return resolveModeFile(mode, (name) =>
+		path.join(libraryRoot, 'publish_files', `books_${name}.jsonl.zst`),
+	);
 }
 
 function lutPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `lookUpTable_${mode}_0.csv`);
+	return resolveModeFile(mode, (name) =>
+		path.join(libraryRoot, 'publish_files', `lookUpTable_${name}_0.csv`),
+	);
 }
 
 function cacheBooksPath(appRoot, mode) {
@@ -45,7 +67,9 @@ function cacheBooksPath(appRoot, mode) {
 }
 
 function forcedBooksPath(appRoot, mode) {
-	return path.join(appRoot, 'src', 'stories', 'data', 'math_books', `${mode}_forced.json`);
+	return resolveModeFile(mode, (name) =>
+		path.join(appRoot, 'src', 'stories', 'data', 'math_books', `${name}_forced.json`),
+	);
 }
 
 function cacheMetaPath(appRoot) {
@@ -151,6 +175,7 @@ print(len(books))
 
 function ensureBooksJson(mode, libraryRoot, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
+	const readable = resolveModeFile(mode, (name) => cacheBooksPath(appRoot, name));
 	if (isCacheStale(mode, libraryRoot, appRoot)) {
 		if (fs.existsSync(cached)) {
 			console.log(`[math-books] Invalidating stale cache for "${mode}" (publish zst updated)`);
@@ -160,6 +185,9 @@ function ensureBooksJson(mode, libraryRoot, appRoot) {
 
 	if (fs.existsSync(cached)) {
 		return cached;
+	}
+	if (readable !== cached && fs.existsSync(readable)) {
+		return readable;
 	}
 
 	const zst = booksZstPath(libraryRoot, mode);
@@ -206,7 +234,7 @@ function parseLutCsv(text, bookCount) {
 }
 
 function loadLutEntries(mode, libraryRoot, appRoot, bookCount) {
-	const cacheLut = cacheLutPath(appRoot, mode);
+	const cacheLut = resolveModeFile(mode, (name) => cacheLutPath(appRoot, name));
 	if (fs.existsSync(cacheLut)) {
 		return parseLutCsv(fs.readFileSync(cacheLut, 'utf-8'), bookCount);
 	}
@@ -256,7 +284,8 @@ export function mathBooksPlugin() {
 						return;
 					}
 
-					const mode = (booksMatch || lutMatch)[1];
+					const requested = (booksMatch || lutMatch)[1];
+					const mode = canonicalMathMode(requested);
 					if (!MATH_MODES.includes(mode)) {
 						res.statusCode = 404;
 						res.end(JSON.stringify({ error: `Unknown mode: ${mode}` }));
