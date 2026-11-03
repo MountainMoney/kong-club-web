@@ -2,6 +2,7 @@ import type { GameRuleData } from 'state-shared';
 
 import config from './config';
 import { shouldDisplayRtp } from './jurisdiction';
+import { coinValueRulesSentence } from './coinFacePools';
 import { isSocialMode, stakeGameDisclaimer } from './socialCopy';
 
 export const RULES_RTP_PCT = (config.rtp * 100).toFixed(2);
@@ -96,12 +97,12 @@ const buildProgressBarSection = (): GameRuleData =>
 
 On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
 
-Coin values are play-amount multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`
+${coinValueRulesSentence(true)}`
 			: `On regular spins, each winning tumble fills the Progress Bar by one step. In See and Hear free spins, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free spin. When the bar fills (5 steps), Board Activation starts the coin collect.
 
 On regular base spins, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Spin and free spins, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per spin.
 
-Coin values are bet multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`
+${coinValueRulesSentence(false)}`
 	);
 
 const buildFeatureSpinSection = (): GameRuleData =>

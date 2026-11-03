@@ -11,8 +11,9 @@
  */
 
 import type { CoinFeatureItem } from './typesBookEvent';
+import { roundCoinFace } from './coinFacePools';
 import {
-	COIN_FACE_VALUES,
+	activeCoinFaceValues,
 	pickWeightedMultiValue,
 } from './coinFeatureNormalize';
 import { capPotToBoard, capWinMultiplier, leftoverCoinSum } from './winCountTier';
@@ -38,7 +39,7 @@ const ADJACENT_8: Array<[number, number]> = [
 ];
 
 const pickFace = (symbol: 'CB' | 'CS' | 'CG', index: number) => {
-	const pool = COIN_FACE_VALUES[symbol];
+	const pool = activeCoinFaceValues()[symbol];
 	return pool[index % pool.length]!;
 };
 
@@ -117,7 +118,7 @@ const ensurePowerCell = (cells: LitCell[], at: { reel: number; row: number }, le
 	}
 };
 
-const formatInt = (n: number) => Math.round(n);
+const formatInt = (n: number) => roundCoinFace(n);
 
 /** Vacuumed coins, sucked old pots, and clover cells — never the sitting acting pot. */
 const regenTargets = (
@@ -146,7 +147,7 @@ const applyMulti = (
 	const mid = items.map((item) => {
 		if (!isAdjacent8(item, at)) return item;
 		if (item.kind === 'coin' && kinds.includes('coin') && !item.collected) {
-			const face = capWinMultiplier(formatInt(item.displayValue ?? item.value) * multi);
+			const face = capWinMultiplier(roundCoinFace(formatInt(item.displayValue ?? item.value) * multi));
 			const metal = coinMetalForFace(face, item.tileLevel ?? 1);
 			return {
 				...item,

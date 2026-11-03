@@ -24,11 +24,14 @@
 	const symbolInfo = $derived(getSymbolInfo({ rawSymbol: props.rawSymbol, state: props.state }));
 	const isSprite = $derived(symbolInfo?.type === 'sprite');
 	const spineLoops = $derived(Boolean(symbolInfo && 'loop' in symbolInfo && symbolInfo.loop));
+	const coinSpine = $derived(symbolInfo?.type === 'spine' && symbolInfo.assetKey === 'coinMetal');
 
-	// Looping spines (barrel wild) must not hold the win/land handshake for the clip length.
+	// Looping spines (barrel) and one-shot coins must not hold the win/land handshake.
+	// The coin clip already finished on the static mount, so win/land resolves immediately.
 	$effect(() => {
-		if (!spineLoops) return;
-		props.state;
+		const state = props.state;
+		const coinHandshake = coinSpine && (state === 'win' || state === 'land');
+		if (!spineLoops && !coinHandshake) return;
 		queueMicrotask(() => props.oncomplete?.());
 	});
 	const showWinFrame = $derived(

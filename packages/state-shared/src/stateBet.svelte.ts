@@ -20,6 +20,11 @@ export const stateBet = $state({
 	autoSpinsSingleWinLimitAmount: Infinity,
 	isSpaceHold: false,
 	isTurbo: false,
+	/**
+	 * Kong Club speed tier (1 normal, 2 turbo, 4 super). 0 means "not set" so
+	 * other games keep the isTurbo boolean. Slam-stop still raises timeScale via isTurbo.
+	 */
+	playbackTimeScale: 0,
 });
 
 const sortedLadder = () => [...stateConfig.betAmountOptions].sort((a, b) => a - b);
@@ -127,7 +132,11 @@ const activeBetMode = () =>
 	stateMeta.betModeMeta?.[stateBet.activeBetModeKey.toLowerCase()] ??
 	null;
 const isContinuousBet = () => stateBet.autoSpinsCounter > 1 || stateBet.isSpaceHold;
-const timeScale = () => (stateBet.isTurbo ? 2 : 1);
+const timeScale = () => {
+	const flagged = stateBet.isTurbo ? 2 : 1;
+	if (stateBet.playbackTimeScale > 0) return Math.max(flagged, stateBet.playbackTimeScale);
+	return flagged;
+};
 const betCost = () => stateBet.betAmount * betCostMultiplier();
 const isBetCostAvailable = () => betCost() > 0 && betCost() <= stateBet.balanceAmount;
 /** True when balance cannot cover the current bet at any ladder step. */

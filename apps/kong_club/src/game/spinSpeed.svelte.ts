@@ -30,8 +30,6 @@ export const setSpinSpeedCommitBlocked = (blocked: boolean) => {
 	spinSpeedCommitBlocked = blocked;
 };
 
-const canCommitSpinSpeedTierNow = () => !spinSpeedCommitBlocked;
-
 const nextSpinSpeedTier = (tier: SpinSpeedTier) => {
 	const tiers = allowedSpinSpeedTiers();
 	const current = nearestAllowedSpinSpeedTier(tier);
@@ -55,6 +53,7 @@ export const syncSpinSpeedToBet = () => {
 	if (stateSpinSpeed.pendingTier && !isSpinSpeedTierAllowed(stateSpinSpeed.pendingTier)) {
 		stateSpinSpeed.pendingTier = null;
 	}
+	stateBet.playbackTimeScale = tier === 'superTurbo' ? 4 : tier === 'turbo' ? 2 : 1;
 	stateBetDerived.updateIsTurbo(tier !== 'normal', { persistent: true });
 };
 
@@ -73,15 +72,11 @@ export const commitPendingSpinSpeedTier = (force = false) => {
 export const cycleSpinSpeedTier = () => {
 	const base = getSpinSpeedDisplayTier();
 	const next = nextSpinSpeedTier(base);
-
-	if (canCommitSpinSpeedTierNow()) {
-		stateSpinSpeed.tier = next;
-		stateSpinSpeed.pendingTier = null;
-		syncSpinSpeedToBet();
-		return;
-	}
-
-	stateSpinSpeed.pendingTier = next;
+	// Apply immediately. beginBetPlayback blocks commit for the whole wager, including
+	// every free spin, so a queued pendingTier never reached the reels until the bonus ended.
+	stateSpinSpeed.tier = next;
+	stateSpinSpeed.pendingTier = null;
+	syncSpinSpeedToBet();
 };
 
 export const isTurboOrFaster = () => effectiveSpinSpeedTier() !== 'normal';

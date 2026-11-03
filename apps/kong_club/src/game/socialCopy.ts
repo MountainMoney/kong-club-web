@@ -1,5 +1,6 @@
 import { stateConfig, stateMeta, stateUrlDerived } from 'state-shared';
 
+import { coinValueRulesSentence } from './coinFacePools';
 import config from './config';
 
 /** Stake social / Stake.us copy mode. */
@@ -197,9 +198,9 @@ const PAYTABLE_COPY = {
 	},
 	levelUpTiles: {
 		default:
-			'Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster pay = base pay × the sum of lit tile multipliers. Coin values: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.',
+			`Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster pay = base pay × the sum of lit tile multipliers. ${coinValueRulesSentence(false)}`,
 		social:
-			'Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster win = base win × the sum of lit tile multipliers. Coin values: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.',
+			`Level-Up Tiles: Bronze / Silver / Gold ranks (2× / 5× / 10×) — grow each time that cell’s symbol type wins in a tumble. Cluster win = base win × the sum of lit tile multipliers. ${coinValueRulesSentence(true)}`,
 	},
 	multiPower: {
 		default:

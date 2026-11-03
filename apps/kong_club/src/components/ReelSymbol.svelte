@@ -174,6 +174,7 @@
 	scale={shrinkScale.current * connectScale * landBreathe}
 	alpha={shrinkAlpha.current * coverAlpha}
 	animating={symbolInfo.type === 'spine' &&
+		symbolInfo.assetKey !== 'coinMetal' &&
 		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}
 >
 	<Symbol

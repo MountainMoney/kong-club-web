@@ -31,7 +31,11 @@ const MODE_COST = {
 	bonus_gamble: 380,
 };
 
-const HARD_FACES = new Set([1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500]);
+const HARD_FACES = new Set([
+	1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500,
+	// Base / Extra Chance base-game faces are the integer pool × 0.20.
+	0.2, 0.4, 0.6, 0.8, 1.4,
+]);
 
 export function lutPathForMode(mode) {
 	return path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);

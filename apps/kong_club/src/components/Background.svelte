@@ -12,9 +12,18 @@
 	import { getBackgroundLook } from '../game/fxLab.svelte';
 	import { stateGame } from '../game/stateGame.svelte';
 
-	import { BACKGROUND_RATIO, PORTRAIT_BACKGROUND_RATIO } from '../game/constants';
 	import { stateBonusIntro } from '../game/bonusIntroPresentation.svelte';
 	import { hasLoadedAssetTexture } from '../game/introAssets';
+	import {
+		BUSH_PLATE_MARKER,
+		BUSH_PLATE_NUDGE,
+		JUNGLE_SUPER_PLATE,
+		TREE_PLATE_MARKER,
+		TREE_PLATE_NUDGE,
+		coverPlate,
+		jungleCover,
+		spineOnPlate,
+	} from '../game/backgroundCover';
 
 
 
@@ -22,50 +31,39 @@
 
 	const showBaseBackground = true;
 
-	const isPortrait = $derived(context.stateLayoutDerived.layoutType() === 'portrait');
-
-
-
-	/** object-fit: cover — always fills canvas at native 16:9 (1920×1080 ref). */
-
-	const backgroundProps = $derived.by(() => {
-
+	/**
+	 * One uniform 16:9 cover for sky, plate, trees, bush, and stump.
+	 * Portrait used to squash that art into 800×1422. Crop instead.
+	 */
+	const cover = $derived.by(() => {
 		const canvas = context.stateLayoutDerived.canvasSizes();
+		return jungleCover(canvas.width, canvas.height);
+	});
 
-		const bgRatio = isPortrait ? PORTRAIT_BACKGROUND_RATIO : BACKGROUND_RATIO;
+	const backgroundProps = $derived({
+		x: cover.x,
+		y: cover.y,
+		width: cover.width,
+		height: cover.height,
+		anchor: cover.anchor,
+	});
 
-		const canvasRatio = canvas.width / canvas.height;
-
-		const center = { x: canvas.width / 2, y: canvas.height / 2, anchor: 0.5 as const };
-
-
-
-		if (canvasRatio > bgRatio) {
-
-			return {
-
-				...center,
-
-				width: canvas.width,
-
-				height: canvas.width / bgRatio,
-
-			};
-
-		}
-
-
-
+	/** Super is 1376×768. Same cover rule, its own pixels, so it is not squashed. */
+	const superProps = $derived.by(() => {
+		const canvas = context.stateLayoutDerived.canvasSizes();
+		const fit = coverPlate(
+			canvas.width,
+			canvas.height,
+			JUNGLE_SUPER_PLATE.w,
+			JUNGLE_SUPER_PLATE.h,
+		);
 		return {
-
-			...center,
-
-			width: canvas.height * bgRatio,
-
-			height: canvas.height,
-
+			x: fit.x,
+			y: fit.y,
+			width: fit.width,
+			height: fit.height,
+			anchor: fit.anchor,
 		};
-
 	});
 
 	const superBgReady = $derived(
@@ -75,29 +73,14 @@
 		superBgReady ? stateBonusIntro.backgroundBlend : 0,
 	);
 
-	/**
-	 * Each spine hides a 1920×1080 region that marks the jungle artboard.
-	 * spine-pixi flips Y, so a positive scale puts that plate on the jungle cover rect.
-	 * Tree marker is slot `树`. Bush marker is slot `灌木`.
-	 */
-	const JUNGLE_PLATE = { w: 1920, h: 1080 };
-	const plateLayout = (cx: number, cy: number) => {
-		const bg = backgroundProps;
-		const sx = bg.width / JUNGLE_PLATE.w;
-		const sy = bg.height / JUNGLE_PLATE.h;
-		return {
-			x: bg.x - cx * sx,
-			y: bg.y + cy * sy,
-			scale: { x: sx, y: sy },
-		};
-	};
 	const treesReady = $derived(Boolean(context.stateApp.loadedAssets?.jungleTrees));
 	const bushReady = $derived(Boolean(context.stateApp.loadedAssets?.jungleBush));
 	const stumpReady = $derived(
 		hasLoadedAssetTexture(context.stateApp.loadedAssets, 'jungleStump'),
 	);
-	const treeLayout = $derived(plateLayout(106.378, 372.2437));
-	const bushLayout = $derived(plateLayout(0, 552.8258));
+	/** Same scale as the plate. Nudge is position only — see `backgroundCover.ts`. */
+	const treeLayout = $derived(spineOnPlate(cover, TREE_PLATE_MARKER, TREE_PLATE_NUDGE));
+	const bushLayout = $derived(spineOnPlate(cover, BUSH_PLATE_MARKER, BUSH_PLATE_NUDGE));
 	/** See (3 scatters) is sunny. Hear (4 scatters) is midnight. Lab can still preview in base. */
 	const look = $derived.by(() => {
 		if (stateGame.sessionBonusTier === 1) return 'sunny' as const;
@@ -159,5 +142,5 @@
 </FadeContainer>
 
 {#if superBgAlpha > 0.01}
-	<Sprite key="jungleSuperBackground" {...backgroundProps} alpha={superBgAlpha} zIndex={-1} />
+	<Sprite key="jungleSuperBackground" {...superProps} alpha={superBgAlpha} zIndex={-1} />
 {/if}

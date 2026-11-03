@@ -1,5 +1,6 @@
 import type { LayoutMode } from './responsiveManager';
-import { BACKGROUND_RATIO } from './constants';
+import { jungleCover } from './backgroundCover';
+import { DESIGN_PORTRAIT, UI_BAR_PORTRAIT } from './ggUi/constants';
 import { BOARD_FRAME_INNER } from './uiAssetSizes';
 
 /** Logical 6×5 grid at 80px cells — scale via `MonkeyBoardLayout.scale`. */
@@ -227,13 +228,10 @@ export const getMonkeyProgressBarScreenLayout = (board: MonkeyBoardLayout) => {
 	};
 };
 
-/** Cover-fit jungle_bg geometry (matches `Background.svelte`). */
+/** Cover-fit jungle_bg geometry (the same rect as `Background.svelte`). */
 const getJungleBgCover = (canvasW: number, canvasH: number) => {
-	const canvasRatio = canvasW / canvasH;
-	if (canvasRatio > BACKGROUND_RATIO) {
-		return { width: canvasW, height: canvasW / BACKGROUND_RATIO, x: canvasW / 2, y: canvasH / 2 };
-	}
-	return { width: canvasH * BACKGROUND_RATIO, height: canvasH, x: canvasW / 2, y: canvasH / 2 };
+	const cover = jungleCover(canvasW, canvasH);
+	return { width: cover.width, height: cover.height, x: cover.x, y: cover.y };
 };
 
 export type MonkeyMascotMainTransform = {
@@ -256,13 +254,32 @@ export const getMonkeyMascotLayout = (
 	const portrait = canvasH > canvasW * 1.05;
 
 	if (portrait && board) {
+		// Gaia's Grotto phone portrait: character centered, head on the bottom
+		// row, feet just above the spin row. The bar is not moved — if the
+		// pocket under the grid is shorter than that, the mascot shrinks to it.
 		const frame = getMonkeyUnifiedFrameLayout(board);
-		const frameBottom = frame.y + frame.height * (1 - frame.anchor.y);
-		const height = main.height * 0.15;
+		const frameTop = frame.y - frame.height * frame.anchor.y;
+		const innerBottom =
+			frameTop +
+			frame.height * ((BOARD_FRAME_INNER.y + BOARD_FRAME_INNER.h) / MM_BORDER_ASSET.h);
+		const mainScale = 'scale' in main ? main.scale : 1;
+		const mainCenterY = 'y' in main && 'scale' in main ? main.y : canvasH / 2;
+		const mainTop = mainCenterY - (main.height * mainScale) / 2;
+		const barFit = Math.min(canvasW / DESIGN_PORTRAIT.width, canvasH / DESIGN_PORTRAIT.height);
+		const barTopCanvas =
+			(canvasH - DESIGN_PORTRAIT.height * barFit) / 2 + UI_BAR_PORTRAIT.top * barFit;
+		const barTopMain = (barTopCanvas - mainTop) / mainScale;
+		const clearance = 10 / mainScale;
+		const feetY = barTopMain - clearance;
+		// The skeleton box is taller than the opaque hat. Scale so the hat
+		// crosses the grid the way GG's helmet does, feet still above the bar.
+		const crownFill = 0.79;
+		const overlap = (canvasH * 0.028) / mainScale;
+		const height = Math.max(1, (feetY - innerBottom + overlap) / crownFill);
 		const width = height * m.aspect;
 		return {
 			x: main.width * 0.5,
-			y: Math.min(main.height * 0.96, frameBottom + height * 0.62),
+			y: feetY,
 			width,
 			height,
 		};
