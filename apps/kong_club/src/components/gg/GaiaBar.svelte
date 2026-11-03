@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { bookEventAmountToNormalisedAmount } from 'utils-shared/amount';
 	import { Container, Rectangle, Sprite, Text } from 'pixi-svelte';
 	import { Tween } from 'svelte/motion';
@@ -11,7 +12,11 @@
 	import { stateBonusOutro } from '../../game/bonusOutroPresentation.svelte';
 	import { stateGame } from '../../game/stateGame.svelte';
 	import { getSpinSpeedDisplayTier } from '../../game/spinSpeed.svelte';
-	import { isAutoplayDisabled, isSpinSpeedControlDisabled } from '../../game/jurisdiction';
+	import {
+		isAutoplayDisabled,
+		isSpacebarDisabled,
+		isSpinSpeedControlDisabled,
+	} from '../../game/jurisdiction';
 	import { isActivateBetMode } from '../../game/betModes';
 	import {
 		freeSpinProgressLabel,
@@ -156,6 +161,30 @@
 		onSpinPress();
 		if (autoArmed) popup = null;
 	};
+
+	const spaceTargetIsTyping = (event: KeyboardEvent) => {
+		const el = event.target;
+		if (!(el instanceof HTMLElement)) return false;
+		const tag = el.tagName.toLowerCase();
+		return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+	};
+
+	onMount(() => {
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key !== ' ' && event.code !== 'Space') return;
+			if (spaceTargetIsTyping(event)) return;
+			event.preventDefault();
+			if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return;
+			if (isSpacebarDisabled()) return;
+			if (context.stateLayout.showLoadingScreen) return;
+			if (hidden || popup || stateModal.modal) return;
+			if (replay && idle) return;
+			if (!idle || inBonus) return;
+			spin();
+		};
+		window.addEventListener('keydown', onKeyDown);
+		return () => window.removeEventListener('keydown', onKeyDown);
+	});
 
 	const shown = $derived(hidden ? 0 : 1);
 </script>
