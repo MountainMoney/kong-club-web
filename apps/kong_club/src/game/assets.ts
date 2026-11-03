@@ -33,14 +33,10 @@ export default {
 	/** Sunny grade. Same 16:9 plate, sky → forest → framing trees → bushes → stump. */
 	sunnySky: { ...sprite('sprites/background/sunny_sky.png'), preload: true },
 	sunnyBack: { ...sprite('sprites/background/sunny_back.png'), preload: true },
-	sunnyTrees: { ...sprite('sprites/background/sunny_trees.png'), preload: true },
-	sunnyBush: { ...sprite('sprites/background/sunny_bush.png'), preload: true },
 	sunnyStump: { ...sprite('sprites/background/sunny_stump.png'), preload: true },
 	/** Midnight grade. Same stack order as sunny. */
 	midnightSky: { ...sprite('sprites/background/midnight_sky.png'), preload: true },
 	midnightBack: { ...sprite('sprites/background/midnight_back.png'), preload: true },
-	midnightTrees: { ...sprite('sprites/background/midnight_trees.png'), preload: true },
-	midnightBush: { ...sprite('sprites/background/midnight_bush.png'), preload: true },
 	midnightStump: { ...sprite('sprites/background/midnight_stump.png'), preload: true },
 	/** Mascot stump — same 1920×1080 plate as the jungle. */
 	jungleStump: {
@@ -81,6 +77,26 @@ export default {
 	/** Grass sway (`Shrubbery`) on the same jungle plate, behind the trees. */
 	jungleBush: {
 		...spineAsset('bush', 'bush', 'bush.atlas', 1),
+		preload: true,
+	},
+	/** See-bonus canopy. Day `shu` loop; atlas is the sunny tree plate. */
+	sunnyJungleTrees: {
+		...spineAsset('treeSunny', 'tree', 'tree.atlas', 1),
+		preload: true,
+	},
+	/** See-bonus shrubs. Day `Shrubbery` loop; atlas is the sunny bush plate. */
+	sunnyJungleBush: {
+		...spineAsset('bushSunny', 'bush', 'bush.atlas', 1),
+		preload: true,
+	},
+	/** Hear-bonus canopy. Day `shu` loop; atlas is the midnight tree plate. */
+	midnightJungleTrees: {
+		...spineAsset('treeMidnight', 'tree', 'tree.atlas', 1),
+		preload: true,
+	},
+	/** Hear-bonus shrubs. Day `Shrubbery` loop; atlas is the midnight bush plate. */
+	midnightJungleBush: {
+		...spineAsset('bushMidnight', 'bush', 'bush.atlas', 1),
 		preload: true,
 	},
 	sparkleFx: sprite('sprites/fx/sparkle.png'),

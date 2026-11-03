@@ -109,19 +109,21 @@
 			? {
 					sky: 'sunnySky',
 					back: 'sunnyBack',
-					trees: 'sunnyTrees',
-					bush: 'sunnyBush',
 					stump: 'sunnyStump',
 				}
 			: look === 'midnight'
 				? {
 						sky: 'midnightSky',
 						back: 'midnightBack',
-						trees: 'midnightTrees',
-						bush: 'midnightBush',
 						stump: 'midnightStump',
 					}
 				: null,
+	);
+	const bonusTreesKey = $derived(
+		look === 'sunny' ? 'sunnyJungleTrees' : look === 'midnight' ? 'midnightJungleTrees' : null,
+	);
+	const bonusBushKey = $derived(
+		look === 'sunny' ? 'sunnyJungleBush' : look === 'midnight' ? 'midnightJungleBush' : null,
 	);
 
 </script>
@@ -136,8 +138,16 @@
 	{#if altKeys}
 		<Sprite key={altKeys.sky} {...backgroundProps} />
 		<Sprite key={altKeys.back} {...backgroundProps} />
-		<Sprite key={altKeys.trees} {...backgroundProps} />
-		<Sprite key={altKeys.bush} {...backgroundProps} />
+		{#if bonusTreesKey && context.stateApp.loadedAssets?.[bonusTreesKey]}
+			<SpineProvider key={bonusTreesKey} {...treeLayout}>
+				<SpineTrack trackIndex={0} animationName="shu" loop />
+			</SpineProvider>
+		{/if}
+		{#if bonusBushKey && context.stateApp.loadedAssets?.[bonusBushKey]}
+			<SpineProvider key={bonusBushKey} {...bushLayout}>
+				<SpineTrack trackIndex={0} animationName="Shrubbery" loop />
+			</SpineProvider>
+		{/if}
 		<Sprite key={altKeys.stump} {...backgroundProps} />
 	{:else}
 		<Sprite key="jungleSky" {...backgroundProps} />
