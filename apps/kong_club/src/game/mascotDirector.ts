@@ -15,9 +15,10 @@ export const MASCOT_PRIORITY: Record<Exclude<MascotAnim, 'idle'>, number> = {
 	celebration: 4,
 };
 
-export const ANGRY_COOLDOWN_MS = 20_000;
 /** Inclusive wait, in ms, between randomidle plays while nothing else is playing. */
 export const RANDOM_IDLE_GAP_MS = [20_000, 40_000] as const;
+/** Minimum time between angry plays. */
+export const ANGRY_COOLDOWN_MS = 30_000;
 export const DEAD_SPIN_STREAK = 5;
 /** 3 stone tablets start a bonus, so 2 is one short. */
 export const NEAR_MISS_SCATTERS = 2;

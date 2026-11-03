@@ -52,7 +52,8 @@ test('idle is the default and randomidle waits for RANDOM_IDLE_GAP_MS', () => {
 	assert.equal(late.nextRandomAt, max);
 });
 
-test('near-miss and five dead spins play angry, then wait 20s', () => {
+test('near-miss and five dead spins play angry, then wait out the cooldown', () => {
+	assert.equal(ANGRY_COOLDOWN_MS, 30_000);
 	const near = mascotCuesForBookEvent(
 		{ type: 'reveal', gameType: 'basegame', board: boardWithScatters(2) },
 		{ countDeadSpins: true },
@@ -65,6 +66,12 @@ test('near-miss and five dead spins play angry, then wait 20s', () => {
 	const cooled = play(state, { type: 'nearMiss' }, 1_000 + ANGRY_COOLDOWN_MS - 1);
 	assert.equal(cooled.current, 'angry');
 	assert.equal(cooled.queue.includes('angry'), false);
+	const ready = play(
+		play(cooled, { type: 'clipComplete', anim: 'angry' }, 1_000 + ANGRY_COOLDOWN_MS),
+		{ type: 'nearMiss' },
+		1_000 + ANGRY_COOLDOWN_MS,
+	);
+	assert.equal(ready.current, 'angry');
 
 	let dead = at(0);
 	for (let spin = 1; spin <= DEAD_SPIN_STREAK - 1; spin += 1) {
