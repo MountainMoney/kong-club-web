@@ -123,7 +123,6 @@ export default {
 	W: symbolSprite('W.png'),
 	EXPLODED_W: symbolSprite('EXPLODED_W.png'),
 	ST: symbolSprite('ST.png'),
-	explosion: spineAsset('symbols3', 'explosion', 'symbols3.atlas'),
 	reelsFrame: sprites('sprites/reelsFrame/reels_frame.json'),
 	payFrame: sprite('sprites/payFrame/payFrame.png'),
 	anticipation: spineAsset('anticipation', 'anticipation'),
@@ -143,9 +142,6 @@ export default {
 		type: 'font',
 		src: '/assets/fonts/purpleFont/mm_purple.xml',
 	},
-	bigwin: spineAsset('bigwin', 'mm_bigwin', 'big_wins.atlas'),
-	fsIntro: spineAsset('fsIntro', 'fs_screen', 'fs_screen.atlas'),
-	fsOutroNumber: spineAsset('fsIntro', 'fs_total_number', 'fs_screen.atlas'),
 	progressBar: {
 		...sprites('sprites/progressBar/progressBar.json'),
 		preload: true,
@@ -156,9 +152,6 @@ export default {
 	},
 	freeSpins: sprites('sprites/freeSpins/freeSpins.json'),
 	winSmall: sprites('sprites/winSmall/MM_Localisation_winsmall.json'),
-	clusterWin: spineAsset('clusterWin', 'clusterpay', 'clusterpay.atlas'),
-	tumble_multiplier: spineAsset('tumbleWin', 'tumble_multiplier', 'tumble_win.atlas'),
-	tumble_win: spineAsset('tumbleWin', 'tumble_win', 'tumble_win.atlas'),
 	coins: {
 		type: 'spriteSheet',
 		src: '/assets/sprites/coin/SD2_Coin.json',

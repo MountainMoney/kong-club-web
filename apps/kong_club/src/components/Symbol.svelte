@@ -3,6 +3,7 @@
 	import { Container, Graphics } from 'pixi-svelte';
 	import { GlowFilter } from 'pixi-filters';
 
+	import KongLeafBurst from './KongLeafBurst.svelte';
 	import SymbolSpine from './SymbolSpine.svelte';
 	import SymbolSprite from './SymbolSprite.svelte';
 	import type { SymbolState, RawSymbol } from '../game/types';
@@ -67,7 +68,9 @@
 	});
 </script>
 
-{#if isSprite && symbolInfo}
+{#if props.state === 'explosion'}
+	<KongLeafBurst x={props.x} y={props.y} oncomplete={props.oncomplete} />
+{:else if isSprite && symbolInfo}
 	<SymbolSprite
 		{symbolInfo}
 		x={props.x}
