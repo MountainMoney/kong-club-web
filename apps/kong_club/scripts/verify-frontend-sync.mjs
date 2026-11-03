@@ -17,9 +17,9 @@ const configPath = path.resolve(
 );
 
 const EXPECTED = {
-	CB: [1, 2, 3, 4],
-	CS: [5, 7, 10, 15, 20],
-	CG: [25, 50, 100, 250, 500],
+	CB: [0.2, 0.5, 1, 2, 3, 4],
+	CS: [5, 10, 15, 20],
+	CG: [25, 50, 100, 250, 500, 1000],
 };
 
 function extractTsPools(src) {
@@ -48,51 +48,44 @@ function extractPyPools(src) {
 
 const feSrc = fs.readFileSync(normalizePath, 'utf8');
 const fe = extractTsPools(feSrc);
-const baseFe = extractTsPools(feSrc.replace('export const COIN_FACE_VALUES', 'export const INTEGER_POOLS').replace(
-	'export const BASE_COIN_FACE_VALUES',
-	'export const COIN_FACE_VALUES',
-));
-const py = extractPyPools(fs.readFileSync(configPath, 'utf8'));
+const pySrc = fs.existsSync(configPath) ? fs.readFileSync(configPath, 'utf8') : null;
+const py = pySrc ? extractPyPools(pySrc) : null;
 
 let ok = true;
 for (const key of ['CB', 'CS', 'CG']) {
 	const a = JSON.stringify(fe[key]);
-	const b = JSON.stringify(py[key]);
 	const c = JSON.stringify(EXPECTED[key]);
-	if (a !== b || a !== c) {
-		console.error(`MISMATCH ${key}: FE=${a} PY=${b} EXPECTED=${c}`);
+	if (a !== c) {
+		console.error(`MISMATCH ${key}: FE=${a} EXPECTED=${c}`);
+		ok = false;
+	} else if (py && JSON.stringify(py[key]) !== c) {
+		console.error(`MISMATCH ${key}: FE=${a} PY=${JSON.stringify(py[key])} EXPECTED=${c}`);
 		ok = false;
 	} else {
 		console.log(`OK ${key}: ${a}`);
 	}
-	const scaled = fe[key].map((face) => Math.round(face * 0.2 * 100) / 100);
-	if (JSON.stringify(scaled) !== JSON.stringify(baseFe[key])) {
-		console.error(`MISMATCH ${key} base scale: FE=${JSON.stringify(baseFe[key])} EXPECTED=${JSON.stringify(scaled)}`);
+}
+if (!pySrc) {
+	console.log('skip math game_config.py (not in this environment)');
+}
+
+// No 0.20× coin-face scale. When math is present, its scale knobs must stay at 1.
+if (pySrc) {
+	const scaleBlock = pySrc.match(/self\.coin_tile_scale_by_mode\s*=\s*\{([\s\S]*?)\}/);
+	if (scaleBlock && /:\s*0\.\d+/.test(scaleBlock[1])) {
+		console.error('coin_tile_scale_by_mode has non-1.0 values — face scale forbidden');
 		ok = false;
-	} else {
-		console.log(`OK ${key} base ×0.20: ${JSON.stringify(baseFe[key])}`);
+	} else if (scaleBlock) {
+		console.log('OK coin_tile_scale_by_mode locked at 1.0');
 	}
-}
 
-// Soft-scale must stay retired in math config.
-const pyFull = fs.readFileSync(configPath, 'utf8');
-const scaleBlock = pyFull.match(/self\.coin_tile_scale_by_mode\s*=\s*\{([\s\S]*?)\}/);
-if (!scaleBlock) {
-	console.error('coin_tile_scale_by_mode missing');
-	ok = false;
-} else if (/:\s*0\.\d+/.test(scaleBlock[1])) {
-	console.error('coin_tile_scale_by_mode has non-1.0 values — soft face scale forbidden');
-	ok = false;
-} else {
-	console.log('OK coin_tile_scale_by_mode locked at 1.0');
-}
-
-const baseScale = pyFull.match(/self\.base_coin_game_scale\s*=\s*([0-9.]+)/);
-if (baseScale && Number(baseScale[1]) !== 0.2) {
-	console.error(`base_coin_game_scale is ${baseScale[1]}, expected 0.20`);
-	ok = false;
-} else if (baseScale) {
-	console.log('OK base_coin_game_scale 0.20');
+	const baseScale = pySrc.match(/self\.base_coin_game_scale\s*=\s*([0-9.]+)/);
+	if (baseScale && Number(baseScale[1]) !== 1) {
+		console.error(`base_coin_game_scale is ${baseScale[1]}, expected 1 (no 0.20× scale)`);
+		ok = false;
+	} else if (baseScale) {
+		console.log('OK base_coin_game_scale 1');
+	}
 }
 
 if (!ok) process.exit(1);
