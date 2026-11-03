@@ -16,8 +16,8 @@ export const MASCOT_PRIORITY: Record<Exclude<MascotAnim, 'idle'>, number> = {
 };
 
 export const ANGRY_COOLDOWN_MS = 20_000;
-export const RANDOM_IDLE_MIN_MS = 8_000;
-export const RANDOM_IDLE_MAX_MS = 15_000;
+/** Inclusive wait, in ms, between randomidle plays while nothing else is playing. */
+export const RANDOM_IDLE_GAP_MS = [20_000, 40_000] as const;
 export const DEAD_SPIN_STREAK = 5;
 /** 3 stone tablets start a bonus, so 2 is one short. */
 export const NEAR_MISS_SCATTERS = 2;
@@ -123,8 +123,10 @@ export const mascotPreviewFromSearch = (search: string): MascotAnim | null => {
 	return isMascotAnim(value) ? value : null;
 };
 
-export const randomIdleDelay = (random: () => number = Math.random) =>
-	RANDOM_IDLE_MIN_MS + random() * (RANDOM_IDLE_MAX_MS - RANDOM_IDLE_MIN_MS);
+export const randomIdleDelay = (random: () => number = Math.random) => {
+	const [min, max] = RANDOM_IDLE_GAP_MS;
+	return min + random() * (max - min);
+};
 
 export const createMascotState = (
 	now: number,

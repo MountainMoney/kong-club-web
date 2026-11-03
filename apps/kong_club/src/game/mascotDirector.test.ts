@@ -10,8 +10,7 @@ import {
 	DEAD_SPIN_STREAK,
 	mascotCuesForBookEvent,
 	mascotPreviewFromSearch,
-	RANDOM_IDLE_MAX_MS,
-	RANDOM_IDLE_MIN_MS,
+	RANDOM_IDLE_GAP_MS,
 	type MascotState,
 } from './mascotDirector.ts';
 
@@ -37,19 +36,20 @@ const boardWithScatters = (count: number) => {
 	];
 };
 
-test('idle is the default and randomidle waits 8–15s', () => {
+test('idle is the default and randomidle waits for RANDOM_IDLE_GAP_MS', () => {
+	const [min, max] = RANDOM_IDLE_GAP_MS;
 	const state = at(0);
 	assert.equal(state.current, 'idle');
-	assert.equal(state.nextRandomAt, RANDOM_IDLE_MIN_MS);
-	const early = play(state, { type: 'tick' }, RANDOM_IDLE_MIN_MS - 1);
+	assert.equal(state.nextRandomAt, min);
+	const early = play(state, { type: 'tick' }, min - 1);
 	assert.equal(early.current, 'idle');
-	const due = play(state, { type: 'tick' }, RANDOM_IDLE_MIN_MS);
+	const due = play(state, { type: 'tick' }, min);
 	assert.equal(due.current, 'randomidle');
-	const back = play(due, { type: 'clipComplete', anim: 'randomidle' }, RANDOM_IDLE_MIN_MS + 10);
+	const back = play(due, { type: 'clipComplete', anim: 'randomidle' }, min + 10);
 	assert.equal(back.current, 'idle');
-	assert.equal(back.nextRandomAt, RANDOM_IDLE_MIN_MS + 10 + RANDOM_IDLE_MIN_MS);
+	assert.equal(back.nextRandomAt, min + 10 + min);
 	const late = createMascotState(0, () => 1);
-	assert.equal(late.nextRandomAt, RANDOM_IDLE_MAX_MS);
+	assert.equal(late.nextRandomAt, max);
 });
 
 test('near-miss and five dead spins play angry, then wait 20s', () => {
@@ -161,21 +161,22 @@ test('20x, mystery result, and a winning bonus end celebrate', () => {
 });
 
 test('priority is celebration, then bananaphone, then angry, then randomidle', () => {
-	let state = play(at(0), { type: 'tick' }, RANDOM_IDLE_MIN_MS);
+	const [gapMin] = RANDOM_IDLE_GAP_MS;
+	let state = play(at(0), { type: 'tick' }, gapMin);
 	assert.equal(state.current, 'randomidle');
-	state = play(state, { type: 'nearMiss' }, RANDOM_IDLE_MIN_MS);
+	state = play(state, { type: 'nearMiss' }, gapMin);
 	assert.equal(state.current, 'angry');
-	state = play(state, { type: 'bonusTrigger' }, RANDOM_IDLE_MIN_MS);
+	state = play(state, { type: 'bonusTrigger' }, gapMin);
 	assert.equal(state.current, 'bananaphone');
 	assert.deepEqual(state.queue, ['angry']);
-	state = play(state, { type: 'bigWin' }, RANDOM_IDLE_MIN_MS);
+	state = play(state, { type: 'bigWin' }, gapMin);
 	assert.equal(state.current, 'celebration');
 	assert.deepEqual(state.queue, ['bananaphone', 'angry']);
-	state = play(state, { type: 'clipComplete', anim: 'celebration' }, RANDOM_IDLE_MIN_MS + 1);
+	state = play(state, { type: 'clipComplete', anim: 'celebration' }, gapMin + 1);
 	assert.equal(state.current, 'bananaphone');
-	state = play(state, { type: 'clipComplete', anim: 'bananaphone' }, RANDOM_IDLE_MIN_MS + 2);
+	state = play(state, { type: 'clipComplete', anim: 'bananaphone' }, gapMin + 2);
 	assert.equal(state.current, 'angry');
-	state = play(state, { type: 'clipComplete', anim: 'angry' }, RANDOM_IDLE_MIN_MS + 3);
+	state = play(state, { type: 'clipComplete', anim: 'angry' }, gapMin + 3);
 	assert.equal(state.current, 'idle');
 });
 
@@ -184,7 +185,7 @@ test('turbo keeps celebration and skips the other cues', () => {
 	assert.equal(play(idle, { type: 'bonusTrigger' }, 10, true).current, 'idle');
 	assert.equal(play(idle, { type: 'nearMiss' }, 10, true).current, 'idle');
 	assert.equal(play(idle, { type: 'tap' }, 10, true).current, 'idle');
-	assert.equal(play(idle, { type: 'tick' }, RANDOM_IDLE_MIN_MS, true).current, 'idle');
+	assert.equal(play(idle, { type: 'tick' }, RANDOM_IDLE_GAP_MS[0], true).current, 'idle');
 	assert.equal(play(idle, { type: 'bigWin' }, 10, true).current, 'celebration');
 	assert.equal(play(idle, { type: 'mysteryResult' }, 10, true).current, 'celebration');
 
