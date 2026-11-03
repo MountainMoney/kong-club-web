@@ -202,6 +202,9 @@ export interface components {
 			feature?: boolean;
 		};
 		ConfigObject: {
+			minBet?: number;
+			maxBet?: number;
+			stepBet?: number;
 			betLevels?: number[];
 			betModes?: {
 				BASE?: components['schemas']['Config'];

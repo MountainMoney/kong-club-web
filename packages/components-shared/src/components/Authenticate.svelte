@@ -3,7 +3,7 @@
 
 	import { requestAuthenticate } from 'rgs-requests';
 	import { stateUrlDerived, stateBet, stateConfig, stateModal, stateUi } from 'state-shared';
-	import { API_AMOUNT_MULTIPLIER, MOST_USED_BET_INDEXES } from 'constants-shared/bet';
+	import { API_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
 
 	type Props = {
 		children: Snippet;
@@ -14,6 +14,20 @@
 	const props: Props = $props();
 
 	let authenticated = $state(false);
+
+	const nearestBetLevel = (target: number, levels: number[]) => {
+		if (levels.includes(target)) return target;
+		let best = levels[0]!;
+		let bestDistance = Math.abs(best - target);
+		for (const level of levels) {
+			const distance = Math.abs(level - target);
+			if (distance < bestDistance - 1e-9) {
+				best = level;
+				bestDistance = distance;
+			}
+		}
+		return best;
+	};
 
 	const authenticate = async () => {
 		try {
@@ -64,13 +78,41 @@
 				// 	}
 				// }
 				stateConfig.jurisdiction = authenticateData?.config?.jurisdiction;
-				stateConfig.betAmountOptions = (authenticateData.config?.betLevels || []).map(
-					(level) => level / API_AMOUNT_MULTIPLIER,
+				const authConfig = authenticateData.config;
+				const toAmount = (micro: number) => micro / API_AMOUNT_MULTIPLIER;
+				const minBet = authConfig.minBet != null ? toAmount(authConfig.minBet) : undefined;
+				const maxBet = authConfig.maxBet != null ? toAmount(authConfig.maxBet) : undefined;
+				const stepBet = authConfig.stepBet != null ? toAmount(authConfig.stepBet) : undefined;
+				const defaultBetLevel =
+					authConfig.defaultBetLevel != null ? toAmount(authConfig.defaultBetLevel) : undefined;
+
+				let levels = (authConfig.betLevels || [])
+					.map(toAmount)
+					.filter((level) => Number.isFinite(level) && level > 0);
+				if (minBet != null) levels = levels.filter((level) => level + 1e-8 >= minBet);
+				if (maxBet != null) levels = levels.filter((level) => level - 1e-8 <= maxBet);
+				levels = [...new Set(levels.map((level) => Number(level.toPrecision(12))))].sort(
+					(a, b) => a - b,
 				);
-				stateConfig.betMenuOptions = stateConfig.betAmountOptions.filter((_, index) =>
-					MOST_USED_BET_INDEXES.includes(index),
-				);
+				if (!levels.length && minBet != null && maxBet != null && stepBet != null && stepBet > 0) {
+					const built: number[] = [];
+					for (let index = 0; index < 10000; index += 1) {
+						const value = Number((minBet + index * stepBet).toPrecision(12));
+						if (value > maxBet + 1e-8) break;
+						built.push(value);
+					}
+					levels = built;
+				}
+
+				stateConfig.minBet = minBet;
+				stateConfig.maxBet = maxBet;
+				stateConfig.stepBet = stepBet;
+				stateConfig.defaultBetLevel = defaultBetLevel;
+				stateConfig.betAmountOptions = levels;
+				stateConfig.betMenuOptions = levels;
 			}
+
+			let openedFromRound = false;
 
 			// round
 			if (authenticateData?.round) {
@@ -96,6 +138,7 @@
 						authenticateData.round.amount > 0
 							? authenticateData.round.amount / API_AMOUNT_MULTIPLIER
 							: 0;
+					openedFromRound = true;
 					stateBet.betAmount = betAmountValue;
 					stateBet.wageredBetAmount = betAmountValue;
 				}
@@ -103,6 +146,18 @@
 				if (authenticateData.round?.mode) {
 					stateBet.activeBetModeKey = authenticateData.round.mode;
 				}
+			}
+
+			if (!openedFromRound && stateConfig.defaultBetLevel != null) {
+				const levels = stateConfig.betAmountOptions;
+				const target = stateConfig.defaultBetLevel;
+				const snapped = levels.length ? nearestBetLevel(target, levels) : target;
+				stateBet.betAmount = snapped;
+				stateBet.wageredBetAmount = snapped;
+			} else if (openedFromRound && stateConfig.betAmountOptions.length) {
+				const snapped = nearestBetLevel(stateBet.betAmount, stateConfig.betAmountOptions);
+				stateBet.betAmount = snapped;
+				stateBet.wageredBetAmount = snapped;
 			}
 		} catch (error) {
 			if (import.meta.env.DEV) console.error(error);

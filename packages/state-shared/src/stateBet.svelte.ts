@@ -44,9 +44,15 @@ const maxAffordableBet = () => {
 	return best;
 };
 
+const withinAuthBetBounds = (step: number) => {
+	if (stateConfig.minBet != null && step < stateConfig.minBet - 1e-8) return false;
+	if (stateConfig.maxBet != null && step > stateConfig.maxBet + 1e-8) return false;
+	return true;
+};
+
 /** Snap to a valid ladder step only. Balance must never change the player's denomination. */
 const snapToLadder = (value: number): number => {
-	const ladder = sortedLadder();
+	const ladder = sortedLadder().filter(withinAuthBetBounds);
 	if (value <= 0) return 0;
 	if (!ladder.length) return value;
 
