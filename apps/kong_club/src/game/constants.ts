@@ -243,13 +243,6 @@ export const zIndexes = {
 	splash: 200,
 };
 
-const explosion = {
-	type: 'spine',
-	assetKey: 'explosion',
-	animationName: 'explosion',
-	sizeRatios: { width: 0.42, height: 0.42 },
-};
-
 /** Shared cell fill for all pay symbols — even scale into the wood grid. */
 const REEL_SYMBOL_SIZE = 0.86;
 /** A / K / Q / J / 10 — 20% smaller than fruit / high symbols. */
@@ -262,7 +255,7 @@ const createSymbolSprites = (assetKey: string, size = REEL_SYMBOL_SIZE) => {
 		sizeRatios: { width: size, height: size },
 	};
 	return {
-		explosion,
+		explosion: sprite,
 		win: sprite,
 		postWinStatic: sprite,
 		static: sprite,
@@ -295,7 +288,7 @@ const createCoinSpine = (animationName: 'tongbi' | 'yinbi' | 'jinbi') => {
 		loop: true,
 	};
 	return {
-		explosion,
+		explosion: spine,
 		win: spine,
 		postWinStatic: spine,
 		static: spine,
@@ -305,7 +298,7 @@ const createCoinSpine = (animationName: 'tongbi' | 'yinbi' | 'jinbi') => {
 };
 
 const createWildSprites = () => ({
-	explosion,
+	explosion: wildW,
 	win: wildW,
 	postWinStatic: wildW,
 	static: wildW,
@@ -314,7 +307,7 @@ const createWildSprites = () => ({
 });
 
 const createScatterSprites = () => ({
-	explosion,
+	explosion: scatterSymbol,
 	win: scatterSymbol,
 	postWinStatic: scatterSymbol,
 	static: scatterSymbol,
