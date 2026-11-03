@@ -34,7 +34,7 @@
 
 	import { waitForTimeout } from 'utils-shared/wait';
 
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 	import { capBookAmount } from '../game/winCountTier';
 
 
@@ -150,7 +150,7 @@
 
 			anchor={0.5}
 
-			text={bookEventAmountToWinCurrencyString(capBookAmount(props.win.amount))}
+			text={formatBookWin(capBookAmount(props.win.amount))}
 
 			style={amountStyle}
 

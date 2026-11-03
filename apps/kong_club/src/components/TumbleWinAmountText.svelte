@@ -5,7 +5,7 @@
 
 	import { Text } from 'pixi-svelte';
 	import { stateBetDerived } from 'state-shared';
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { ensurePrizeNumberFont } from '../game/introFont';
@@ -68,7 +68,7 @@
 <Text
 	anchor={0.5}
 	scale={scale.current}
-	text={bookEventAmountToWinCurrencyString(capBookAmount(displayAmount.current))}
+	text={formatBookWin(capBookAmount(displayAmount.current))}
 	style={amountStyle}
 	resolution={textRes}
 />

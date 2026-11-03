@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { numberToBetCurrencyString, numberToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBoardWin, formatMoney } from '../game/stakeMoney';
 	import { stateI18nDerived } from 'state-shared';
 	import { stateBet } from 'state-shared';
 
@@ -37,14 +37,14 @@
 	);
 	const finalWinDisplay = $derived(
 		fetchResult
-			? numberToWinCurrencyString(
+			? formatBoardWin(
 					replayTotalWinCurrency(
 						fetchResult.payoutMultiplier,
 						fetchResult.bet.amount,
 						fetchResult.payout,
 					),
 				)
-			: numberToWinCurrencyString(0),
+			: formatBoardWin(0),
 	);
 	const replayCostMultiplier = $derived(fetchResult?.costMultiplier ?? stateReplay.costMultiplier ?? 1);
 	const replayBetCost = $derived(stateBet.betAmount);
@@ -157,7 +157,7 @@
 						<div class="replay-divider" aria-hidden="true"></div>
 						<div class="replay-row">
 							<dt>{replayLabel('baseBet')}</dt>
-							<dd>{numberToBetCurrencyString(replayBetCost)}</dd>
+							<dd>{formatMoney(replayBetCost, 'bet')}</dd>
 						</div>
 						<div class="replay-row">
 							<dt>{replayLabel('costMultiplier')}</dt>
@@ -165,7 +165,7 @@
 						</div>
 						<div class="replay-row replay-row--highlight">
 							<dt>{replayLabel('totalBetCost')}</dt>
-							<dd>{numberToBetCurrencyString(replayRealCost)}</dd>
+							<dd>{formatMoney(replayRealCost, 'bet')}</dd>
 						</div>
 						{#if fetchResult}
 							<div class="replay-row">

@@ -12,7 +12,7 @@ export type EmitterEventWin =
 	import { Container, Text } from 'pixi-svelte';
 	import { FadeContainer, WinCountUpProvider } from 'components-pixi';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 	import { CanvasSizeRectangle, MainContainer } from 'components-layout';
 	import { OnMount } from 'components-shared';
 
@@ -100,7 +100,7 @@ export type EmitterEventWin =
 							<WinAnimation animationMap={winLevelData.animation}>
 								<Text
 									anchor={0.5}
-									text={bookEventAmountToWinCurrencyString(countUpAmount)}
+									text={formatBookWin(countUpAmount)}
 									style={amountStyle}
 									resolution={textRes}
 								/>
@@ -108,7 +108,7 @@ export type EmitterEventWin =
 						{:else}
 							<Text
 								anchor={0.5}
-								text={bookEventAmountToWinCurrencyString(countUpAmount)}
+								text={formatBookWin(countUpAmount)}
 								style={amountStyle}
 								resolution={textRes}
 							/>
