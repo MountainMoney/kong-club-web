@@ -83,6 +83,9 @@ const formatNumericDisplay = (value: number): number => Math.round(value);
 
 const parseCoinFace = (raw: unknown): number => roundCoinFace(Number(raw));
 
+/** Every face in the shared bronze / silver / gold table. */
+type CoinFaceValue = (typeof COIN_FACE_VALUES)[keyof typeof COIN_FACE_VALUES][number];
+
 /** Snap a corrupted whole face onto the pool for this spin. Fractional book faces stay. */
 export const snapCoinFace = (raw: number, symbol: CoinFeatureItem['symbol']): number => {
 	const n = parseCoinFace(raw);
@@ -91,7 +94,7 @@ export const snapCoinFace = (raw: number, symbol: CoinFeatureItem['symbol']): nu
 	const pool = activeCoinFaceValues();
 	const faces =
 		symbol === 'CG' ? pool.CG : symbol === 'CS' ? pool.CS : pool.CB;
-	let best = faces[0]!;
+	let best: CoinFaceValue = faces[0]!;
 	let bestDist = Math.abs(n - best);
 	for (const face of faces) {
 		const dist = Math.abs(n - face);
