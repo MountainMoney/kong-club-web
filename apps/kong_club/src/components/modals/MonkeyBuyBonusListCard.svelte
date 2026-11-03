@@ -3,7 +3,7 @@
 	import { formatMoney } from '../../game/stakeMoney';
 
 	import type { BuyBonusCardDef } from '../../game/buyBonusScreen';
-	import { assetUrl } from '../../game/assetUrl';
+	import { assetSrc } from '../../assets/resolve';
 	import { bonusDescriptionCopy } from '../../game/socialCopy';
 	import {
 		BUY_BONUS_LIST_ICON_BOX_H,
@@ -12,7 +12,7 @@
 	} from '../../game/buyBonusScreen';
 	import { onMount } from 'svelte';
 	import {
-		FEATURE_COIN_SRCS,
+		FEATURE_COIN_KEYS,
 		buyBonusCoinTriangleLayout,
 		buyBonusScatterLayout,
 	} from '../../game/buyBonusScatterLayout';
@@ -56,8 +56,8 @@
 	);
 
 	const heroSize = $derived(Math.round(BUY_BONUS_LIST_ICON_BOX_H * 0.9));
-	const cardArtSrc = $derived(assetUrl(props.card.imageSrc));
-	const featureCoinSrcs = FEATURE_COIN_SRCS.map((src) => assetUrl(src));
+	const cardArtSrc = $derived(assetSrc(props.card.imageKey));
+	const featureCoinSrcs = FEATURE_COIN_KEYS.map((key) => assetSrc(key));
 
 	const selectCard = () => {
 		if (props.disabled) return;

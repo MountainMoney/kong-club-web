@@ -28,9 +28,7 @@ export const assetUrl = (path: string): string => {
 	const resolved = `${base}${normalized}`;
 	if (isRelativeBase) return resolved;
 
-	return typeof window !== 'undefined'
-		? new URL(resolved, window.location.origin).href
-		: resolved;
+	return typeof window !== 'undefined' ? new URL(resolved, window.location.origin).href : resolved;
 };
 
 type SpineSrc = { atlas: string; skeleton: string; scale?: number };
@@ -41,16 +39,17 @@ const resolveSpineSrc = (src: SpineSrc): SpineSrc => ({
 	skeleton: assetUrl(src.skeleton),
 });
 
+const resolveSrc = (src: string | SpineSrc) =>
+	typeof src === 'string' ? assetUrl(src) : resolveSpineSrc(src);
+
 /** Rewrite every manifest entry so production loads from the correct origin + base path. */
 export const resolveAssetsManifest = (manifest: Assets): Assets => {
 	const out: Assets = {};
 	for (const [key, asset] of Object.entries(manifest)) {
 		if (!asset) continue;
-		if (typeof asset.src === 'string') {
-			out[key] = { ...asset, src: assetUrl(asset.src) };
-		} else {
-			out[key] = { ...asset, src: resolveSpineSrc(asset.src as SpineSrc) };
-		}
+		const next = { ...asset, src: resolveSrc(asset.src) };
+		if (asset.fallbackSrc) next.fallbackSrc = resolveSrc(asset.fallbackSrc);
+		out[key] = next;
 	}
 	return out;
 };

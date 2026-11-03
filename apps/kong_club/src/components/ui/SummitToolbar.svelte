@@ -11,7 +11,7 @@
 	} from 'state-shared';
 	import { bookEventAmountToNormalisedAmount } from 'utils-shared/amount';
 	import { getContext } from '../../game/context';
-	import { assetUrl } from '../../game/assetUrl';
+	import { assetSrc } from '../../assets/resolve';
 	import { isGameplayInputAllowed } from '../../game/gameplayLock.svelte';
 	import { requestAutoBet, requestBet } from '../../game/commitWager';
 	import { invalidateWinPresentation, spinWinOverlay } from '../../game/spinWinOverlay.svelte';
@@ -81,7 +81,8 @@
 	});
 	const forcePortrait = $derived(context.stateLayoutDerived.layoutType() === 'portrait');
 
-	const summitSrc = (name: string) => assetUrl(`/assets/monkey/ui/summit/${name}`);
+	const summitSrc = (name: 'sound' | 'music') =>
+		assetSrc(name === 'sound' ? 'ui_summit_sound' : 'ui_summit_music');
 
 	const inFreegame = $derived(stateGame.gameType === 'freegame');
 	const layout = $derived(

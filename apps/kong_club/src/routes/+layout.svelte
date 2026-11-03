@@ -3,6 +3,7 @@
 	import { GlobalStyle } from 'components-ui-html';
 	import { LoadI18n } from 'components-shared';
 	import { setContext } from '../game/context';
+	import KongFontFaces from '../components/KongFontFaces.svelte';
 
 	import messagesMap from '../i18n/messagesMap';
 
@@ -12,6 +13,8 @@
 
 	setContext();
 </script>
+
+<KongFontFaces />
 
 <GlobalStyle>
 	<LoadI18n {messagesMap}>

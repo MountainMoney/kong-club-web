@@ -31,7 +31,13 @@ export type RawAsset = RawSpine | RawSprite | RawSprites | RawSpriteSheet | RawA
 export type RawType = 'spine' | 'sprite' | 'sprites' | 'spriteSheet' | 'font' | 'audio';
 
 export type SpineSrc = { skeleton: string; atlas: string; scale?: number };
-export type Asset = { type: RawType; src: string | SpineSrc; preload?: boolean };
+export type Asset = {
+	type: RawType;
+	src: string | SpineSrc;
+	preload?: boolean;
+	/** Loaded when `src` 404s or times out, so a missing file cannot hang the game. */
+	fallbackSrc?: string | SpineSrc;
+};
 export type Assets = PIXI.Dict<Asset>;
 
 export type ParticleSpawnOption =

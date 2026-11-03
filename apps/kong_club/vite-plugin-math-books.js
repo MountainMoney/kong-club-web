@@ -6,6 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
+import { writeMathProfile } from './scripts/generate-math-profile.mjs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MATH_MODES = [
@@ -246,6 +248,7 @@ function uniformLutEntries(bookCount) {
 export function mathBooksPlugin() {
 	const libraryRoot = resolveMathLibraryRoot();
 	const appRoot = __dirname;
+	writeMathProfile({ appRoot });
 
 	return {
 		name: 'kong-club-math-books',

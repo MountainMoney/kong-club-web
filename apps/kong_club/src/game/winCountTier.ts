@@ -4,6 +4,7 @@ import type { WinPopupAlias } from './uiAssetSizes';
 
 import { WIN_COUNT_BASE_COUNT_MS } from './winCountLayout';
 import { productionFeatureScale } from './presentationClocks';
+import { PUBLISHED_MAX_WIN_X } from './mathProfile';
 
 
 
@@ -13,12 +14,12 @@ export type WinCountTier = WinPopupAlias | null;
 
 export type WinPresentationTier = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-/** Cap multiplier for this game (all modes). */
-export const MAX_WIN_MULTIPLIER = 25000;
+/** Cap multiplier for this game (all modes), from the generated math profile. */
+export const MAX_WIN_MULTIPLIER = PUBLISHED_MAX_WIN_X;
 
 export const isMaxWinMultiplier = (multiplier: number) => multiplier >= MAX_WIN_MULTIPLIER;
 
-/** Clamp a shown face / pot / MULTI product to 25,000×. */
+/** Clamp a shown face / pot / MULTI product to the published max win. */
 export const capWinMultiplier = (multiplier: number): number => {
 	const n = Number(multiplier);
 	if (!Number.isFinite(n) || n <= 0) return 0;
@@ -116,7 +117,7 @@ export const shouldDeferToolbarWinUntilCountUp = (
 
  * Win celebration thresholds (× per-spin bet/denomination):
 
- *   40×–149× BIG · 150×–499× SUPER · 500×–2499× MEGA · 2500×–24999× EPIC · 25000× MAX
+ *   40×–149× BIG · 150×–499× SUPER · 500×–2499× MEGA · 2500× through the published max: EPIC, then MAX
 
  */
 

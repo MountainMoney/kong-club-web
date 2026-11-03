@@ -1,4 +1,5 @@
 import config from '../config';
+import { formatMathCost, mathMode, oddsText } from '../mathProfile';
 import {
 	ANTE_BET_MODE_KEY,
 	FEATURE_SPIN_BET_MODE_KEY,
@@ -82,8 +83,7 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 512, height: 512 },
 		theme: 'Lobby',
 		body: 'About 1 in 130 spins instead of about 1 in 260.',
-		detail:
-			'Stays on for every spin until you turn it off. Doubles the base bonus chance for 1.4× bet.',
+		detail: `Stays on for every spin until you turn it off. Doubles the base bonus chance for ${formatMathCost(mathMode('base_ante').cost)}× bet.`,
 		price: config.betModes.base_ante.cost,
 	},
 	{
@@ -92,8 +92,7 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 983, height: 1024 },
 		theme: 'Feature',
 		body: 'The progress bar starts full. Every spin lands a 5+ cluster.',
-		detail:
-			'Each spin costs 65× bet with the progress bar filled. After the tumbles stop, the coin game plays.',
+		detail: `Each spin costs ${formatMathCost(mathMode('feature_spin').cost)}× bet with the progress bar filled. After the tumbles stop, the coin game plays.`,
 		price: config.betModes.feature_spin.cost,
 	},
 	{
@@ -102,8 +101,7 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 662, height: 903 },
 		theme: 'Peak',
 		body: 'The whole board starts gold. The bar can dump, or hit the coin game.',
-		detail:
-			'Each spin costs 1,400× bet. The whole board starts gold. After it lands the bar fills. It can dump, or hit full and play the coin game.',
+		detail: `Each spin costs ${formatMathCost(mathMode('peak_spin').cost)}× bet. The whole board starts gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
 		price: config.betModes.peak_spin.cost,
 	},
 	{
@@ -112,7 +110,7 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 819, height: 1024 },
 		theme: 'See',
 		body: '3 scatters. The board clears, then 10 free spins.',
-		detail: 'Buy See No Evil for 115× bet. 3 scatters. The board clears, then 10 free spins.',
+		detail: `Buy See No Evil for ${formatMathCost(mathMode('bonus_see').cost)}× bet. 3 scatters. The board clears, then 10 free spins.`,
 		price: config.betModes.bonus_see.cost,
 	},
 	{
@@ -121,7 +119,7 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 819, height: 1024 },
 		theme: 'Hear',
 		body: '4 scatters. The board stays, then 10 free spins.',
-		detail: 'Buy Hear No Evil for 250× bet. 4 scatters. The board stays, then 10 free spins.',
+		detail: `Buy Hear No Evil for ${formatMathCost(mathMode('bonus_hear').cost)}× bet. 4 scatters. The board stays, then 10 free spins.`,
 		price: config.betModes.bonus_hear.cost,
 	},
 	{
@@ -130,9 +128,8 @@ const SEEDS: OfferSeed[] = [
 		artSize: { width: 819, height: 1024 },
 		// Backdrop keys are ggBg*Gamble. The card title comes from paytableModeLabel.
 		theme: 'Gamble',
-		body: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
-		detail:
-			'Each spin costs 380× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
+		body: oddsText('bonus_pick'),
+		detail: `Each spin costs ${formatMathCost(mathMode('bonus_pick').cost)}× bet. ${oddsText('bonus_pick')}.`,
 		price: config.betModes.bonus_pick.cost,
 	},
 ];

@@ -1,17 +1,26 @@
-import {
-	AUTO_POPUP_SUBTITLE_SIZE,
-	AUTO_POPUP_TITLE_SIZE,
-} from './autoplayPopupTheme';
+import { AUTO_POPUP_SUBTITLE_SIZE, AUTO_POPUP_TITLE_SIZE } from './autoplayPopupTheme';
 import { BAR_LABEL_SIZE, BAR_VALUE_SIZE } from './layoutScene';
-import {
-	TOOLBAR_MENU_I_FONT_SIZE,
-	TOOLBAR_MENU_LABEL_SIZE,
-} from './toolbarMenuTheme';
+import { TOOLBAR_MENU_I_FONT_SIZE, TOOLBAR_MENU_LABEL_SIZE } from './toolbarMenuTheme';
 import { SYMBOL_SIZE } from './constants';
 import { PAYLINE_AMOUNT_FONT_SIZE } from './paylineWinAmount';
 import { PRIZE_NUMBER_FONT, PRIZE_NUMBER_WEIGHT } from './prizeNumberFont';
 import { UI_FONT } from './uiFont';
 import { WIN_COUNT_AMOUNT_SIZE } from './winCountLayout';
+
+/** A missing face must not stall splash or the first spin. */
+const loadFaces = async (faces: string[], ms = 2500) => {
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	try {
+		await Promise.race([
+			Promise.all(faces.map((face) => document.fonts.load(face).catch(() => []))),
+			new Promise<void>((resolve) => {
+				timer = setTimeout(resolve, ms);
+			}),
+		]);
+	} finally {
+		if (timer !== undefined) clearTimeout(timer);
+	}
+};
 
 let fredokaReady: Promise<void> | null = null;
 let fredokaOneReady: Promise<void> | null = null;
@@ -34,7 +43,7 @@ const FREDOKA_ONE_BOOT_FACES = [
 export const ensureFredokaOneFont = () => {
 	if (!fredokaOneReady) {
 		fredokaOneReady = (async () => {
-			await Promise.all(FREDOKA_ONE_BOOT_FACES.map((face) => document.fonts.load(face)));
+			await loadFaces(FREDOKA_ONE_BOOT_FACES);
 		})();
 	}
 	return fredokaOneReady;
@@ -44,23 +53,26 @@ export const ensureFredokaOneFont = () => {
 export const ensureIntroFredokaFont = () => {
 	if (!fredokaReady) {
 		fredokaReady = (async () => {
-			await Promise.all([
-				document.fonts.load('700 56px Fredoka'),
-				document.fonts.load('700 48px Fredoka'),
-				document.fonts.load('600 48px Fredoka'),
-				document.fonts.load('700 40px Fredoka'),
-				document.fonts.load(`700 ${WIN_COUNT_AMOUNT_SIZE}px Fredoka`),
-				document.fonts.load(`900 ${Math.round(WIN_COUNT_AMOUNT_SIZE * 0.78)}px Fredoka`),
-				document.fonts.load(`700 ${PAYLINE_AMOUNT_FONT_SIZE}px Fredoka`),
-				document.fonts.load('700 32px Fredoka'),
-				document.fonts.load('700 26px Fredoka'),
-				document.fonts.load('700 22px Fredoka'),
-				document.fonts.load('800 42px Fredoka'),
-				document.fonts.load('800 36px Fredoka'),
-				document.fonts.load('800 30px Fredoka'),
-				document.fonts.load('800 24px Fredoka'),
+			await loadFaces([
+				'700 56px Fredoka',
+				'700 48px Fredoka',
+				'600 48px Fredoka',
+				'700 40px Fredoka',
+				`700 ${WIN_COUNT_AMOUNT_SIZE}px Fredoka`,
+				`900 ${Math.round(WIN_COUNT_AMOUNT_SIZE * 0.78)}px Fredoka`,
+				`700 ${PAYLINE_AMOUNT_FONT_SIZE}px Fredoka`,
+				'700 32px Fredoka',
+				'700 26px Fredoka',
+				'700 22px Fredoka',
+				'800 42px Fredoka',
+				'800 36px Fredoka',
+				'800 30px Fredoka',
+				'800 24px Fredoka',
 			]);
-			await document.fonts.ready;
+			await Promise.race([
+				document.fonts.ready.catch(() => undefined),
+				new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+			]);
 		})();
 	}
 	return fredokaReady;
@@ -91,12 +103,11 @@ export const ensurePrizeNumberFont = () => {
 				72,
 				64,
 			];
-			await Promise.all(
-				sizes.map((px) =>
-					document.fonts.load(`${PRIZE_NUMBER_WEIGHT} ${px}px "${PRIZE_NUMBER_FONT}"`),
-				),
-			);
-			await document.fonts.ready;
+			await loadFaces(sizes.map((px) => `${PRIZE_NUMBER_WEIGHT} ${px}px "${PRIZE_NUMBER_FONT}"`));
+			await Promise.race([
+				document.fonts.ready.catch(() => undefined),
+				new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+			]);
 		})();
 	}
 	return prizeNumberReady;
@@ -116,12 +127,15 @@ export const ensureAileronFont = () => {
 				AUTO_POPUP_SUBTITLE_SIZE,
 				12,
 			];
-			await Promise.all([
-				...sizes.map((px) => document.fonts.load(`bold ${px}px ${UI_FONT}`)),
-				...sizes.map((px) => document.fonts.load(`900 ${px}px ${UI_FONT}`)),
-				document.fonts.load(`600 ${BAR_LABEL_SIZE}px ${UI_FONT}`),
+			await loadFaces([
+				...sizes.map((px) => `bold ${px}px ${UI_FONT}`),
+				...sizes.map((px) => `900 ${px}px ${UI_FONT}`),
+				`600 ${BAR_LABEL_SIZE}px ${UI_FONT}`,
 			]);
-			await document.fonts.ready;
+			await Promise.race([
+				document.fonts.ready.catch(() => undefined),
+				new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+			]);
 			aileronLoaded = true;
 		})();
 	}

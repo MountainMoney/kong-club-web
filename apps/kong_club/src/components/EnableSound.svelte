@@ -9,9 +9,10 @@
 	const context = getContext();
 
 	onMount(() => {
-		const loadedAudio = $state.snapshot(
-			context.stateApp.loadedAssets['sound'],
-		) as LoadedAudio<SoundName>;
+		const loadedAudio = $state.snapshot(context.stateApp.loadedAssets['sound']) as
+			| LoadedAudio<SoundName>
+			| undefined;
+		if (!loadedAudio?.src) return;
 		const { destroy } = sound.load(loadedAudio);
 
 		return () => {

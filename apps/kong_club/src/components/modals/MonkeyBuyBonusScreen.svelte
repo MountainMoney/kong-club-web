@@ -37,7 +37,7 @@
 		buyBonusPortraitConfirmWidth,
 		isActivateBetMode,
 	} from '../../game/buyBonusScreen';
-	import { assetUrl } from '../../game/assetUrl';
+	import { assetSrc } from '../../assets/resolve';
 	import { buyBonusActionLabel, insufficientBalanceMessage, autoSpinBeforeBonusMessage } from '../../game/socialCopy';
 	import MonkeyBuyBonusBetControl from './MonkeyBuyBonusBetControl.svelte';
 	import MonkeyBuyBonusPortraitLayout from './MonkeyBuyBonusPortraitLayout.svelte';
@@ -213,7 +213,7 @@
 		suppressDismissUntil = performance.now() + 450;
 		for (const src of BUY_BONUS_MENU_PREFETCH) {
 			const img = new Image();
-			img.src = assetUrl(src);
+			img.src = assetSrc(src);
 		}
 		window.addEventListener('resize', updateScale);
 		return () => window.removeEventListener('resize', updateScale);

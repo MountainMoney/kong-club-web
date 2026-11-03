@@ -8,6 +8,7 @@ import {
 	isGambleBuyBetMode,
 } from './betModes';
 import config from './config';
+import { formatMathCost, modeLabel, oddsText } from './mathProfile';
 import {
 	BUY_BONUS_CARD_GAP,
 	BUY_BONUS_CARD_W,
@@ -74,7 +75,7 @@ export type BuyBonusCardDef = {
 	mode: string;
 	title: string;
 	description: string;
-	imageSrc: string;
+	imageKey: string;
 	iconLayout: BuyBonusIconLayout;
 	volatility: string;
 	buttonColor: string;
@@ -121,54 +122,54 @@ export const volatilityCaps = (label: string) =>
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
-		title: 'EXTRA CHANCE',
+		title: modeLabel(ANTE_BET_MODE_KEY).toUpperCase(),
 		description: `Double the base bonus chance: about 1 in 130 spins instead of about 1 in 260, for ${extraChanceCostLabel()} base bet.`,
-		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
+		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'extraChance' },
 		volatility: volatilityForMode(ANTE_BET_MODE_KEY),
 		buttonColor: '#FFE14A',
 	},
 	{
 		mode: 'feature_spin',
-		title: 'FEATURE SPIN',
+		title: modeLabel('feature_spin').toUpperCase(),
 		description: `Each spin costs ${config.betModes.feature_spin.cost}× bet with the Progress Bar filled. Every spin lands a 5+ cluster, then the coin game after tumbles stop.`,
-		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
+		imageKey: 'symbol_CG',
 		iconLayout: { kind: 'featureSpin' },
 		volatility: volatilityForMode('feature_spin'),
 		buttonColor: '#7DFF6A',
 	},
 	{
 		mode: 'peak_spin',
-		title: 'TRIFECTA SPIN',
+		title: modeLabel('peak_spin').toUpperCase(),
 		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
-		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
+		imageKey: 'symbol_CG',
 		iconLayout: { kind: 'summitSpin' },
 		volatility: volatilityForMode('peak_spin'),
 		buttonColor: '#FFD500',
 	},
 	{
 		mode: 'bonus_see',
-		title: 'SEE NO EVIL',
+		title: modeLabel('bonus_see').toUpperCase(),
 		description: `Buy the See No Evil bonus for ${config.betModes.bonus_see.cost}× bet. 3 scatters. The board clears, then 10 free spins.`,
-		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
+		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 3 },
 		volatility: volatilityForMode('bonus_see'),
 		buttonColor: '#5EE7FF',
 	},
 	{
 		mode: 'bonus_hear',
-		title: 'HEAR NO EVIL',
+		title: modeLabel('bonus_hear').toUpperCase(),
 		description: `Buy the Hear No Evil bonus for ${config.betModes.bonus_hear.cost}× bet. 4 scatters. The board stays, then 10 free spins.`,
-		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
+		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 4 },
 		volatility: volatilityForMode('bonus_hear'),
 		buttonColor: '#FF8A3D',
 	},
 	{
 		mode: 'bonus_pick',
-		title: 'MYSTERY BONUS',
-		description: `Each spin costs ${config.betModes.bonus_pick.cost}× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).`,
-		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
+		title: modeLabel('bonus_pick').toUpperCase(),
+		description: `Each spin costs ${formatMathCost(config.betModes.bonus_pick.cost)}× bet. ${oddsText('bonus_pick')}.`,
+		imageKey: 'symbol_ST',
 		iconLayout: { kind: 'scatter', count: 5 },
 		volatility: volatilityForMode('bonus_pick'),
 		buttonColor: '#FF5AD1',
@@ -195,10 +196,10 @@ export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
 };
 
 export const BUY_BONUS_MENU_PREFETCH = [
-	'/assets/sprites/monkeySymbols/ST.png',
-	'/assets/sprites/monkeySymbols/CL.png',
-	'/assets/sprites/monkeySymbols/XM_red.png',
-	'/assets/sprites/monkeySymbols/CG.png',
-	'/assets/sprites/monkeySymbols/CB.png',
-	'/assets/sprites/monkeySymbols/CS.png',
+	'symbol_ST',
+	'symbol_CL',
+	'symbol_XM_red',
+	'symbol_CG',
+	'symbol_CB',
+	'symbol_CS',
 ] as const;

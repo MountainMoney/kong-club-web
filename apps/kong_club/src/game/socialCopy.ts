@@ -3,6 +3,7 @@ import { stateConfig, stateMeta, stateUrlDerived } from 'state-shared';
 import { normalizeLegacyBetModeKey } from './betModes';
 
 import config from './config';
+import { modeLabel } from './mathProfile';
 
 /** Stake social / Stake.us copy mode. */
 export const isSocialMode = () =>
@@ -227,23 +228,9 @@ export const paytableCopy = (key: PaytableCopyKey) => {
 	return isSocialMode() ? entry.social : entry.default;
 };
 
-const PAYTABLE_MODE_LABELS = {
-	base: 'Base game',
-	base_ante: 'Extra Chance',
-	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
-	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
-	bonus_see: 'See No Evil',
-	bonus_hear: 'Hear No Evil',
-	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
-} as const;
+export type PaytableModeKey = string;
 
-export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;
-
-export const paytableModeLabel = (modeKey: PaytableModeKey) => {
-	const entry = PAYTABLE_MODE_LABELS[modeKey];
-	if (typeof entry === 'string') return entry;
-	return isSocialMode() ? entry.social : entry.default;
-};
+export const paytableModeLabel = (modeKey: string) => modeLabel(modeKey, isSocialMode());
 
 /** Short bonus-card copy has stricter Stake.us wording than full rules text. */
 export const bonusDescriptionCopy = (text: string) => {

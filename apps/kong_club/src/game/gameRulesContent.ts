@@ -2,47 +2,31 @@ import type { GameRuleData } from 'state-shared';
 
 import config from './config';
 import { shouldDisplayRtp } from './jurisdiction';
+import {
+	formatMaxWin,
+	formatMathCost,
+	mathModes,
+	modeLabel,
+	oddsText,
+	rtpPercentLabel,
+} from './mathProfile';
 import { isSocialMode, stakeGameDisclaimer } from './socialCopy';
 
-export const RULES_RTP_PCT = (config.rtp * 100).toFixed(2);
-export const RULES_MAX_WIN_X = config.betModes.base.max_win.toLocaleString('en-US');
+export const RULES_RTP_PCT = rtpPercentLabel(config.rtp);
+export const RULES_MAX_WIN_X = formatMaxWin(config.betModes.base.max_win);
 export const RULES_FREE_SPINS = 10;
 
-type BetModeKey = keyof typeof config.betModes;
-
-const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
-	base: { default: 'Base game', social: 'Base game' },
-	base_ante: { default: 'Extra Chance', social: 'Extra Chance' },
-	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
-	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
-	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
-	bonus_hear: { default: 'Hear No Evil', social: 'Hear No Evil' },
-	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
-};
-
-const modeLabel = (modeKey: BetModeKey) =>
-	isSocialMode() ? MODE_LABELS[modeKey].social : MODE_LABELS[modeKey].default;
-
-const formatModeMaxWin = (modeKey: BetModeKey) =>
-	config.betModes[modeKey].max_win.toLocaleString('en-US');
-
-const modeRtpMaxLine = (modeKey: BetModeKey) => {
-	const mode = config.betModes[modeKey];
-	const label = modeLabel(modeKey);
+const modeRtpMaxLine = (modeId: string) => {
+	const mode = config.betModes[modeId as keyof typeof config.betModes];
+	const label = modeLabel(modeId, isSocialMode());
 	if (!shouldDisplayRtp()) return `• ${label}`;
-	return `• ${label} — RTP ${(mode.rtp * 100).toFixed(2)}% · Max win ${formatModeMaxWin(modeKey)}×`;
+	return `• ${label} — RTP ${rtpPercentLabel(mode.rtp)}% · Max win ${formatMaxWin(mode.max_win)}×`;
 };
 
 const rtpBlock = () => {
 	if (shouldDisplayRtp()) {
 		return `\n\nReturn to Player (RTP) and maximum win by mode:
-${modeRtpMaxLine('base')}
-${modeRtpMaxLine('base_ante')}
-${modeRtpMaxLine('feature_spin')}
-${modeRtpMaxLine('peak_spin')}
-${modeRtpMaxLine('bonus_see')}
-${modeRtpMaxLine('bonus_hear')}
-${modeRtpMaxLine('bonus_pick')}`;
+${mathModes.map((mode) => modeRtpMaxLine(mode.id)).join('\n')}`;
 	}
 
 	return isSocialMode()
@@ -101,7 +85,7 @@ Coin values are play-amount multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; 
 
 On regular base spins, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Spin and free spins, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per spin.
 
-Coin values are bet multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`
+Coin values are bet multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`,
 	);
 
 const buildFeatureSpinSection = (): GameRuleData =>
@@ -140,7 +124,7 @@ const buildScatterSection = (): GameRuleData =>
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 plays to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Mystery Bonus (${config.betModes.bonus_pick.cost}×): 50% dead play, 45% Hear, 5% Monkey Madness.
+You can buy See No Evil (${formatMathCost(config.betModes.bonus_see.cost)}×) or Hear No Evil (${formatMathCost(config.betModes.bonus_hear.cost)}×), or activate Mystery Bonus (${formatMathCost(config.betModes.bonus_pick.cost)}×): ${oddsText('bonus_pick', true)}.
 
 Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
 			: `Stone tablet scatters do not pay. They start a bonus:
@@ -151,7 +135,7 @@ Level-Up Tiles reset on bonus entry, then carry across free games within that bo
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 spins to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Mystery Bonus (${config.betModes.bonus_pick.cost}×): 50% dead spin, 45% Hear, 5% Monkey Madness.
+You can buy See No Evil (${formatMathCost(config.betModes.bonus_see.cost)}×) or Hear No Evil (${formatMathCost(config.betModes.bonus_hear.cost)}×), or activate Mystery Bonus (${formatMathCost(config.betModes.bonus_pick.cost)}×): ${oddsText('bonus_pick')}.
 
 Level-Up Tiles reset on bonus entry, then carry across free spins within that bonus.`,
 	);
