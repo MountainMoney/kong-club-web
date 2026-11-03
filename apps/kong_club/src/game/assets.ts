@@ -3,11 +3,6 @@ const sprite = (path: string) => ({
 	src: `/assets/${path}`,
 });
 
-const sprites = (path: string) => ({
-	type: 'sprites' as const,
-	src: `/assets/${path}`,
-});
-
 /** Spine atlas is named after its folder unless atlasFile is overridden (e.g. big_wins.atlas). */
 const spineAsset = (folder: string, skeleton: string, atlasFile?: string, scale = 2) => ({
 	type: 'spine' as const,
@@ -26,10 +21,6 @@ const symbolSprite = (file: string) => ({
 const uiSprite = (file: string) => sprite(`monkey/ui/${file}`);
 
 export default {
-	pressToContinueText: {
-		...sprites('sprites/pressToContinueText/MM_pressanywhere.json'),
-		preload: true,
-	},
 	jungleBackground: {
 		...sprite('sprites/background/jungle_bg.png'),
 		preload: true,
@@ -123,46 +114,7 @@ export default {
 	W: symbolSprite('W.png'),
 	EXPLODED_W: symbolSprite('EXPLODED_W.png'),
 	ST: symbolSprite('ST.png'),
-	explosion: spineAsset('symbols3', 'explosion', 'symbols3.atlas'),
-	reelsFrame: sprites('sprites/reelsFrame/reels_frame.json'),
-	payFrame: sprite('sprites/payFrame/payFrame.png'),
-	anticipation: spineAsset('anticipation', 'anticipation'),
-	goldFont: {
-		type: 'font',
-		src: '/assets/fonts/goldFont/mm_gold.xml',
-	},
-	goldBlur: {
-		type: 'font',
-		src: '/assets/fonts/goldBlur/miningfont_gold_blur.xml',
-	},
-	silverFont: {
-		type: 'font',
-		src: '/assets/fonts/silverFont/mm_silver.xml',
-	},
-	purpleFont: {
-		type: 'font',
-		src: '/assets/fonts/purpleFont/mm_purple.xml',
-	},
 	bigwin: spineAsset('bigwin', 'mm_bigwin', 'big_wins.atlas'),
-	fsIntro: spineAsset('fsIntro', 'fs_screen', 'fs_screen.atlas'),
-	fsOutroNumber: spineAsset('fsIntro', 'fs_total_number', 'fs_screen.atlas'),
-	progressBar: {
-		...sprites('sprites/progressBar/progressBar.json'),
-		preload: true,
-	},
-	symbolsStatic: {
-		...sprites('sprites/symbolsStatic/symbolsStatic.json'),
-		preload: true,
-	},
-	freeSpins: sprites('sprites/freeSpins/freeSpins.json'),
-	winSmall: sprites('sprites/winSmall/MM_Localisation_winsmall.json'),
-	clusterWin: spineAsset('clusterWin', 'clusterpay', 'clusterpay.atlas'),
-	tumble_multiplier: spineAsset('tumbleWin', 'tumble_multiplier', 'tumble_win.atlas'),
-	tumble_win: spineAsset('tumbleWin', 'tumble_win', 'tumble_win.atlas'),
-	coins: {
-		type: 'spriteSheet',
-		src: '/assets/sprites/coin/SD2_Coin.json',
-	},
 	sound: {
 		type: 'audio',
 		src: '/assets/audio/sounds.json',

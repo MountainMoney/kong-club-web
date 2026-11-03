@@ -272,6 +272,11 @@
 {/if}
 
 <style>
+	.mm-game-root,
+	.mm-game-root :global(canvas) {
+		touch-action: none;
+	}
+
 	.mm-game-root {
 		position: relative;
 		width: 100%;

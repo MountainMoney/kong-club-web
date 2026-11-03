@@ -19,17 +19,6 @@ const checks = [
 	'sprites/reelFrame/board.png',
 	'sprites/reelFrame/border.png',
 	'sprites/mascot/monkey.png',
-	'sprites/pressToContinueText/MM_pressanywhere.json',
-	'sprites/pressToContinueText/MM_pressanywhere.webp',
-	'sprites/progressBar/progressBar.json',
-	'sprites/progressBar/progressBar.webp',
-	'spines/loader/loader.atlas',
-	'spines/loader/loader.webp',
-	'spines/fsIntro/fs_screen.atlas',
-	'spines/fsIntro/fs_screen.json',
-	'spines/fsIntro/fs_screen_number.json',
-	'spines/fsIntro/fs_total_number.json',
-	'spines/fsIntro/fs_screen.webp',
 	'spines/mmMascot/MM_Mascot_2.atlas',
 	'spines/mmMascot/MM_Mascot_2.json',
 	'spines/mmMascot/MM_Mascot_2.png',
@@ -64,7 +53,6 @@ const rootLoaderChecks = [
 	{ full: path.join(staticDir, 'trifecta/assets/wave-logo.wav'), label: 'static/trifecta/assets/wave-logo.wav (app.html boot loader)' },
 	{ full: path.join(staticDir, 'trifecta/vendor/xmb/spline.js'), label: 'static/trifecta/vendor/xmb/spline.js (app.html boot loader)' },
 	{ full: path.join(staticDir, 'trifecta/vendor/xmb/spline-reverse.js'), label: 'static/trifecta/vendor/xmb/spline-reverse.js (app.html boot loader)' },
-	{ full: path.join(staticDir, 'stake-engine-loader.gif'), label: 'static/stake-engine-loader.gif (StakeGameRoot)' },
 ];
 
 const reelFrameChecks = [

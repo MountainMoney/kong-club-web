@@ -5,7 +5,7 @@
 	import { Container, Graphics, Rectangle, Sprite, Text } from 'pixi-svelte';
 	import { CanvasSizeRectangle, MainContainer } from 'components-layout';
 	import { OnHotkey } from 'components-shared';
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 
 	import config from '../game/config';
 
@@ -382,7 +382,7 @@
 					y={0}
 					alpha={countUpDisplayBookAmount > 0 ? 1 : 0}
 					scale={countUpFinishScale.current}
-					text={bookEventAmountToWinCurrencyString(countUpDisplayBookAmount)}
+					text={formatBookWin(countUpDisplayBookAmount)}
 					style={amountStyle}
 					resolution={textRes}
 				/>

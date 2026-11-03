@@ -213,7 +213,7 @@
 						: 'TRIFECTA SPIN'
 					: gambleActive
 						? isSocialMode()
-							? 'FEATURE PICK'
+							? 'MYSTERY BONUS'
 							: 'GAMBLE'
 						: toolbarLabel('bet'),
 	);

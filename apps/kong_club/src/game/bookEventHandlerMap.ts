@@ -4,6 +4,7 @@ import { recordBookEvent, checkIsMultipleRevealEvents, type BookEventHandlerMap 
 import { stateBet } from 'state-shared';
 import { PUBLIC_LOCAL_DEV } from 'envs';
 import {
+	canonicalizeBookMode,
 	isFeatureSpinBetMode,
 	isHeldFeatureBoardMode,
 	isGambleBuyBetMode,
@@ -418,10 +419,16 @@ const flushDeferredFeatureActivation = async () => {
 };
 
 /** Same playback for `kongClubMode` and legacy `monkeyMayhemMode`. */
+const withCanonicalMode = <T extends { mode: string }>(bookEvent: T): T => {
+	const mode = canonicalizeBookMode(bookEvent.mode);
+	return mode === bookEvent.mode ? bookEvent : { ...bookEvent, mode };
+};
+
 const handleModeStateEvent = async (
 	bookEvent: ModeStateBookEvent,
 	{ bookEvents }: BookEventContext,
 ) => {
+	bookEvent = withCanonicalMode(bookEvent);
 	eventEmitter.broadcast({ type: 'monkeyModeState', payload: bookEvent });
 	const isBonusStart =
 		bookEvent.state.startsWith('start_bonus_') || bookEvent.state.startsWith('organic_bonus_');
@@ -772,6 +779,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		await runBonusSnapshotRestore(bookEvent.bookEvents);
 	},
 	updateLevelUpTiles: async (bookEvent: BookEventOfType<'updateLevelUpTiles'>) => {
+		bookEvent = withCanonicalMode(bookEvent);
 		if (hasDeferredFeatureActivation() && isTileWipeEvent(bookEvent)) {
 			deferFeatureTileWipe(bookEvent);
 			return;
@@ -786,6 +794,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		await applyLevelUpTiles(bookEvent);
 	},
 	progressFill: async (bookEvent: BookEventOfType<'progressFill'>) => {
+		bookEvent = withCanonicalMode(bookEvent);
 		progressFillsConsumed += 1;
 		if (progressFillsConsumed <= progressFillsShownEarly) return;
 		if (isPeakSpinBetMode(stateBet.activeBetModeKey)) return;

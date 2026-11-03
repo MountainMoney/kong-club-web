@@ -49,7 +49,9 @@ export const FOOTBALL_DEFAULT_BET_MODE_KEY = 'base';
 export const ANTE_BET_MODE_KEY = 'base_ante';
 export const FEATURE_SPIN_BET_MODE_KEY = 'feature_spin';
 export const PEAK_SPIN_BET_MODE_KEY = 'peak_spin';
-export const GAMBLE_BET_MODE_KEY = 'bonus_gamble';
+/** RGS / replay / offer id. Math publish files may still be `bonus_pick` or `bonus_gamble`. */
+export const GAMBLE_BET_MODE_KEY = 'bonus_mystery';
+export const LEGACY_MYSTERY_BET_MODE_KEYS = ['bonus_gamble', 'bonus_pick'] as const;
 /** Player-facing name. Math / RGS key stays `peak_spin`. */
 export const SUMMIT_SPIN_LABEL = 'TRIFECTA';
 export const SUMMIT_SPIN_TITLE = 'TRIFECTA SPIN';
@@ -93,6 +95,10 @@ export function normalizeLegacyBetModeKey(key: string): string {
 	if (upper === 'BASE') return FOOTBALL_DEFAULT_BET_MODE_KEY;
 
 	const lower = trimmed.toLowerCase();
+	if ((LEGACY_MYSTERY_BET_MODE_KEYS as readonly string[]).includes(lower)) {
+		return GAMBLE_BET_MODE_KEY;
+	}
+
 	const canonicalKeys = [
 		FOOTBALL_DEFAULT_BET_MODE_KEY,
 		...ACTIVATE_BET_MODE_KEYS,
@@ -130,6 +136,12 @@ export const shouldSkipActorPreSpin = (key: string = stateBet.activeBetModeKey) 
 export const isGambleBuyBetMode = (key: string) =>
 	normalizeLegacyBetModeKey(key) === GAMBLE_BET_MODE_KEY;
 
+/** Book `mode` on kongClubMode / progressFill / updateLevelUpTiles. */
+export const canonicalizeBookMode = (mode: string) => {
+	const normalized = normalizeLegacyBetModeKey(mode);
+	return normalized === GAMBLE_BET_MODE_KEY ? GAMBLE_BET_MODE_KEY : mode;
+};
+
 export const isFeatureSpinBetMode = (key: string) =>
 	normalizeLegacyBetModeKey(key) === FEATURE_SPIN_BET_MODE_KEY;
 
@@ -157,7 +169,7 @@ export const activateModeCostMultiplier = (mode: ActivateBetModeKey | string) =>
 	if (normalized === ANTE_BET_MODE_KEY) return config.betModes.base_ante.cost;
 	if (normalized === FEATURE_SPIN_BET_MODE_KEY) return config.betModes.feature_spin.cost;
 	if (normalized === PEAK_SPIN_BET_MODE_KEY) return config.betModes.peak_spin.cost;
-	if (normalized === GAMBLE_BET_MODE_KEY) return config.betModes.bonus_gamble.cost;
+	if (normalized === GAMBLE_BET_MODE_KEY) return config.betModes.bonus_mystery.cost;
 	return 1;
 };
 
@@ -199,7 +211,7 @@ export const buyModeCostMultiplier = (mode: string) => {
 	if (meta?.costMultiplier) return meta.costMultiplier;
 	if (normalized === 'bonus_see') return config.betModes.bonus_see.cost;
 	if (normalized === 'bonus_hear') return config.betModes.bonus_hear.cost;
-	if (normalized === 'bonus_gamble') return config.betModes.bonus_gamble.cost;
+	if (normalized === GAMBLE_BET_MODE_KEY) return config.betModes.bonus_mystery.cost;
 	return 1;
 };
 
@@ -342,13 +354,13 @@ export function initKongClubBetModes() {
 				title: `Hear No Evil (${config.betModes.bonus_hear.cost}×)`,
 				button: 'Buy',
 			}),
-			modeEntry('bonus_gamble', {
+			modeEntry(GAMBLE_BET_MODE_KEY, {
 				type: 'activate',
-				costMultiplier: config.betModes.bonus_gamble.cost,
-				title: `Gamble (${config.betModes.bonus_gamble.cost}×)`,
+				costMultiplier: config.betModes.bonus_mystery.cost,
+				title: `Gamble (${config.betModes.bonus_mystery.cost}×)`,
 				button: 'Activate',
 				parent: 'base',
-				description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% Hear No Evil, 10% Monkey Madness.`,
+				description: `Each spin costs ${config.betModes.bonus_mystery.cost}× bet. 50% dead spin, 45% Hear No Evil, 5% Monkey Madness.`,
 			}),
 		]);
 		stateMeta.betModeMeta = meta;

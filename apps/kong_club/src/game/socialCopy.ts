@@ -118,10 +118,6 @@ export const betModeDisplayTitle = (modeKey: string) => {
 	return meta?.text?.title ?? modeKey.toUpperCase();
 };
 
-/** Replay shows clean player-facing mode names; cost is already displayed in its own row. */
-export const replayModeDisplayTitle = (modeKey: string) =>
-	betModeDisplayTitle(modeKey).replace(/\s*\([^)]*\)\s*$/, '');
-
 /** Official Stake Engine disclaimer — verbatim in both modes. Do not rewrite. */
 export const STAKE_GAME_DISCLAIMER =
 	'Malfunction voids all wins and plays. A consistent internet connection is required. In the event of a disconnection, reload the game to finish any uncompleted rounds. The expected return is calculated over many plays. The game display is not representative of any physical device and is for illustrative purposes only. Winnings are settled according to the amount received from the Remote Game Server and not from events within the web browser. TM and © 2026 Stake Engine.';
@@ -163,7 +159,7 @@ export const applySocialCopy = (text: string) => {
 		.replace(/\bpaying\b/gi, 'winning')
 		.replace(/\bpaylines\b/gi, 'win lines')
 		.replace(/\bpayline\b/gi, 'win line')
-		.replace(/\bgamble\b/gi, 'feature pick')
+		.replace(/\bgamble\b/gi, 'mystery bonus')
 		.replace(/\bgambling\b/gi, 'playing')
 		.replace(/\bwinnings\b/gi, 'wins')
 		.replace(/\bcash\b/gi, 'coins')
@@ -193,7 +189,7 @@ const PAYTABLE_COPY = {
 		default:
 			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 		social:
-			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
+			'Scatter (stone tablet): does not win. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
 	},
 	levelUpTiles: {
 		default:
@@ -234,7 +230,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },
+	bonus_mystery: { default: 'Gamble', social: 'Mystery Bonus' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;
@@ -243,6 +239,16 @@ export const paytableModeLabel = (modeKey: PaytableModeKey) => {
 	const entry = PAYTABLE_MODE_LABELS[modeKey];
 	if (typeof entry === 'string') return entry;
 	return isSocialMode() ? entry.social : entry.default;
+};
+
+/** Replay shows the social mode name; cost is already displayed in its own row. */
+export const replayModeDisplayTitle = (modeKey: string) => {
+	const lower = modeKey.trim().toLowerCase();
+	const key = (
+		lower === 'bonus_gamble' || lower === 'bonus_pick' ? 'bonus_mystery' : lower
+	) as PaytableModeKey;
+	if (Object.hasOwn(PAYTABLE_MODE_LABELS, key)) return paytableModeLabel(key);
+	return betModeDisplayTitle(modeKey).replace(/\s*\([^)]*\)\s*$/, '');
 };
 
 /** Short bonus-card copy has stricter Stake.us wording than full rules text. */

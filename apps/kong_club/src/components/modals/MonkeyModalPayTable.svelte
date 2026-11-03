@@ -7,6 +7,7 @@
 	import MonkeyPaytablePanel from './MonkeyPaytablePanel.svelte';
 	import MonkeyGameRuleSections from './MonkeyGameRuleSections.svelte';
 	import { buildKongClubGameRules } from '../../game/gameRulesContent';
+	import { isSocialMode } from '../../game/socialCopy';
 
 	type Props = {
 		children: Snippet;
@@ -21,7 +22,12 @@
 
 {#if stateModal.modal?.name === 'payTable'}
 	<OnHotkey hotkey="Escape" onpress={close} />
-	<section class="info-overlay" aria-label="Kong Club paytable" role="dialog" aria-modal="true">
+	<section
+		class="info-overlay"
+		aria-label={isSocialMode() ? 'Kong Club win table' : 'Kong Club paytable'}
+		role="dialog"
+		aria-modal="true"
+	>
 		<button type="button" class="bonus-scrim" aria-label="close info" onclick={close}></button>
 		<button type="button" class="bonus-close" aria-label="close info" onclick={close}>×</button>
 		<div class="info-panel summit-ui-type">

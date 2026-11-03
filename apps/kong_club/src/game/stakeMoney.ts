@@ -2,7 +2,7 @@
  * Stake DisplayAmount helpers (from Summit drop-in stakeCompliance.ts).
  * Penguin MODE_RTP / INFO_PAYTABLE omitted — MM math lives in math-sdk.
  */
-import { numberToFloat } from 'utils-shared/amount';
+import { bookEventAmountToNormalisedAmount, numberToFloat } from 'utils-shared/amount';
 import { stateBet } from 'state-shared';
 
 import { MAX_WIN_MULTIPLIER } from './winCountTier';
@@ -50,10 +50,10 @@ const STAKE_CURRENCY_META: Record<string, CurrencyDisplayMeta> = {
 	OMR: { symbol: 'OMR', decimals: 2, symbolAfter: true },
 	QAR: { symbol: 'QAR', decimals: 2, symbolAfter: true },
 	BHD: { symbol: 'BD', decimals: 2 },
-	XGC: { symbol: 'GC', decimals: 0, symbolAfter: true },
+	XGC: { symbol: 'GC', decimals: 2, symbolAfter: true },
 	XSC: { symbol: 'SC', decimals: 2, symbolAfter: true },
 	AGC: { symbol: 'AGC', decimals: 0, symbolAfter: true },
-	GC: { symbol: 'GC', decimals: 0, symbolAfter: true },
+	GC: { symbol: 'GC', decimals: 2, symbolAfter: true },
 	XEC: { symbol: 'SC', decimals: 2, symbolAfter: true },
 	ASC: { symbol: 'SC', decimals: 2, symbolAfter: true },
 	SC: { symbol: 'SC', decimals: 2, symbolAfter: true },
@@ -89,23 +89,24 @@ function winFractionDigits(value: number): number {
 	return 4;
 }
 
-function formatCurrencyAmount(value: number, maxDp: number, kind: MoneyKind): string {
+function fractionDigits(amount: number, kind: MoneyKind, decimals: number): number {
+	if (decimals <= 0) return 0;
+	if (kind !== 'win') return decimals;
+	return Math.max(decimals, winFractionDigits(Math.abs(amount)));
+}
+
+function formatCurrencyAmount(value: number, kind: MoneyKind): string {
 	const amount = numberToFloat(value);
 	const meta = currencyDisplayMeta();
-	let dp = meta.decimals;
-	if (kind === 'win') {
-		const whole = Math.abs(amount - Math.round(amount)) < 1e-9;
-		dp = meta.decimals === 0 && whole ? 0 : Math.max(meta.decimals, maxDp);
-	}
+	const dp = fractionDigits(amount, kind, meta.decimals);
 	const formatted = formatAmountNumber(amount, dp, dp);
 	return attachCurrencySymbol(formatted, meta);
 }
 
 export function formatMoney(value: number, kind: MoneyKind = 'balance', _social = false): string {
-	const abs = Number.isFinite(value) ? value : 0;
-	const maxDp = kind === 'win' ? winFractionDigits(abs) : currencyDisplayMeta().decimals;
+	const amount = Number.isFinite(value) ? value : 0;
 	void _social;
-	return formatCurrencyAmount(abs, maxDp, kind);
+	return formatCurrencyAmount(amount, kind);
 }
 
 export type MoneyParts = {
@@ -133,18 +134,23 @@ export function formatMoneyParts(
 	opts?: { maxFractionDigits?: number },
 ): MoneyParts {
 	const abs = Number.isFinite(value) ? value : 0;
-	const maxDp =
+	const decimals = currencyDisplayMeta().decimals;
+	let maxDp =
 		opts?.maxFractionDigits != null
 			? Math.max(0, Math.min(4, opts.maxFractionDigits))
-			: Math.max(2, winFractionDigits(abs));
+			: decimals <= 0
+				? 0
+				: Math.max(decimals, winFractionDigits(abs));
+	if (decimals <= 0) maxDp = 0;
+	const minDp = decimals <= 0 ? 0 : Math.min(decimals, maxDp);
 	const fixed = abs.toLocaleString('en-US', {
-		minimumFractionDigits: Math.min(2, maxDp),
+		minimumFractionDigits: minDp,
 		maximumFractionDigits: maxDp,
 	});
 	const dot = fixed.lastIndexOf('.');
 	const whole = dot >= 0 ? fixed.slice(0, dot) : fixed;
 	const frac = dot >= 0 ? fixed.slice(dot + 1) : maxDp > 0 ? '00' : '';
-	const cents = maxDp > 0 ? frac.padEnd(Math.min(2, maxDp), '0') : '';
+	const cents = maxDp > 0 ? frac.padEnd(minDp, '0') : '';
 	return {
 		prefix: currencyDisplayPrefix(social),
 		whole,
@@ -192,6 +198,15 @@ export function capWinCurrency(value: number, bet = stateBet.wageredBetAmount ||
 
 export function formatBoardWin(value: number, social = false): string {
 	const abs = capWinCurrency(Number.isFinite(value) ? value : 0);
+	if (currencyDisplayMeta().decimals <= 0) return formatMoney(abs, 'balance', social);
 	if (currencyWouldHide(abs)) return formatMoney(abs, 'win', social);
 	return formatMoney(abs, 'balance', social);
+}
+
+/** Book-event win amounts (popup count-up, cluster floats) in the active currency. */
+export function formatBookWin(bookAmount: number, social = false): string {
+	const normalised = bookEventAmountToNormalisedAmount(
+		Number.isFinite(bookAmount) ? bookAmount : 0,
+	);
+	return formatBoardWin(normalised, social);
 }

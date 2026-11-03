@@ -17,7 +17,7 @@ const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
 	bonus_hear: { default: 'Hear No Evil', social: 'Hear No Evil' },
-	bonus_gamble: { default: 'Gamble', social: 'Feature Pick' },
+	bonus_mystery: { default: 'Gamble', social: 'Mystery Bonus' },
 };
 
 const modeLabel = (modeKey: BetModeKey) =>
@@ -42,7 +42,7 @@ ${modeRtpMaxLine('feature_spin')}
 ${modeRtpMaxLine('peak_spin')}
 ${modeRtpMaxLine('bonus_see')}
 ${modeRtpMaxLine('bonus_hear')}
-${modeRtpMaxLine('bonus_gamble')}`;
+${modeRtpMaxLine('bonus_mystery')}`;
 	}
 
 	return isSocialMode()
@@ -92,9 +92,9 @@ const buildProgressBarSection = (): GameRuleData =>
 	ruleSection(
 		'PROGRESS BAR & BOARD ACTIVATION',
 		isSocialMode()
-			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
+			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear wins at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
 
-On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
+On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and win when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
 
 Coin values are play-amount multiples from fixed pools: Bronze (CB) 1, 2, 3, 4; Silver (CS) 5, 7, 10, 15, 20; Gold (CG) 25, 50, 100, 250, 500.`
 			: `On regular spins, each winning tumble fills the Progress Bar by one step. In See and Hear free spins, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free spin. When the bar fills (5 steps), Board Activation starts the coin collect.
@@ -108,12 +108,12 @@ const buildFeatureSpinSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'FEATURE PLAY' : 'FEATURE SPIN',
 		isSocialMode()
-			? `Toggle Feature Play from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× play amount per play). The Progress Bar starts full. Every play lands a 5+ cluster, then the coin game after tumbles stop.
+			? `Toggle Feature Play from the bonus menu (${config.betModes.feature_spin.cost}× play amount per play). The Progress Bar starts full. Every play lands a 5+ cluster, then the coin game after tumbles stop.
 
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`
-			: `Toggle Feature Spin from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× bet per spin). The Progress Bar starts full. Every spin lands a 5+ cluster, then the coin game after tumbles stop.
+Toggle off from the bonus button or the bonus menu.`
+			: `Toggle Feature Spin from the bonus menu (${config.betModes.feature_spin.cost}× bet per spin). The Progress Bar starts full. Every spin lands a 5+ cluster, then the coin game after tumbles stop.
 
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`,
+Toggle off from the bonus button or the bonus menu.`,
 	);
 
 const buildPeakSpinSection = (): GameRuleData =>
@@ -132,7 +132,7 @@ const buildScatterSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'SCATTER & FREE GAMES' : 'SCATTER & FREE SPINS',
 		isSocialMode()
-			? `Stone tablet scatters do not pay. They start a bonus:
+			? `Stone tablet scatters do not win. They start a bonus:
 • 1–2 scatters do not start a bonus
 • 3 scatters → See No Evil (${RULES_FREE_SPINS} free games; board clears; each winning cluster fills the Progress Bar; threshold 5)
 • 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free games, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free game)
@@ -140,7 +140,7 @@ const buildScatterSection = (): GameRuleData =>
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 plays to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_gamble.cost}×): 50% dead play, 40% Hear, 10% Monkey Madness.
+You can play See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate ${modeLabel('bonus_mystery')} (${config.betModes.bonus_mystery.cost}×): 50% dead play, 45% Hear, 5% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
 			: `Stone tablet scatters do not pay. They start a bonus:
@@ -151,7 +151,7 @@ Level-Up Tiles reset on bonus entry, then carry across free games within that bo
 
 Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 spins to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Gamble (${config.betModes.bonus_gamble.cost}×): 50% dead spin, 40% Hear, 10% Monkey Madness.
+You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate ${modeLabel('bonus_mystery')} (${config.betModes.bonus_mystery.cost}×): 50% dead spin, 45% Hear, 5% Monkey Madness.
 
 Level-Up Tiles reset on bonus entry, then carry across free spins within that bonus.`,
 	);
@@ -160,8 +160,8 @@ const buildWildsSection = (): GameRuleData =>
 	ruleSection(
 		'WILDS',
 		isSocialMode()
-			? `Monkey wild (MW) substitutes for all winning symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`
-			: `Monkey wild (MW) substitutes for all paying symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`,
+			? `Monkey wild (MW) substitutes for all winning symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with up to 4 on the board at once.`
+			: `Monkey wild (MW) substitutes for all paying symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with up to 4 on the board at once.`,
 	);
 
 const buildSymbolPaysSection = (): GameRuleData =>
@@ -178,6 +178,30 @@ Banana, Grape, Orange, Coconut, Lemon — see paytable for exact multiples by cl
 Cluster pay = base pay × the sum of lit tile multipliers (Bronze 2×, Silver 5×, Gold 10×).`,
 	);
 
+const buildControlsSection = (): GameRuleData =>
+	ruleSection(
+		'CONTROLS',
+		isSocialMode()
+			? `• Play — starts a play. Space does the same when no menu or modal is open, a bonus round is not running, and a play can start.
+• Play − and Play + — step the play amount. The play-amount readout opens the amount list.
+• Auto Play — opens a list of round counts. Choosing a number starts Auto Play. The first press only opens the list.
+• Turbo — cycles play speed: normal, turbo, then super.
+• Bonus (logo) — opens the bonus menu, or turns an active mode off.
+• Menu — music, sound effects, and Game Info.
+• Game Info — opens these rules and the win table.
+• Bonus menu — each offer shows PLAY or ACTIVATE. PLAY opens a confirm step that shows the amount. ACTIVATE switches that mode on for the next play and shows the new amount. Close leaves the menu. − and + change the play amount.
+• During a bonus, the menu includes Hold to skip.`
+			: `• Spin — places a bet. Space does the same when no menu or modal is open, a bonus round is not running, and a bet can be placed.
+• Bet − and Bet + — step the bet. The bet readout opens the bet list.
+• Autoplay — opens a round picker. Choosing a number starts autoplay. The first press only opens the picker.
+• Turbo — cycles spin speed: normal, turbo, then super.
+• Bonus (logo) — opens the bonus menu, or turns an active mode off.
+• Menu — music, sound effects, and Game Info.
+• Game Info — opens these rules and the paytable.
+• Bonus menu — each offer shows BUY or ACTIVATE. BUY opens a confirm step that shows the cost. ACTIVATE switches that mode on for the next spin and shows the new cost. Close leaves the menu. − and + change the bet.
+• During a bonus, the menu includes Hold to skip.`,
+	);
+
 const buildOfficialDisclaimerSection = (): GameRuleData =>
 	ruleSection('GENERAL GAME DISCLAIMER', stakeGameDisclaimer());
 
@@ -190,5 +214,6 @@ export const buildKongClubGameRules = (): GameRuleData[] => [
 	buildScatterSection(),
 	buildWildsSection(),
 	buildSymbolPaysSection(),
+	buildControlsSection(),
 	buildOfficialDisclaimerSection(),
 ];

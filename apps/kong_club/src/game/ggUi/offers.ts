@@ -83,7 +83,8 @@ const SEEDS: OfferSeed[] = [
 		id: FEATURE_SPIN_BET_MODE_KEY,
 		art: 'CG',
 		artSize: { width: 983, height: 1024 },
-		theme: 'Feature',
+		// Base-game buy, so it takes a day-jungle backdrop (bg-*-see.png).
+		theme: 'See',
 		body: 'The progress bar starts full. Every spin lands a 5+ cluster.',
 		detail:
 			'Each spin costs 65× bet with the progress bar filled. After the tumbles stop, the coin game plays.',
@@ -91,9 +92,10 @@ const SEEDS: OfferSeed[] = [
 	},
 	{
 		id: PEAK_SPIN_BET_MODE_KEY,
-		art: 'monkeyMascot',
-		artSize: { width: 662, height: 903 },
-		theme: 'Peak',
+		art: 'ST',
+		artSize: { width: 512, height: 512 },
+		// Base-game buy, so it takes a day-jungle backdrop (bg-*-hear.png).
+		theme: 'Hear',
 		body: 'The whole board starts gold. The bar can dump, or hit the coin game.',
 		detail:
 			'Each spin costs 1,400× bet. The whole board starts gold. After it lands the bar fills. It can dump, or hit full and play the coin game.',
@@ -101,31 +103,33 @@ const SEEDS: OfferSeed[] = [
 	},
 	{
 		id: 'bonus_see',
-		art: 'seeMonkey',
-		artSize: { width: 819, height: 1024 },
-		theme: 'See',
+		art: 'ST',
+		artSize: { width: 512, height: 512 },
+		// gg-ui/bg-*-feature.png is the sunny backdrop (See No Evil plays on the sunny look).
+		theme: 'Feature',
 		body: '3 scatters. The board clears, then 10 free spins.',
 		detail: 'Buy See No Evil for 115× bet. 3 scatters. The board clears, then 10 free spins.',
 		price: config.betModes.bonus_see.cost,
 	},
 	{
 		id: 'bonus_hear',
-		art: 'hearMonkey',
-		artSize: { width: 819, height: 1024 },
-		theme: 'Hear',
+		art: 'ST',
+		artSize: { width: 512, height: 512 },
+		// gg-ui/bg-*-peak.png is the midnight backdrop (Hear No Evil plays on the midnight look).
+		theme: 'Peak',
 		body: '4 scatters. The board stays, then 10 free spins.',
 		detail: 'Buy Hear No Evil for 250× bet. 4 scatters. The board stays, then 10 free spins.',
 		price: config.betModes.bonus_hear.cost,
 	},
 	{
 		id: GAMBLE_BET_MODE_KEY,
-		art: 'speakMonkey',
-		artSize: { width: 819, height: 1024 },
+		art: 'ST',
+		artSize: { width: 512, height: 512 },
 		theme: 'Gamble',
-		body: '50% nothing, 40% Hear No Evil, 10% Monkey Madness.',
+		body: '50% nothing, 45% Hear No Evil, 5% Monkey Madness.',
 		detail:
-			'Each spin costs 380× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).',
-		price: config.betModes.bonus_gamble.cost,
+			'Each spin costs 380× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).',
+		price: config.betModes.bonus_mystery.cost,
 	},
 ];
 
@@ -146,7 +150,9 @@ export const slotOf = (offer: BonusOffer) => {
 const tuneArt = (id: string, spot: BonusOffer['artSpot']) => {
 	if (!spot) return spot;
 	// The bonus mark includes its own lettering, so it sits higher on the confirm card.
-	if (id === ANTE_BET_MODE_KEY && spot.confirm) {
+	// See / Hear / Gamble now use the same bonus mark (ST), so they get the same lift.
+	const usesBonusMark = [ANTE_BET_MODE_KEY, PEAK_SPIN_BET_MODE_KEY, 'bonus_see', 'bonus_hear', GAMBLE_BET_MODE_KEY].includes(id);
+	if (usesBonusMark && spot.confirm) {
 		spot.confirm = { ...spot.confirm, scale: (spot.confirm.scale ?? 1) * 0.82, dy: -36 };
 	}
 	// The gold coin is almost square and was crowding the title.

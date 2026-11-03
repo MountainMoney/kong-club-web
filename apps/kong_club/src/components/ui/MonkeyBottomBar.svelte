@@ -6,7 +6,7 @@
 	import { Button } from 'components-pixi';
 	import { getContext } from 'components-ui-pixi/src/context';
 	import { stateBet, stateBetDerived, stateConfig, stateModal, stateUi, AUTO_SPINS_TEXT_OPTION_MAP } from 'state-shared';
-	import { bookEventAmountToWinCurrencyString, numberToBetCurrencyString, numberToCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin, formatMoney } from '../../game/stakeMoney';
 
 	import MonkeySpinButton from './MonkeySpinButton.svelte';
 	import MonkeyTurboButton from './MonkeyTurboButton.svelte';
@@ -70,12 +70,12 @@ import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme'
 	const winTween = new Tween(stateBet.winBookEventAmount);
 	const winValueScale = new Tween(1);
 	let lastWinFlashAmount = 0;
-	const balanceValue = $derived(numberToCurrencyString(balanceTween.current));
+	const balanceValue = $derived(formatMoney(balanceTween.current, 'balance'));
 	// In free spins show the base bet denomination, not the buy-bonus cost multiplier
 	const betValue = $derived(
 		inFreegame
-			? numberToCurrencyString(stateBet.wageredBetAmount || stateBet.betAmount)
-			: numberToCurrencyString(stateBetDerived.betCost()),
+			? formatMoney(stateBet.wageredBetAmount || stateBet.betAmount, 'bet')
+			: formatMoney(stateBetDerived.betCost(), 'bet'),
 	);
 	const inFreegame = $derived(stateGame.gameType === 'freegame');
 	const anteActive = $derived(stateBet.activeBetModeKey === ANTE_BET_MODE_KEY);
@@ -83,7 +83,7 @@ import { TOOLBAR_CLOSE_SIZE, TOOLBAR_MENU_W } from '../../game/toolbarMenuTheme'
 	const peakSpinActive = $derived(stateBet.activeBetModeKey === PEAK_SPIN_BET_MODE_KEY);
 	const gambleActive = $derived(stateBet.activeBetModeKey === GAMBLE_BET_MODE_KEY);
 	const featureToggleActive = $derived(anteActive || featureSpinActive || peakSpinActive || gambleActive);
-	const totalWinValue = $derived(bookEventAmountToWinCurrencyString(capBookAmount(winTween.current)));
+	const totalWinValue = $derived(formatBookWin(capBookAmount(winTween.current)));
 	const spinsProgress = $derived(
 		freeSpinProgressLabel(stateUi.freeSpinCounterCurrent || 0, stateUi.freeSpinCounterTotal || 0),
 	);

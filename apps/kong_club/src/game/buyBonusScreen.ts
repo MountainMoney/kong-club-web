@@ -3,6 +3,8 @@ import { stateMeta } from 'state-shared';
 import {
 	ANTE_BET_MODE_KEY,
 	FEATURE_SPIN_BET_MODE_KEY,
+	GAMBLE_BET_MODE_KEY,
+	LEGACY_MYSTERY_BET_MODE_KEYS,
 	extraChanceCostLabel,
 	isActivateBetMode,
 } from './betModes';
@@ -90,7 +92,7 @@ const MEASURED_PAYOUT_STD: Record<string, number> = {
 	peak_spin: 1463.12,
 	bonus_see: 398.66,
 	bonus_hear: 546.97,
-	bonus_gamble: 4468.38,
+	bonus_mystery: 4468.38,
 };
 
 export const volatilityLabelFromStd = (std: number): string => {
@@ -164,12 +166,12 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		buttonColor: '#FF8A3D',
 	},
 	{
-		mode: 'bonus_gamble',
+		mode: GAMBLE_BET_MODE_KEY,
 		title: 'GAMBLE',
-		description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).`,
+		description: `Each spin costs ${config.betModes.bonus_mystery.cost}× bet. 50% dead spin, 45% 4 scatters (Hear No Evil), 5% 5 scatters (Monkey Madness).`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
-		volatility: volatilityForMode('bonus_gamble'),
+		volatility: volatilityForMode(GAMBLE_BET_MODE_KEY),
 		buttonColor: '#FF5AD1',
 	},
 ];
@@ -189,7 +191,12 @@ export { isActivateBetMode };
 
 /** Feature and TRIFECTA stay on. See, Hear, and Gamble are scatter buys. */
 export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
-	if (mode === 'bonus_gamble') return 'buy';
+	if (
+		mode === GAMBLE_BET_MODE_KEY ||
+		(LEGACY_MYSTERY_BET_MODE_KEYS as readonly string[]).includes(mode)
+	) {
+		return 'buy';
+	}
 	return isActivateBetMode(mode) ? 'activate' : 'buy';
 };
 

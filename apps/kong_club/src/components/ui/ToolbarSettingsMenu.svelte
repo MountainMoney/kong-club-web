@@ -3,7 +3,7 @@
 	import { Container, Rectangle, Text } from 'pixi-svelte';
 	import { Button } from 'components-pixi';
 	import { stateBet, stateBetDerived, stateModal, stateSound } from 'state-shared';
-	import { numberToCurrencyString } from 'utils-shared/amount';
+	import { formatMoney } from '../../game/stakeMoney';
 
 	import {
 		cycleSpinSpeedTier,
@@ -118,7 +118,7 @@
 		`SESSION: ${Math.floor(sessionElapsedSeconds / 60)}:${String(sessionElapsedSeconds % 60).padStart(2, '0')}`,
 	);
 	const netPositionLabel = $derived(
-		`NET: ${numberToCurrencyString(stateBet.balanceAmount - (sessionStartBalance ?? stateBet.balanceAmount))}`,
+		`NET: ${formatMoney(stateBet.balanceAmount - (sessionStartBalance ?? stateBet.balanceAmount), 'balance')}`,
 	);
 
 	const menuTop = $derived(-menuH);

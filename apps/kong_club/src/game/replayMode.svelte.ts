@@ -4,7 +4,12 @@ import { API_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
 import { requestReplay } from 'rgs-requests';
 import { stateBet, stateUi } from 'state-shared';
 
-import { normalizeLegacyBetModeKey, setActiveBetModeKey } from './betModes';
+import {
+	GAMBLE_BET_MODE_KEY,
+	LEGACY_MYSTERY_BET_MODE_KEYS,
+	normalizeLegacyBetModeKey,
+	setActiveBetModeKey,
+} from './betModes';
 import { MAX_WIN_MULTIPLIER, capWinMultiplier } from './winCountTier';
 import { getMathBookByIndex } from './localMathBooks';
 import { stateSpinSpeed } from './spinSpeed.svelte';
@@ -139,7 +144,18 @@ export const parseReplayQuery = (): ReplayQuery => {
 	return {
 		game: params.get('game') ?? '',
 		version: params.get('version') ?? '',
-		mode: params.get('mode') ?? '',
+		mode: (() => {
+			const rawMode = (params.get('mode') ?? '').trim();
+			if (!rawMode) return '';
+			const lower = rawMode.toLowerCase();
+			if (
+				lower === GAMBLE_BET_MODE_KEY ||
+				(LEGACY_MYSTERY_BET_MODE_KEYS as readonly string[]).includes(lower)
+			) {
+				return GAMBLE_BET_MODE_KEY;
+			}
+			return rawMode;
+		})(),
 		event: params.get('event') ?? '',
 		rgsUrl: params.get('rgs_url') ?? '',
 		currency: params.get('currency') ?? 'USD',

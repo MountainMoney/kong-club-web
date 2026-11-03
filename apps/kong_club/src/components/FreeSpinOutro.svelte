@@ -14,7 +14,7 @@
 
 	import { MainContainer } from 'components-layout';
 	import { Container, Sprite, Text } from 'pixi-svelte';
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 
 	import { getContext } from '../game/context';
@@ -230,7 +230,7 @@
 					x={0}
 					y={layout.amountY}
 					alpha={amountAlphaTween.current}
-					text={bookEventAmountToWinCurrencyString(amount)}
+					text={formatBookWin(amount)}
 					style={amountStyle}
 					resolution={textRes}
 				/>

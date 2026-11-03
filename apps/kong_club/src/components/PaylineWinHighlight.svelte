@@ -41,7 +41,7 @@
 	import { backOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
 	import { Container, Graphics, Text } from 'pixi-svelte';
-	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
+	import { formatBookWin } from '../game/stakeMoney';
 	import BoardContainer from './BoardContainer.svelte';
 	import { isGameAudioUnlocked } from '../game/audioUnlock.svelte';
 	import { getContext } from '../game/context';
@@ -965,7 +965,7 @@
 					>
 						<Text
 							anchor={0.5}
-							text={bookEventAmountToWinCurrencyString(label.bookAmount)}
+							text={formatBookWin(label.bookAmount)}
 							style={amountLabelStyle}
 							resolution={textRes}
 						/>
