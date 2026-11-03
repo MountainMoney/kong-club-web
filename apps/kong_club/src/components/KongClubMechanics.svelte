@@ -16,7 +16,8 @@
 		| { type: 'peakBarTease'; hit: boolean }
 		| { type: 'peakBarSpinReset' }
 		| { type: 'monkeyMechanicsReset'; instant?: boolean }
-		| { type: 'heldBoardSpinAway' };
+		| { type: 'heldBoardSpinAway' }
+		| { type: 'coinFeatureClear' };
 </script>
 
 <script lang="ts">

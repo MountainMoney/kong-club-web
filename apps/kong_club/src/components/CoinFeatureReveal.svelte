@@ -9,6 +9,7 @@
 	import SymbolSpine from './SymbolSpine.svelte';
 	import SymbolSprite from './SymbolSprite.svelte';
 	import { BOARD_DIMENSIONS, SYMBOL_SIZE, zIndexes } from '../game/constants';
+	import { roundCoinFace } from '../game/coinFacePools';
 	import { COIN_ART, coinFaceDigitCount, coinFaceLabelOffset } from '../game/symbolSpriteLayout';
 	import { getSymbolInfo, getSymbolX } from '../game/utils';
 	import { stateGame } from '../game/stateGame.svelte';
@@ -37,6 +38,7 @@
 		beginCoinFeatureDim,
 		beginPreCoinShrink,
 		clearCoinCellCover,
+		completeHeldTileFade,
 		isHeldBoardDismissActive,
 		tryFinishHeldBoardDismiss,
 		PRE_COIN_SHRINK_MS,
@@ -57,6 +59,7 @@
 	import { PRIZE_NUMBER_FONT, PRIZE_NUMBER_WEIGHT } from '../game/prizeNumberFont';
 	import { coinMetalForFace, tileLevelToCoinSymbol } from '../game/tileLevelVisual';
 	import { isHeldFeatureBoardMode } from '../game/betModes';
+	import { shouldRetireCoinView } from '../game/coinViewLifetime';
 	import CoinFaceNumber from './CoinFaceNumber.svelte';
 	import CoinShine from './CoinShine.svelte';
 	import type { CoinFeatureItem } from '../game/typesBookEvent';
@@ -171,6 +174,10 @@
 	];
 
 	let activeReveals = $state<ActiveReveal[]>([]);
+	/** Reveal keys whose disc has finished its single flip. Shine waits on this. */
+	let flipSettled = $state<Record<string, boolean>>({});
+	/** Views that followed a reel leave. They must not snap onto the next symbol. */
+	const ridingKeys = new Set<string>();
 	const leaving = $derived(isHeldBoardDismissActive());
 	let motions = $state<Record<string, Motion>>({});
 	let bolts = $state<Bolt[]>([]);
@@ -380,12 +387,9 @@
 		},
 	) =>
 		capWinMultiplier(
-			Math.max(
-				0,
-				Math.round(
-					Number(item.potShown ?? item.resolvedValue ?? item.payout ?? item.displayValue ?? item.value ?? 0) ||
-						0,
-				),
+			roundCoinFace(
+				Number(item.potShown ?? item.resolvedValue ?? item.payout ?? item.displayValue ?? item.value ?? 0) ||
+					0,
 			),
 		);
 
@@ -629,11 +633,17 @@
 		motions = {};
 		bolts = [];
 		boltMotions = {};
+		flipSettled = {};
+		ridingKeys.clear();
 		collectTotal = 0;
 		showCollectTotal = false;
 		featurePaidTotal = 0;
 		clearCoinCellCover();
-		if (isHeldBoardDismissActive()) tryFinishHeldBoardDismiss();
+		if (isHeldBoardDismissActive()) {
+			// Freegame never fades plaques, so tileFadeActive would block tryFinish.
+			if (stateGame.gameType === 'freegame') completeHeldTileFade();
+			else tryFinishHeldBoardDismiss();
+		}
 		releaseRevealWait();
 	};
 
@@ -650,6 +660,7 @@
 			finishReveal();
 			return;
 		}
+		for (const reveal of activeReveals) ridingKeys.add(reveal.key);
 		ensureRaf();
 	};
 
@@ -683,8 +694,7 @@
 		if (!shown) return;
 		await waitRawMs(HOLD_AFTER_BIG_WIN_BOARD_MS);
 		if (token !== runToken) return;
-		restoreHeldFaceLabels();
-		releaseRevealWait();
+		settleCollectedCoins();
 	};
 
 	const tickMotions = () => {
@@ -698,10 +708,21 @@
 		for (const reveal of activeReveals) {
 			const home = homePos(reveal.reel, reveal.row);
 
-			if (dismissing) {
+			const riding = ridingKeys.has(reveal.key);
+			if (riding || dismissing) {
+				if (dismissing) ridingKeys.add(reveal.key);
 				const y = reelCellY(reveal.reel, reveal.row);
-				if (y >= maskBottom || y < home.y - 4) {
+				if (
+					shouldRetireCoinView({
+						riding: ridingKeys.has(reveal.key),
+						dismissActive: dismissing,
+						symbolY: y,
+						homeY: home.y,
+						maskBottom,
+					})
+				) {
 					releaseCoinCellCover(reveal.reel, reveal.row);
+					ridingKeys.delete(reveal.key);
 					clearedKeys.push(reveal.key);
 					continue;
 				}
@@ -984,6 +1005,16 @@
 		ensureRaf();
 	};
 
+	/** Lab sit-freeze keeps numbered discs. Every other collect destroys them. */
+	const settleCollectedCoins = () => {
+		if (isFxLabActive() && stateFxLab.forceShowPowerLabels) {
+			restoreHeldFaceLabels();
+			releaseRevealWait();
+			return;
+		}
+		finishReveal();
+	};
+
 	/** After 25,000×, only the capped pot stays numbered. Leftovers never paid. */
 	const hideNonMaxWinPayLabels = () => {
 		const maxPot = activeReveals.find(
@@ -1022,8 +1053,20 @@
 				.filter((reveal) => reveal.kind === 'collector' && !reveal.collected)
 				.map((reveal) => cellKey(reveal)),
 		);
-		const ordered = [...roundItems]
-			.filter((item) => item.kind === 'collector' || !potKeys.has(cellKey(item)))
+		const sittingCoinKeys = new Set(
+			activeReveals
+				.filter(
+					(reveal) =>
+						(reveal.kind === 'coin' || reveal.kind === 'collector') && !reveal.collected,
+				)
+				.map((reveal) => cellKey(reveal)),
+		);
+		const ordered = [...roundItems].filter((item) => {
+			if (potKeys.has(cellKey(item)) && item.kind !== 'collector') return false;
+			if (item.kind === 'collector' && potKeys.has(cellKey(item))) return false;
+			if (append && sittingCoinKeys.has(cellKey(item))) return false;
+			return true;
+		})
 			.sort(waveOrder);
 		const minDiag = ordered.reduce((min, item) => Math.min(min, waveIndex(item)), Infinity);
 		const maxDiag = ordered.reduce((max, item) => Math.max(max, waveIndex(item)), 0);
@@ -1275,7 +1318,7 @@
 				const amount =
 					source.kind === 'collector'
 						? potFaceOf(source)
-						: capWinMultiplier(Math.round(Number(source.displayValue ?? source.value ?? 0) || 0));
+						: capWinMultiplier(roundCoinFace(Number(source.displayValue ?? source.value ?? 0) || 0));
 				if (amount <= 0) return null;
 				return {
 					key: `suck:${cellKey(sourceItem)}`,
@@ -1322,16 +1365,18 @@
 					),
 				);
 				running = capPotToBoard(
-					running +
-						Math.round(
-							Number(
-								prev?.potShown ??
-									prev?.displayValue ??
-									prev?.value ??
-									sourceItem.displayValue ??
-									sourceItem.value,
-							) || 0,
-						),
+					roundCoinFace(
+						running +
+							roundCoinFace(
+								Number(
+									prev?.potShown ??
+										prev?.displayValue ??
+										prev?.value ??
+										sourceItem.displayValue ??
+										sourceItem.value,
+								) || 0,
+							),
+					),
 					leftoverAfter,
 				);
 				const lastHit = i === sucked.length - 1;
@@ -1636,8 +1681,7 @@
 			if (!shown) return MAX_WIN_MULTIPLIER;
 			await waitRawMs(HOLD_AFTER_BIG_WIN_BOARD_MS);
 			if (token !== runToken) return MAX_WIN_MULTIPLIER;
-			restoreHeldFaceLabels();
-			releaseRevealWait();
+			settleCollectedCoins();
 			return MAX_WIN_MULTIPLIER;
 		}
 
@@ -1872,8 +1916,7 @@
 							return;
 						}
 						if (winPresentedThisReveal) {
-							restoreHeldFaceLabels();
-							releaseRevealWait();
+							settleCollectedCoins();
 							return;
 						}
 						if (boardAtMaxWin() || leftoverAtCap()) {
@@ -1896,8 +1939,7 @@
 
 						const collectedPaid = await playDefaultCollect(token);
 						if (token !== runToken) return;
-						restoreHeldFaceLabels();
-						releaseRevealWait();
+						settleCollectedCoins();
 					}
 				} catch (error) {
 					if (import.meta.env.DEV) {
@@ -1967,6 +2009,12 @@
 			beginHeldBoardFollowReel();
 		},
 
+		coinFeatureClear: () => {
+			if (isFxLabActive() && stateFxLab.forceShowPowerLabels) return;
+			runToken += 1;
+			finishReveal();
+		},
+
 		winSkip: () => {
 			if (!revealComplete) return;
 			flushWaits();
@@ -1979,10 +2027,10 @@
 	});
 </script>
 
-{#snippet coinDisc(name: 'CB' | 'CS' | 'CG')}
+{#snippet coinDisc(name: 'CB' | 'CS' | 'CG', onFlipEnd: () => void)}
 	{@const info = getSymbolInfo({ rawSymbol: { name }, state: 'static' })}
 	{#if info.type === 'spine'}
-		<SymbolSpine symbolInfo={info} loop listener={{}} />
+		<SymbolSpine symbolInfo={info} loop={false} listener={{ complete: onFlipEnd }} />
 	{:else}
 		<SymbolSprite symbolInfo={info} />
 	{/if}
@@ -2015,7 +2063,7 @@
 			alpha={motion.alpha}
 		>
 			{#if blank}
-				{@render coinDisc(displaySymbol(reveal))}
+				{@render coinDisc(displaySymbol(reveal), () => {})}
 			{:else if reveal.kind === 'multiplier'}
 				<Sprite
 					key="XM_hollow"
@@ -2045,8 +2093,12 @@
 				<Graphics draw={drawPowerPlaque(reveal.kind)} />
 			{:else}
 				<Container x={coinArtNudge.x} y={coinArtNudge.y} scale={coinArtNudge.scale}>
-					{@render coinDisc(displaySymbol(reveal))}
-					<CoinShine live={motion.alpha >= 0.35 && motion.scale >= 0.4} />
+					{@render coinDisc(displaySymbol(reveal), () => {
+						flipSettled = { ...flipSettled, [reveal.key]: true };
+					})}
+					<CoinShine
+						live={flipSettled[reveal.key] === true && motion.alpha >= 0.98 && motion.scale >= 0.98}
+					/>
 				</Container>
 			{/if}
 		</Container>

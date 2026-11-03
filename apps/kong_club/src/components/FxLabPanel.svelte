@@ -3,8 +3,8 @@
 
 	import { stateFxLab, setPacingPreset, setCoinFacePreset, setCoinFaceFillLook, setCoinFaceMidCrease, resetCoinArtNudge, resetCoinFaceGradient, resetMultiFaceGradient, resetBagFaceGradient, setCoinDigitLab, setCoinCharLab, setMascotClip, resetMascotNudge, setBackgroundLook, MASCOT_CLIPS } from '../game/fxLab.svelte';
 	import type { BackgroundLook } from '../game/fxLab.svelte';
+	import { activeCoinFaceValues, formatCoinFaceLabel } from '../game/coinFeatureNormalize';
 	import {
-		COIN_FACE_VALUES,
 		cancelFxLabPreview,
 		previewBonusHearChrome,
 		previewCenterCountUp50,
@@ -196,8 +196,8 @@
 			</button>
 			{#if openSection === 'coins'}
 				<p class="fx-lab__sub">
-					Faces = bet multiples. Bronze {COIN_FACE_VALUES.CB.join('·')} · Silver
-					{COIN_FACE_VALUES.CS.join('·')} · Gold {COIN_FACE_VALUES.CG.join('·')}
+					Faces = bet multiples. Bronze {activeCoinFaceValues().CB.map(formatCoinFaceLabel).join('·')} · Silver
+					{activeCoinFaceValues().CS.map(formatCoinFaceLabel).join('·')} · Gold {activeCoinFaceValues().CG.map(formatCoinFaceLabel).join('·')}
 				</p>
 				<p class="fx-lab__sub">
 					Fill looks from Stake refs — Lime (1000) · Holo (x5) · Candy (500). Now = current metal.

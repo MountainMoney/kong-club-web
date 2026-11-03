@@ -40,6 +40,7 @@
 		finishHeldBoardDismiss,
 		setHeldTileFadeAlpha,
 		stateCoinFeatureCover,
+		tryFinishHeldBoardDismiss,
 	} from '../game/coinFeatureCover.svelte';
 
 	const context = getContext();
@@ -344,6 +345,7 @@
 		monkeyTilesUpdate: (event) => {
 			stopTileFade();
 			stateCoinFeatureCover.tileFadeActive = false;
+			tryFinishHeldBoardDismiss();
 			setHeldTileFadeAlpha(1);
 			rememberTileLevels(event.payload.tileLevels, event.payload.tileMultipliers);
 			const incoming = normalizeTileLevels(
@@ -390,7 +392,12 @@
 		},
 		heldBoardSpinAway: () => {
 			// See / Hear / Madness plaques persist for the whole bonus.
-			if (stateGame.gameType === 'freegame') return;
+			// Still release the dismiss latch — the fade never runs in freegame,
+			// and leaving tileFadeActive set hangs the next tumble.
+			if (stateGame.gameType === 'freegame') {
+				completeHeldTileFade();
+				return;
+			}
 			fadeTilesAway();
 		},
 		monkeyTileWinPulse: (event) => {

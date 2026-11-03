@@ -1,7 +1,22 @@
+import { usesScaledBaseCoinFaces } from './coinFaceMode';
+import {
+	BASE_COIN_FACE_VALUES,
+	COIN_FACE_VALUES,
+	bookCoinKind,
+	coinFaceValuesFor,
+	formatCoinFaceLabel,
+	roundCoinFace,
+} from './coinFacePools';
 import { normalizeTileLevel, tileLevelToCoinSymbol } from './tileLevelVisual';
 import { stateGame } from './stateGame.svelte';
 import type { CoinFeatureActivation, CoinFeatureItem } from './typesBookEvent';
 import { capWinMultiplier } from './winCountTier';
+
+export {
+	BASE_COIN_FACE_VALUES,
+	COIN_FACE_VALUES,
+	formatCoinFaceLabel,
+} from './coinFacePools';
 
 type LegacyCoinFeatureItem = {
 	reel: number;
@@ -36,13 +51,6 @@ export type RawCoinFeature = Partial<CoinFeatureActivation> & {
 	items?: Array<CoinFeatureItem & { powerResolved?: boolean }>;
 };
 
-/** Exact face pools — initial reveal labels must be one of these. */
-export const COIN_FACE_VALUES = {
-	CB: [1, 2, 3, 4],
-	CS: [5, 7, 10, 15, 20],
-	CG: [25, 50, 100, 250, 500],
-} as const;
-
 /** Clover / MULTI values — matches math `coin_game_multi_values`. */
 export const COIN_POWER_MULTI_VALUES = [2, 3, 4, 5, 10, 20] as const;
 
@@ -67,40 +75,32 @@ const ALL_COIN_FACES = new Set<number>([
 	...COIN_FACE_VALUES.CB,
 	...COIN_FACE_VALUES.CS,
 	...COIN_FACE_VALUES.CG,
+	...BASE_COIN_FACE_VALUES.CB,
+	...BASE_COIN_FACE_VALUES.CS,
+	...BASE_COIN_FACE_VALUES.CG,
 ]);
+
+/** Pool for the spin that is on screen. Base / Extra Chance shrink; free spins do not. */
+export const activeCoinFaceValues = () => coinFaceValuesFor(usesScaledBaseCoinFaces());
 
 const coinSymbolForLevel = (level: number): CoinFeatureItem['symbol'] =>
 	tileLevelToCoinSymbol(level) ?? 'CB';
 
 const formatNumericDisplay = (value: number): number => Math.round(value);
 
-/** Coin face label — keep up to 2 decimals so scaled bonus faces match paid total. Never show over 25,000×. */
-export const formatCoinFaceLabel = (value: number): string => {
-	const n = Math.round(capWinMultiplier(value) * 100) / 100;
-	if (!Number.isFinite(n) || n <= 0) return '0';
-	if (Math.abs(n - Math.round(n)) < 1e-6) return `${Math.round(n)}`;
-	return n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
-};
+const parseCoinFace = (raw: unknown): number => roundCoinFace(Number(raw));
 
-const parseCoinFace = (raw: unknown): number => {
-	const n = Number(raw);
-	if (!Number.isFinite(n)) return 0;
-	return Math.round(n * 100) / 100;
-};
-
-/** Snap corrupted face×tile labels back to a legal base face. */
+/** Snap a corrupted whole face onto the pool for this spin. Fractional book faces stay. */
 export const snapCoinFace = (raw: number, symbol: CoinFeatureItem['symbol']): number => {
-	const n = formatNumericDisplay(raw);
+	const n = parseCoinFace(raw);
 	if (ALL_COIN_FACES.has(n)) return n;
-	const pool =
-		symbol === 'CG'
-			? COIN_FACE_VALUES.CG
-			: symbol === 'CS'
-				? COIN_FACE_VALUES.CS
-				: COIN_FACE_VALUES.CB;
-	let best = pool[0]!;
+	if (Math.abs(n - Math.round(n)) > 1e-9) return n;
+	const pool = activeCoinFaceValues();
+	const faces =
+		symbol === 'CG' ? pool.CG : symbol === 'CS' ? pool.CS : pool.CB;
+	let best = faces[0]!;
 	let bestDist = Math.abs(n - best);
-	for (const face of pool) {
+	for (const face of faces) {
 		const dist = Math.abs(n - face);
 		if (dist < bestDist) {
 			best = face;
@@ -117,10 +117,7 @@ const asAction = (
 	return undefined;
 };
 
-const asKind = (raw?: string): CoinFeatureItem['kind'] => {
-	if (raw === 'multiplier' || raw === 'collector' || raw === 'tier_shift') return raw;
-	return 'coin';
-};
+const asKind = (raw?: string): CoinFeatureItem['kind'] => bookCoinKind(raw);
 
 const powerSymbol = (kind: CoinFeatureItem['kind']): CoinFeatureItem['symbol'] => {
 	if (kind === 'multiplier') return 'XM';
@@ -132,9 +129,11 @@ const powerSymbol = (kind: CoinFeatureItem['kind']): CoinFeatureItem['symbol'] =
 const normalizePowerItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatureItem => {
 	const kind = asKind(raw.kind);
 	const tileLevel = raw.tileLevel ?? raw.level ?? 1;
-	const value = capWinMultiplier(formatNumericDisplay(raw.value ?? raw.displayValue ?? 0));
+	// Clovers are whole multipliers. Pots can hold a scaled sum (1.4, 0.6).
+	const readPower = kind === 'collector' ? parseCoinFace : formatNumericDisplay;
+	const value = capWinMultiplier(readPower(raw.value ?? raw.displayValue ?? 0));
 	const resolved = capWinMultiplier(
-		formatNumericDisplay(raw.resolvedValue ?? raw.collectedValue ?? raw.payout ?? value),
+		readPower(raw.resolvedValue ?? raw.collectedValue ?? raw.payout ?? value),
 	);
 
 	return {
@@ -147,7 +146,7 @@ const normalizePowerItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeat
 		tileLevel,
 		tileMultiplier: 1,
 		resolvedValue: resolved,
-		payout: capWinMultiplier(raw.payout ?? resolved),
+		payout: capWinMultiplier(readPower(raw.payout ?? resolved)),
 		round,
 		action: asAction(raw.action),
 		powerResolved: raw.powerResolved === true ? true : undefined,
@@ -188,7 +187,7 @@ const normalizeCoinItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatu
 		tileLevel,
 		tileMultiplier: 1,
 		resolvedValue: resolved,
-		payout: capWinMultiplier(raw.payout ?? resolved),
+		payout: capWinMultiplier(parseCoinFace(raw.payout ?? resolved)),
 		round,
 		action: asAction(raw.action),
 		powerResolved: powerResolved || undefined,
@@ -365,7 +364,7 @@ export const ensurePrizesOnLitTiles = (
 			if (tileLevel <= 0 || (skipBronze && tileLevel <= 1) || occupied.has(`${reelIndex}:${row}`))
 				return;
 			const symbol = tileLevelToCoinSymbol(tileLevel) ?? 'CB';
-			const face = COIN_FACE_VALUES[symbol][0] ?? 1;
+			const face = activeCoinFaceValues()[symbol][0] ?? 1;
 			extras.push({
 				reel: reelIndex,
 				row,

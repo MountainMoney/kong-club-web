@@ -56,12 +56,13 @@ export const COIN_FACE_LABEL_BY_CHAR: Record<string, { x: number; y: number }> =
 };
 
 export const coinFaceDigitCount = (label: string): 1 | 2 | 3 | 4 | 5 => {
-	const digits = label.replace(/\D/g, '');
-	const n = digits.length || 1;
+	const body = label.replace(/[^0-9.]/g, '');
+	const n = body.length || 1;
 	return Math.min(5, Math.max(1, n)) as 1 | 2 | 3 | 4 | 5;
 };
 
 export const coinFaceSingleDigit = (label: string): string | null => {
+	if (label.includes('.')) return null;
 	const digits = label.replace(/\D/g, '');
 	if (digits.length !== 1) return null;
 	return digits;

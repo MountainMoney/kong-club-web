@@ -292,7 +292,8 @@ const createCoinSpine = (animationName: 'tongbi' | 'yinbi' | 'jinbi') => {
 		assetKey: 'coinMetal',
 		animationName,
 		sizeRatios: { width: 0.8, height: 0.8 },
-		loop: true,
+		/** One flip, then hold the landed face. */
+		loop: false,
 	};
 	return {
 		explosion,

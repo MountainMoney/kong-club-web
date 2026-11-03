@@ -29,6 +29,7 @@ import {
 	CLUSTER_WIN_POP_MS,
 } from './clusterConnectionTempo';
 import {
+	activeCoinFaceValues,
 	COIN_FACE_VALUES,
 	COIN_POWER_MULTI_VALUES,
 	COIN_POWER_MULTI_WEIGHTS,
@@ -213,7 +214,7 @@ const tilesFromCells = (cells: LitCell[]) => {
 
 const coinItemFromCell = (cell: LitCell, faceIndex: number): CoinFeatureItem => {
 	const symbol = tileLevelToCoinSymbol(cell.level) ?? 'CB';
-	const pool = COIN_FACE_VALUES[symbol];
+	const pool = activeCoinFaceValues()[symbol];
 	const face = pool[faceIndex % pool.length]!;
 	return {
 		reel: cell.reel,
@@ -616,4 +617,4 @@ export const cancelFxLabPreview = () => {
 	}
 };
 
-export { COIN_FACE_VALUES, PROGRESS_THRESHOLD_BASE, MAX_TILE_LEVEL };
+export { activeCoinFaceValues, COIN_FACE_VALUES, PROGRESS_THRESHOLD_BASE, MAX_TILE_LEVEL };

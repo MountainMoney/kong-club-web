@@ -1,5 +1,7 @@
 import { BOOK_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
 
+import { roundCoinFace } from './coinFacePools';
+
 import type { WinPopupAlias } from './uiAssetSizes';
 
 import { WIN_COUNT_BASE_COUNT_MS } from './winCountLayout';
@@ -39,9 +41,9 @@ export const leftoverCoinSum = (
 	for (const item of items) {
 		if (item.kind !== 'coin' || item.collected) continue;
 		const n = Number(item.displayValue ?? item.value ?? item.payout ?? 0);
-		if (Number.isFinite(n) && n > 0) total += Math.round(n);
+		if (Number.isFinite(n) && n > 0) total += roundCoinFace(n);
 	}
-	return total;
+	return roundCoinFace(total);
 };
 
 /**
@@ -49,8 +51,8 @@ export const leftoverCoinSum = (
  * Leftover already ≥ 25,000 → pot 0 (gather coins, then max-win count-up).
  */
 export const capPotToBoard = (rawPot: number, leftover: number): number => {
-	const leftoverN = Math.max(0, Math.round(Number(leftover) || 0));
-	const raw = Math.max(0, Math.round(Number(rawPot) || 0));
+	const leftoverN = Math.max(0, roundCoinFace(Number(leftover) || 0));
+	const raw = Math.max(0, roundCoinFace(Number(rawPot) || 0));
 	if (leftoverN >= MAX_WIN_MULTIPLIER) return 0;
 	if (raw + leftoverN > MAX_WIN_MULTIPLIER) return MAX_WIN_MULTIPLIER - leftoverN;
 	return raw;

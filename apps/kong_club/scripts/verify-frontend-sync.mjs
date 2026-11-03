@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, '..');
-const normalizePath = path.join(appRoot, 'src/game/coinFeatureNormalize.ts');
+const normalizePath = path.join(appRoot, 'src/game/coinFacePools.ts');
 const configPath = path.resolve(
 	appRoot,
 	'../../../math-sdk/games/kong_club/game_config.py',
@@ -24,7 +24,7 @@ const EXPECTED = {
 
 function extractTsPools(src) {
 	const block = src.match(/export const COIN_FACE_VALUES = \{([\s\S]*?)\} as const/);
-	if (!block) throw new Error('COIN_FACE_VALUES not found in coinFeatureNormalize.ts');
+	if (!block) throw new Error('COIN_FACE_VALUES not found in coinFacePools.ts');
 	const out = {};
 	for (const key of ['CB', 'CS', 'CG']) {
 		const m = block[1].match(new RegExp(`${key}:\\s*\\[([^\\]]+)\\]`));
@@ -46,7 +46,12 @@ function extractPyPools(src) {
 	return out;
 }
 
-const fe = extractTsPools(fs.readFileSync(normalizePath, 'utf8'));
+const feSrc = fs.readFileSync(normalizePath, 'utf8');
+const fe = extractTsPools(feSrc);
+const baseFe = extractTsPools(feSrc.replace('export const COIN_FACE_VALUES', 'export const INTEGER_POOLS').replace(
+	'export const BASE_COIN_FACE_VALUES',
+	'export const COIN_FACE_VALUES',
+));
 const py = extractPyPools(fs.readFileSync(configPath, 'utf8'));
 
 let ok = true;
@@ -59,6 +64,13 @@ for (const key of ['CB', 'CS', 'CG']) {
 		ok = false;
 	} else {
 		console.log(`OK ${key}: ${a}`);
+	}
+	const scaled = fe[key].map((face) => Math.round(face * 0.2 * 100) / 100);
+	if (JSON.stringify(scaled) !== JSON.stringify(baseFe[key])) {
+		console.error(`MISMATCH ${key} base scale: FE=${JSON.stringify(baseFe[key])} EXPECTED=${JSON.stringify(scaled)}`);
+		ok = false;
+	} else {
+		console.log(`OK ${key} base ×0.20: ${JSON.stringify(baseFe[key])}`);
 	}
 }
 
@@ -73,6 +85,14 @@ if (!scaleBlock) {
 	ok = false;
 } else {
 	console.log('OK coin_tile_scale_by_mode locked at 1.0');
+}
+
+const baseScale = pyFull.match(/self\.base_coin_game_scale\s*=\s*([0-9.]+)/);
+if (baseScale && Number(baseScale[1]) !== 0.2) {
+	console.error(`base_coin_game_scale is ${baseScale[1]}, expected 0.20`);
+	ok = false;
+} else if (baseScale) {
+	console.log('OK base_coin_game_scale 0.20');
 }
 
 if (!ok) process.exit(1);

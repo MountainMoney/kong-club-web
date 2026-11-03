@@ -65,6 +65,7 @@ import {
 import { clearLastTileLevels, rememberTileLevels } from './lastTileLevels';
 import {
 	beginHeldBoardDismiss,
+	finishHeldBoardDismiss,
 	hasSittingCoinCells,
 	isHeldBoardDismissActive,
 } from './coinFeatureCover.svelte';
@@ -540,7 +541,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 				uniqueSymbolPositions(win.positions.map(bookPositionToTilePosition)),
 				{ snap: stateSpinSkip.forceSkip },
 			);
-			void animateSymbols(uniqueSymbolPositions(win.positions));
+			void animateSymbols({ positions: win.positions });
 			eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_winlevel_small' });
 			if (applyFillPerCluster && fillsApplied < fillsThisTumble) {
 				applyProgressFillOnConnection(bookEvents);
@@ -644,7 +645,18 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		eventEmitter.broadcast({ type: 'drawerButtonHide' });
 	},
 	tumbleBoard: async (bookEvent: BookEventOfType<'tumbleBoard'>, { bookEvents }: BookEventContext) => {
+		eventEmitter.broadcast({ type: 'coinFeatureClear' });
+		const heldDismissDeadline = performance.now() + 2500;
 		while (isHeldBoardDismissActive()) {
+			if (performance.now() >= heldDismissDeadline) {
+				if (import.meta.env.DEV) {
+					console.warn(
+						'[tumbleBoard] held board dismiss still active after 2.5s; forcing finish',
+					);
+				}
+				finishHeldBoardDismiss();
+				break;
+			}
 			await waitForTimeout(16);
 		}
 		if (isPeakSpinBetMode(stateBet.activeBetModeKey)) {
