@@ -306,10 +306,10 @@ export const previewForceBonusHearSpin = () =>
 
 export const previewForceGambleHearSpin = () =>
 	runFxLabPreview(
-		'Force Gamble Hear book',
+		'Force Mystery Bonus Hear book',
 		async () => {
-			const index = await findFirstBookWithModeState('bonus_gamble', 'start_bonus_hear');
-			await forceBookAndSpin('bonus_gamble', index, 'bonus_gamble hear');
+			const index = await findFirstBookWithModeState('bonus_mystery', 'start_bonus_hear');
+			await forceBookAndSpin('bonus_mystery', index, 'bonus_mystery hear');
 		},
 		sticky,
 	);

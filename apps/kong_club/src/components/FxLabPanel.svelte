@@ -885,7 +885,7 @@
 						5 ST Madness
 					</button>
 					<button type="button" class="primary" disabled={busy} onclick={() => previewForceGambleHearSpin()}>
-						Gamble Hear
+						Mystery Bonus Hear
 					</button>
 					<button type="button" class="primary" disabled={busy} onclick={() => previewForceLiveMultiBook()}>
 						Live MULTI

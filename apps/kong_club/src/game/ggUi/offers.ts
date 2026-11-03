@@ -125,7 +125,7 @@ const SEEDS: OfferSeed[] = [
 		body: '50% nothing, 40% Hear No Evil, 10% Monkey Madness.',
 		detail:
 			'Each spin costs 380× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).',
-		price: config.betModes.bonus_gamble.cost,
+		price: config.betModes.bonus_mystery.cost,
 	},
 ];
 

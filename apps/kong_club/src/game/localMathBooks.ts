@@ -176,7 +176,7 @@ export async function findFirstBookWithScatterCount(
 }
 
 const MADNESS_TRIGGER_STATES = new Set(['start_bonus_madness', 'organic_bonus_madness']);
-const MADNESS_TRIGGER_MODES = ['bonus_gamble', 'base', 'base_ante'] as const;
+const MADNESS_TRIGGER_MODES = ['bonus_mystery', 'base', 'base_ante'] as const;
 
 const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');

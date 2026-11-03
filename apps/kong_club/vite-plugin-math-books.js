@@ -15,7 +15,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_mystery',
 ];
 
 const DEV_BOOK_COUNTS = {
@@ -25,7 +25,7 @@ const DEV_BOOK_COUNTS = {
 	peak_spin: 100,
 	bonus_see: 100,
 	bonus_hear: 100,
-	bonus_gamble: 80,
+	bonus_mystery: 80,
 };
 
 function resolveMathLibraryRoot() {

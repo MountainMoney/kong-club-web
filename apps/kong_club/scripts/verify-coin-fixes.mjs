@@ -129,7 +129,7 @@ if (!scaledBaseCoinFaces('base', 'basegame') || !scaledBaseCoinFaces('base_ante'
 if (scaledBaseCoinFaces('base', 'freegame') || scaledBaseCoinFaces('base_ante', 'freegame')) {
 	fail('free spins inside base and ante keep the integer faces');
 }
-for (const mode of ['feature_spin', 'peak_spin', 'bonus_see', 'bonus_hear', 'bonus_gamble']) {
+for (const mode of ['feature_spin', 'peak_spin', 'bonus_see', 'bonus_hear', 'bonus_mystery']) {
 	if (scaledBaseCoinFaces(mode, 'basegame') || scaledBaseCoinFaces(mode, 'freegame')) {
 		fail(`${mode} must keep the integer faces`);
 	}

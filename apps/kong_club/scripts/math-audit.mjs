@@ -28,7 +28,7 @@ const MODE_COST = {
 	peak_spin: 1400,
 	bonus_see: 115,
 	bonus_hear: 250,
-	bonus_gamble: 380,
+	bonus_mystery: 380,
 };
 
 const HARD_FACES = new Set([
