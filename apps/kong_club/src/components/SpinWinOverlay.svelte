@@ -7,8 +7,6 @@
 	import { OnHotkey } from 'components-shared';
 	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
 
-	import config from '../game/config';
-
 	import { getContext } from '../game/context';
 	import { zIndexes } from '../game/constants';
 	import { stateApp } from '../game/stateApp';
@@ -136,7 +134,6 @@
 	});
 
 	const isMaxWinTier = $derived(spinWinOverlay.tier === 'max');
-	const maxWinSpineReady = $derived(Boolean(stateApp.loadedAssets?.bigwin));
 	const maxWinAnimation = winLevelMap[10].animation;
 
 	const popupKey = $derived(
@@ -299,7 +296,7 @@
 					scale={amountScale.current}
 					sortableChildren={true}
 				>
-				{#if isMaxWinTier && maxWinSpineReady}
+				{#if isMaxWinTier}
 					{#key spinWinOverlay.countUpSession}
 						<Container
 							zIndex={1}
@@ -327,30 +324,6 @@
 							blendMode="normal"
 						/>
 					{/key}
-				{:else if isMaxWinTier && spinWinOverlay.labelScale > 0.01}
-					<Text
-						zIndex={1}
-						anchor={{ x: 0.5, y: 1 }}
-						y={labelY - winLayout.amountFontSize * 0.12}
-						text={`${config.betModes.base.max_win.toLocaleString('en-US')}×`}
-						style={{
-							...tierLabelStyle,
-							fontSize: winLayout.amountFontSize * 0.42,
-							fill: 0xffee58,
-							letterSpacing: Math.max(2, Math.round(6 * winLayout.scale)),
-						}}
-						resolution={textRes}
-						scale={spinWinOverlay.labelScale}
-					/>
-					<Text
-						zIndex={2}
-						anchor={{ x: 0.5, y: 1 }}
-						y={labelY}
-						text={tierLabelText}
-						style={tierLabelStyle}
-						resolution={textRes}
-						scale={spinWinOverlay.labelScale}
-					/>
 				{:else if tierLabelText && spinWinOverlay.labelScale > 0.01}
 					<Graphics
 						zIndex={0}

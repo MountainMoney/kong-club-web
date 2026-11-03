@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { onMount } from 'svelte';
 
-	import { SpineProvider, SpineTrack, SpineSlot } from 'pixi-svelte';
+	import { Container, Graphics } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
 
@@ -27,25 +28,51 @@
 	const context = getContext();
 	const spineWidth = $derived(props.width ?? context.stateGameDerived.boardLayout().width);
 
-	let oncomplete = $state(() => {});
+	const palette: Record<string, number> = {
+		big_win_intro: 0xf0c14a,
+		epic_win_intro: 0x7dff6a,
+		mega_win_intro: 0xc084fc,
+		super_win_intro: 0xff8a3d,
+		max_win_intro: 0xffe14a,
+	};
+
+	let elapsed = $state(0);
 	let animationState = $state<AnimationState>('intro');
+
+	onMount(() => {
+		const started = performance.now();
+		let frame = 0;
+		const tick = () => {
+			elapsed = (performance.now() - started) / 1000;
+			if (animationState === 'intro' && elapsed > 0.72) animationState = 'idle';
+			frame = requestAnimationFrame(tick);
+		};
+		frame = requestAnimationFrame(tick);
+		return () => cancelAnimationFrame(frame);
+	});
+
+	const draw = $derived((graphics: import('pixi.js').Graphics) => {
+		graphics.clear();
+		const color = palette[props.animationMap.intro] ?? 0xf0c14a;
+		const radius = spineWidth * (animationState === 'intro' ? 0.18 + elapsed * 0.22 : 0.42);
+		const spin = elapsed * (animationState === 'idle' ? 0.8 : 2.4);
+		graphics.circle(0, 0, radius).stroke({ color, width: 8, alpha: 0.9 });
+		graphics.circle(0, 0, radius * 0.62).stroke({ color: 0x2f6a32, width: 5, alpha: 0.85 });
+		for (let leaf = 0; leaf < 8; leaf++) {
+			const angle = spin + (leaf / 8) * Math.PI * 2;
+			const reach = radius * (0.72 + (leaf % 2) * 0.18);
+			graphics
+				.ellipse(Math.cos(angle) * reach, Math.sin(angle) * reach * 0.72, 18, 8)
+				.fill({ color, alpha: 0.85 });
+		}
+	});
 </script>
 
-<SpineProvider width={spineWidth} key="bigwin" anchor={props.anchor ?? 0.5}>
-	<SpineTrack
-		trackIndex={0}
-		animationName={props.animationMap[animationState]}
-		loop={animationState === 'idle'}
-		listener={{
-			complete: () => {
-				if (animationState === 'intro') animationState = 'idle';
-				else if (animationState === 'outro') oncomplete();
-			},
-		}}
-	/>
+<Container>
+	<Graphics {draw} />
 	{#if props.children}
-		<SpineSlot slotName="slot_win_count">
+		<Container>
 			{@render props.children()}
-		</SpineSlot>
+		</Container>
 	{/if}
-</SpineProvider>
+</Container>

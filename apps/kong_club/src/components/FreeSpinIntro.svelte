@@ -11,7 +11,7 @@
 	import { stateUrlDerived } from 'state-shared';
 	import { FadeContainer } from 'components-pixi';
 	import { waitForResolve } from 'utils-shared/wait';
-	import { SpineProvider, SpineSlot, SpineTrack, Sprite, Text } from 'pixi-svelte';
+	import { Sprite, Text } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
 	import {
@@ -26,12 +26,9 @@
 	import PressToContinue from './PressToContinue.svelte';
 	import FreeSpinAnimation from './FreeSpinAnimation.svelte';
 
-	type AnimationName = 'intro' | 'idle';
-
 	const context = getContext();
 
 	let show = $state(false);
-	let animationName = $state<AnimationName>('intro');
 	let freeSpinsFromEvent = $state(0);
 	let oncomplete = $state(() => {});
 	let fontReady = $state(false);
@@ -79,29 +76,17 @@
 				/>
 			{/if}
 
-			<SpineProvider key="fsIntroNumber" width={sizes.width * 0.4}>
-				<SpineTrack
-					trackIndex={0}
-					{animationName}
-					loop={animationName === 'idle'}
-					listener={{
-						complete: () => (animationName = 'idle'),
-					}}
-				/>
-				<SpineSlot slotName="slot_number">
-					<Text
-						anchor={{ x: 0.5, y: 0.5 }}
-						text={freeSpinsFromEvent}
-						style={{
-							fontFamily: 'Fredoka',
-							fontSize: sizes.width * 0.15,
-							fontWeight: '700',
-							fill: 0xffffff,
-							stroke: { color: 0x000000, width: 6 },
-						}}
-					/>
-				</SpineSlot>
-			</SpineProvider>
+			<Text
+				anchor={{ x: 0.5, y: 0.5 }}
+				text={freeSpinsFromEvent}
+				style={{
+					fontFamily: 'Fredoka',
+					fontSize: sizes.width * 0.15,
+					fontWeight: '700',
+					fill: 0xffffff,
+					stroke: { color: 0x000000, width: 6 },
+				}}
+			/>
 
 			{#if socialLabels}
 				<Text
