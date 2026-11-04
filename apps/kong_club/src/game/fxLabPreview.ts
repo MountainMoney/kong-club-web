@@ -316,14 +316,14 @@ export const previewForceGambleHearSpin = () =>
 
 export const previewForceBonusMadnessSpin = () =>
 	runFxLabPreview(
-		'Force 5 ST Madness',
+		'Force 5 ST Speak No Evil',
 		async () => {
 			const hit = await findFirstMadnessTriggerBook();
 			if (!hit) {
-				if (import.meta.env.DEV) console.warn('[FxLab] No 5-scatter Madness trigger book');
+				if (import.meta.env.DEV) console.warn('[FxLab] No 5-scatter Speak No Evil trigger book');
 				return;
 			}
-			await forceBookAndSpin(hit.mode, hit.index, `${hit.mode} start Madness`);
+			await forceBookAndSpin(hit.mode, hit.index, `${hit.mode} start Speak No Evil`);
 		},
 		sticky,
 	);

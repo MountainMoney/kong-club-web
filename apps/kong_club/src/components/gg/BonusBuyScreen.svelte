@@ -8,8 +8,9 @@
 	import { formatMoney } from '../../game/stakeMoney';
 	import { isMathBooksLoading } from '../../game/stateMathBooksLoading.svelte';
 	import { isBuyFeatureDisabled } from '../../game/jurisdiction';
-	import { isActivateBetMode } from '../../game/betModes';
-	import { BONUS_BUY, BONUS_BUY_COLOR, DESIGN, UI_FONT_FAMILY } from '../../game/ggUi/constants';
+	import { HUNT_BET_MODE_KEY, isActivateBetMode, isHuntBetMode, setHuntLevel } from '../../game/betModes';
+	import { HUNT_LEVELS } from '../../game/stateHunt.svelte';
+	import { BONUS_BUY, BONUS_BUY_COLOR, UI_FONT_FAMILY } from '../../game/ggUi/constants';
 	import { bonusOffers, slotOf, stackedOffers, type BonusOffer } from '../../game/ggUi/offers';
 	import { createPress } from '../../game/ggUi/press.svelte';
 	import { autoplayBusy, changeBet, confirmBonusOffer } from '../../game/ggUi/actions';
@@ -83,8 +84,10 @@
 	const costOf = (offer: BonusOffer) => offer.price * stateBet.betAmount;
 	const priceOf = (offer: BonusOffer) => formatMoney(costOf(offer), 'bet');
 	const affordable = (offer: BonusOffer) => costOf(offer) <= stateBet.balanceAmount;
-	const isOn = (offer: BonusOffer) =>
-		isActivateBetMode(offer.id) && stateBet.activeBetModeKey === offer.id;
+	const isOn = (offer: BonusOffer) => {
+		if (offer.id === HUNT_BET_MODE_KEY) return isHuntBetMode(stateBet.activeBetModeKey);
+		return isActivateBetMode(offer.id) && stateBet.activeBetModeKey === offer.id;
+	};
 
 	const cuts = BONUS_BUY.card;
 	const S = BONUS_BUY.stepper;
@@ -93,16 +96,17 @@
 
 	const layout = $derived.by(() => {
 		const { width, height } = canvasSizes();
-		const fit = scaleToFit(DESIGN);
+		const stage = BONUS_BUY.stage;
+		const fit = scaleToFit(stage);
 		if (fit >= M.below) {
-			const x = (width - DESIGN.width * fit) / 2;
-			const y = (height - DESIGN.height * fit) / 2;
+			const x = (width - stage.width * fit) / 2;
+			const y = (height - stage.height * fit) / 2;
 			return {
 				compact: false,
 				scale: fit,
 				x,
 				y,
-				centre: DESIGN.width / 2,
+				centre: stage.width / 2,
 				cardAt: (offer: BonusOffer) => {
 					const slot = slotOf(offer);
 					return {
@@ -114,8 +118,8 @@
 				dialog: BONUS_BUY.dialog,
 				detail: BONUS_BUY.detail,
 				close: { x: x + BONUS_BUY.close.x * fit, y: y + BONUS_BUY.close.y * fit },
-				stepper: { x: x + (DESIGN.width / 2) * fit, y: y + S.y * fit, reach: S.reach },
-				height: DESIGN.height,
+				stepper: { x: x + (stage.width / 2) * fit, y: y + S.y * fit, reach: S.reach },
+				height: stage.height,
 			};
 		}
 		const columns = confirming || width < M.twoColumnsFrom ? 1 : 2;
@@ -281,6 +285,14 @@
 						kind={offer.kind}
 						active={isOn(offer)}
 						dimmed={!affordable(offer) || blocked(offer)}
+						onslide={
+							offer.slider
+								? (index) => {
+										const level = HUNT_LEVELS[index - 1];
+										if (level) setHuntLevel(level);
+									}
+								: undefined
+						}
 						onpress={unlessDragged(() => {
 							if (blocked(offer)) return;
 							confirming = offer;

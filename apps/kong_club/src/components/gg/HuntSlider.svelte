@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { Container, Graphics, Rectangle } from 'pixi-svelte';
+	import { Container, Graphics, Rectangle, Text } from 'pixi-svelte';
 	import { Tween } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
-	import { BONUS_BUY, BONUS_BUY_COLOR } from '../../game/ggUi/constants';
+	import { BONUS_BUY, BONUS_BUY_COLOR, UI_FONT_FAMILY } from '../../game/ggUi/constants';
 
 	// Figma: Frame 2147258648 (30:634): a track, one segment per level, filled up to the thumb.
 	const {
@@ -13,6 +13,7 @@
 		width,
 		level,
 		levels,
+		labels = [],
 		onslide,
 	}: {
 		x: number;
@@ -20,6 +21,7 @@
 		width: number;
 		level: number;
 		levels: number;
+		labels?: string[];
 		onslide: (level: number) => void;
 	} = $props();
 
@@ -91,5 +93,20 @@
 			onpointerdown={() => onslide(index + 1)}
 			onpointerover={(event) => event.buttons & 1 && onslide(index + 1)}
 		/>
+		{#if labels[index]}
+			<Text
+				text={labels[index]}
+				x={index * zone + zone / 2}
+				y={S.height + 18}
+				anchor={0.5}
+				style={{
+					fontFamily: UI_FONT_FAMILY,
+					fontSize: 16,
+					fontWeight: '600',
+					fill: index < level ? BONUS_BUY_COLOR.text : BONUS_BUY_COLOR.label,
+					align: 'center',
+				}}
+			/>
+		{/if}
 	{/each}
 </Container>

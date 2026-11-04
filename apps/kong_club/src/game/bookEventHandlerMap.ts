@@ -33,6 +33,7 @@ import {
 	presentScatterFreeSpinIntro,
 } from './freeSpinPresentation';
 import { bonusTierFromModeState } from './bonusIntroContent';
+import { isBonusUpgradeState, isSpeakBonusState } from './bonusState';
 import { applyFreeSpinCounterState } from './bonusSnapshotRestore';
 import {
 	CLUSTER_CONNECT_STAGGER_MS,
@@ -145,6 +146,7 @@ const presentBonusIntroFromMode = async (
 	const isBonusStart =
 		bookEvent.state.startsWith('start_bonus_') || bookEvent.state.startsWith('organic_bonus_');
 	if (!isBonusStart) return false;
+	if (isBonusUpgradeState(bookEvent.state) && stateGame.gameType === 'freegame') return false;
 
 	const modeIndex = bookEvents.indexOf(bookEvent);
 	const landingReveal = _.findLast(
@@ -156,7 +158,7 @@ const presentBonusIntroFromMode = async (
 		: [];
 	const tier = bonusTierFromModeState(bookEvent.state);
 
-	// Landed 3/4/5 ST: See clears the board; Hear/Madness keep it. Do not re-spin.
+	// Landed 3/4/5 ST: See clears the board; Hear and Speak No Evil keep it.
 	if (landingReveal && landedPositions.length >= 3) {
 		await presentScatterFreeSpinIntro({
 			totalFs: BONUS_SPINS_TOTAL,
@@ -171,7 +173,11 @@ const presentBonusIntroFromMode = async (
 
 	// Gamble already played a real first reveal. Intro on that board — never a second ST land.
 	if (isGambleBuyBetMode(stateBet.activeBetModeKey)) {
-		const scatterCount = bookEvent.state.includes('madness') ? 5 : 4;
+		const scatterCount = isSpeakBonusState(bookEvent.state)
+			? 5
+			: bookEvent.state.includes('see')
+				? 3
+				: 4;
 		const positions =
 			landedPositions.length > 0 ? landedPositions : buyBonusTriggerPositions(scatterCount);
 		await presentScatterFreeSpinIntro({
@@ -185,7 +191,7 @@ const presentBonusIntroFromMode = async (
 		return true;
 	}
 
-	if (bookEvent.state.includes('madness')) {
+	if (isSpeakBonusState(bookEvent.state)) {
 		await presentBuyBonusFreeSpinTrigger({
 			scatterCount: 5,
 			animateSymbols,

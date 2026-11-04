@@ -265,6 +265,11 @@ export const BONUS_BUY = {
 	},
 	titleShadow: { distance: 2, alpha: 0.4 },
 	grid: { x: [269, 735, 1201], wideX: [269, 968], y: [167, 485, 803] },
+	/**
+	 * Three GG rows plus the stepper sit below the 1080 playfield.
+	 * The buy screen scales this stage to the window.
+	 */
+	stage: { width: 1920, height: 1240 },
 	dialog: { x: 800, y: 298 },
 	// Under the confirm card: the full explanation of the offer
 	detail: { y: 810, gap: 28, width: 720, size: 22, lineHeight: 30 },
@@ -272,7 +277,7 @@ export const BONUS_BUY = {
 	close: { x: 1824, y: 32, size: 64, icon: 32, radius: 8, border: 2 },
 	// Figma: Group 2087331776 (30:3850): chips `reach` either side of the centre
 	stepper: {
-		y: 992,
+		y: 1136,
 		reach: 225,
 		chip: { width: 68, height: 64 },
 		amountY: 16,

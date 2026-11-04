@@ -38,11 +38,14 @@
 	import { stateBet } from 'state-shared';
 	import {
 		PROGRESS_THRESHOLD_BASE,
+		PROGRESS_THRESHOLD_BONUS,
 		PROGRESS_THRESHOLD_FEATURE,
 		PROGRESS_THRESHOLD_PEAK,
+		SPEAK_NO_EVIL_TITLE,
 		isFeatureSpinBetMode,
 		isPeakSpinBetMode,
 	} from '../game/betModes';
+	import { isSpeakBonusState } from '../game/bonusState';
 	import { skippableDelay } from '../game/spinSkip.svelte';
 	import {
 		SUMMIT_TEASE_CLIMB_MS,
@@ -95,7 +98,7 @@
 
 	let progress = $state({ value: 0, threshold: PROGRESS_THRESHOLD_BASE });
 	let barPhase = $state(0);
-	/** Madness vine wash — one hue cycle ~22s so it fades, not marches. */
+	/** Speak No Evil hue wash — one cycle ~22s so it fades, not marches. */
 	let rainbowPhase = $state(0);
 	let modeLabel = $state('');
 	/** Sticky HEAR positions (board-local reel/row, no padding). */
@@ -112,8 +115,8 @@
 	const barLayout = $derived(getMonkeyProgressBarBoardLayout(BOARD_W, BOARD_H));
 	const summitArmed = $derived(isPeakSpinBetMode(stateBet.activeBetModeKey));
 	let summitDumpRed = $state(false);
-	/** 5-scatter Monkey Madness — bar stays full + rainbow until bonus ends. */
-	let madnessArmed = $state(false);
+	/** Speak No Evil — bar stays full and fades rainbow until the bonus ends. */
+	let speakArmed = $state(false);
 
 	const syncProgressBarView = () => {
 		const track = trackLayout;
@@ -130,8 +133,8 @@
 		stateProgressBar.fillVisual = Math.min(1, Math.max(0, fillTween.current));
 		stateProgressBar.dumpRed = summitDumpRed;
 		stateProgressBar.armed = summitArmed;
-		stateProgressBar.scatterRainbow = !summitDumpRed && madnessArmed;
-		stateProgressBar.goldWash = !summitDumpRed && summitArmed && !madnessArmed;
+		stateProgressBar.scatterRainbow = !summitDumpRed && speakArmed;
+		stateProgressBar.goldWash = !summitDumpRed && summitArmed && !speakArmed;
 		stateProgressBar.modeLabel = modeLabel;
 		stateProgressBar.sparks = sparks;
 		stateProgressBar.barPhase = barPhase;
@@ -318,23 +321,14 @@
 			.then(() => endFillMotion(seq));
 	};
 
-	const showFeatureSpinArmed = (opts?: { instant?: boolean }) => {
-		modeLabel = 'FEATURE SPIN';
+	const showSpeakArmed = (opts?: { instant?: boolean }) => {
+		speakArmed = true;
+		modeLabel = SPEAK_NO_EVIL_TITLE.toUpperCase();
 		progress = {
-			value: PROGRESS_THRESHOLD_FEATURE,
-			threshold: PROGRESS_THRESHOLD_FEATURE,
+			value: PROGRESS_THRESHOLD_BONUS,
+			threshold: PROGRESS_THRESHOLD_BONUS,
 		};
-		flowFillTo(PROGRESS_THRESHOLD_FEATURE, PROGRESS_THRESHOLD_FEATURE, opts);
-	};
-
-	const showMadnessArmed = (opts?: { instant?: boolean }) => {
-		madnessArmed = true;
-		modeLabel = 'MONKEY MADNESS';
-		progress = {
-			value: PROGRESS_THRESHOLD_BASE,
-			threshold: PROGRESS_THRESHOLD_BASE,
-		};
-		flowFillTo(PROGRESS_THRESHOLD_BASE, PROGRESS_THRESHOLD_BASE, opts);
+		flowFillTo(PROGRESS_THRESHOLD_BONUS, PROGRESS_THRESHOLD_BONUS, opts);
 	};
 
 	const showPeakSpinArmed = (opts?: { instant?: boolean }) => {
@@ -441,8 +435,8 @@
 	});
 
 	$effect(() => {
-		if (context.stateGame.scatterCounter >= 5 && !madnessArmed) {
-			showMadnessArmed();
+		if (context.stateGame.scatterCounter >= 5 && !speakArmed && context.stateGame.gameType !== 'basegame') {
+			showSpeakArmed();
 		}
 	});
 
@@ -462,13 +456,8 @@
 				modeLabel = 'TRIFECTA SPIN';
 			}
 
-			if (isFeatureSpinBetMode(stateBet.activeBetModeKey) && event.payload.value <= 0) {
-				showFeatureSpinArmed();
-				return;
-			}
-
-			if (madnessArmed || event.payload.mode === 'bonus_madness') {
-				showMadnessArmed();
+			if (speakArmed || isSpeakBonusState(event.payload.mode)) {
+				showSpeakArmed();
 				return;
 			}
 
@@ -493,13 +482,8 @@
 		},
 
 		monkeyBoardActivation: () => {
-			if (isFeatureSpinBetMode(stateBet.activeBetModeKey)) {
-				showFeatureSpinArmed();
-				return;
-			}
-
-			if (madnessArmed) {
-				showMadnessArmed();
+			if (speakArmed) {
+				showSpeakArmed();
 				return;
 			}
 
@@ -522,10 +506,15 @@
 			const state = event.payload.state;
 			if (state === 'feature_spin') modeLabel = 'FEATURE SPIN';
 			else if (state === 'peak_spin') modeLabel = 'TRIFECTA SPIN';
-			else if (state.includes('madness')) showMadnessArmed();
+			else if (isSpeakBonusState(state)) showSpeakArmed();
 			else if (state.includes('hear')) {
-				madnessArmed = false;
+				speakArmed = false;
 				modeLabel = 'HEAR NO EVIL';
+				progress = { ...progress, threshold: PROGRESS_THRESHOLD_BONUS };
+			} else if (state.includes('see')) {
+				speakArmed = false;
+				modeLabel = 'SEE NO EVIL';
+				progress = { ...progress, threshold: PROGRESS_THRESHOLD_BONUS };
 			} else modeLabel = '';
 
 			if (!state.includes('hear')) {
@@ -545,12 +534,18 @@
 			stickyPulse = 0;
 			summitDumpRed = false;
 			resetSummitTeaseOverlay();
-			if (isFeatureSpinBetMode(stateBet.activeBetModeKey)) {
-				showFeatureSpinArmed({ instant: true });
+			if (speakArmed && context.stateGame.gameType === 'freegame') {
+				showSpeakArmed({ instant: Boolean(event.instant) });
+			} else if (isFeatureSpinBetMode(stateBet.activeBetModeKey)) {
+				modeLabel = 'FEATURE SPIN';
+				progress = { value: 0, threshold: PROGRESS_THRESHOLD_FEATURE };
+				flowFillTo(0, PROGRESS_THRESHOLD_FEATURE, event.instant
+					? { instant: true }
+					: { durationMs: PROGRESS_BAR_SPIN_DRAIN_MS, easing: cubicIn });
 			} else if (isPeakSpinBetMode(stateBet.activeBetModeKey)) {
 				showPeakSpinArmed({ instant: true });
 			} else {
-				madnessArmed = false;
+				speakArmed = false;
 				modeLabel = '';
 				progress = { value: 0, threshold: PROGRESS_THRESHOLD_BASE };
 				flowFillTo(0, PROGRESS_THRESHOLD_BASE, event.instant

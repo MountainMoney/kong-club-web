@@ -17,12 +17,15 @@ import {
 	ANTE_BET_MODE_KEY,
 	FEATURE_SPIN_BET_MODE_KEY,
 	FOOTBALL_DEFAULT_BET_MODE_KEY,
+	HUNT_BET_MODE_KEY,
 	activateToggleBetMode,
+	activeHuntLevel,
 	deactivateToggleBetModes,
 	isActivateBetMode,
 	type ActivateBetModeKey,
 	type OneShotBuyModeKey,
 } from '../betModes';
+import { huntModeKeyFor } from '../stateHunt.svelte';
 import { startBuyBonusRound } from '../buyBonusEntry';
 import { requestAutoBet, requestBet } from '../commitWager';
 import { eventEmitter } from '../eventEmitter';
@@ -180,8 +183,10 @@ export const confirmBonusOffer = async (offer: BonusOffer): Promise<boolean> => 
 	}
 	if (offer.kind === 'buy' && !isActivateBetMode(offer.id) && isBuyFeatureDisabled()) return false;
 
-	if (isActivateBetMode(offer.id)) {
-		if (!activateToggleBetMode(offer.id as ActivateBetModeKey)) {
+	const activateKey =
+		offer.id === HUNT_BET_MODE_KEY ? huntModeKeyFor(activeHuntLevel()) : offer.id;
+	if (offer.id === HUNT_BET_MODE_KEY || isActivateBetMode(activateKey)) {
+		if (!activateToggleBetMode(activateKey as ActivateBetModeKey)) {
 			showInsufficientBalanceModal(insufficientBalanceMessage());
 			return false;
 		}

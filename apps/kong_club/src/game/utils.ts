@@ -7,6 +7,7 @@ import { SYMBOL_SIZE, REEL_PADDING, SYMBOL_INFO_MAP, BOARD_DIMENSIONS } from './
 import { eventEmitter } from './eventEmitter';
 import type { Bet, BookEventOfType } from './typesBookEvent';
 import { bookEventHandlerMap } from './bookEventHandlerMap';
+import { normalizeBookEvents } from './bookEventNormalize';
 import type { RawSymbol, SymbolState, Position } from './types';
 import { beginBetPlayback, endBetPlayback } from './spinSkip.svelte';
 import { resetGameplayAfterBookError } from './gameplayErrorReset';
@@ -19,7 +20,9 @@ export const playBet = async (bet: Bet) => {
 	beginBetPlayback();
 	stateBet.winBookEventAmount = 0;
 	try {
-		await playBookEvents(bet.state);
+		await playBookEvents(
+			normalizeBookEvents(bet.state, new Set(Object.keys(bookEventHandlerMap))),
+		);
 	} catch (error) {
 		resetGameplayAfterBookError(error);
 		throw error;
@@ -51,7 +54,7 @@ export const convertTorResumableBet = (betToResume: Bet) => {
 
 	return {
 		...betToResume,
-		mode: normalizeLegacyBetModeKey(betToResume.mode),
+		mode: normalizeLegacyBetModeKey(betToResume.mode ?? ''),
 		state: stateToResume,
 	};
 };
