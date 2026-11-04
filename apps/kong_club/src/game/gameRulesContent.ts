@@ -22,7 +22,7 @@ const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
 	bonus_hear: { default: 'Hear No Evil', social: 'Hear No Evil' },
-	bonus_mystery: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
 	bonus_risky: { default: 'Risky Mystery Bonus', social: 'Risky Mystery Bonus' },
 };
 
@@ -135,7 +135,7 @@ Retriggers: 2 scatters add 2 plays, 3 or more scatters add 4 plays. There is no 
 
 Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Play and TRIFECTA can be on.
 
-Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_mystery.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
+Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_pick.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
 
 In the base game, tiles return to plain when the play ends. Nothing carries to the next play.`
 			: `Stone tablet scatters do not pay. They start a ${RULES_FREE_SPINS}-spin bonus. Scatters that land in tumbles count. A bonus ends immediately at ${RULES_MAX_WIN_X}×.
@@ -149,7 +149,7 @@ Retriggers: 2 scatters add 2 spins, 3 or more scatters add 4 spins. There is no 
 
 Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Spin and TRIFECTA can be on.
 
-Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_mystery.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
+Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_pick.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
 
 In the base game, tiles return to plain when the spin ends. Nothing carries to the next spin.`,
 	);

@@ -57,7 +57,8 @@ export const FOOTBALL_DEFAULT_BET_MODE_KEY = 'base';
 export const ANTE_BET_MODE_KEY = 'base_ante';
 export const FEATURE_SPIN_BET_MODE_KEY = 'feature_spin';
 export const PEAK_SPIN_BET_MODE_KEY = 'peak_spin';
-export const GAMBLE_BET_MODE_KEY = 'bonus_mystery';
+/** Math publish key. Player-facing name stays Mystery Bonus. */
+export const GAMBLE_BET_MODE_KEY = 'bonus_pick';
 export const RISKY_MYSTERY_BET_MODE_KEY = 'bonus_risky';
 export const HUNT_BET_MODE_KEY = 'hunt';
 /** Player-facing name. Math / RGS key stays `peak_spin`. */
@@ -80,8 +81,9 @@ export const PROGRESS_THRESHOLD_SEE = 5;
 export const PROGRESS_THRESHOLD_BONUS = 5;
 
 export const formatCostMultiplier = (cost: number) => {
-	const rounded = Math.round(cost * 100) / 100;
-	return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+	const rounded = Math.round(cost * 10000) / 10000;
+	if (Number.isInteger(rounded)) return `${rounded}`;
+	return rounded.toFixed(4).replace(/\.?0+$/, '');
 };
 
 /** Toolbar / buy-screen cost label for Extra Chance (matches math cost). */
@@ -117,6 +119,7 @@ const BET_MODE_ALIASES: Record<string, string> = {
 	extrachance: ANTE_BET_MODE_KEY,
 	baseante: ANTE_BET_MODE_KEY,
 	bonus_gamble: GAMBLE_BET_MODE_KEY,
+	bonus_mystery: GAMBLE_BET_MODE_KEY,
 	gamble: GAMBLE_BET_MODE_KEY,
 	mystery: GAMBLE_BET_MODE_KEY,
 	mystery_bonus: GAMBLE_BET_MODE_KEY,
@@ -222,7 +225,7 @@ export const activateModeCostMultiplier = (mode: ActivateBetModeKey | string) =>
 	if (normalized === ANTE_BET_MODE_KEY) return config.betModes.base_ante.cost;
 	if (normalized === FEATURE_SPIN_BET_MODE_KEY) return config.betModes.feature_spin.cost;
 	if (normalized === PEAK_SPIN_BET_MODE_KEY) return config.betModes.peak_spin.cost;
-	if (normalized === GAMBLE_BET_MODE_KEY) return config.betModes.bonus_mystery.cost;
+	if (normalized === GAMBLE_BET_MODE_KEY) return config.betModes.bonus_pick.cost;
 	const huntLevel = huntLevelFromModeKey(normalized);
 	if (huntLevel) return config.betModes[huntModeKeyFor(huntLevel)].cost;
 	return 1;
@@ -266,7 +269,7 @@ export const buyModeCostMultiplier = (mode: string) => {
 	if (meta?.costMultiplier) return meta.costMultiplier;
 	if (normalized === 'bonus_see') return config.betModes.bonus_see.cost;
 	if (normalized === 'bonus_hear') return config.betModes.bonus_hear.cost;
-	if (normalized === 'bonus_mystery') return config.betModes.bonus_mystery.cost;
+	if (normalized === 'bonus_pick') return config.betModes.bonus_pick.cost;
 	if (normalized === 'bonus_risky') return config.betModes.bonus_risky.cost;
 	return 1;
 };
@@ -460,12 +463,12 @@ export function initKongClubBetModes() {
 				title: `Hear No Evil (${formatCostMultiplier(config.betModes.bonus_hear.cost)}×)`,
 				button: 'Buy',
 			}),
-			modeEntry('bonus_mystery', {
+			modeEntry('bonus_pick', {
 				type: 'buy',
-				costMultiplier: config.betModes.bonus_mystery.cost,
-				title: `Mystery Bonus (${formatCostMultiplier(config.betModes.bonus_mystery.cost)}×)`,
+				costMultiplier: config.betModes.bonus_pick.cost,
+				title: `Mystery Bonus (${formatCostMultiplier(config.betModes.bonus_pick.cost)}×)`,
 				button: 'Buy',
-				description: `Guaranteed bonus for ${formatCostMultiplier(config.betModes.bonus_mystery.cost)}× bet. 50% See No Evil, 45% Hear No Evil, 5% ${SPEAK_NO_EVIL_TITLE}.`,
+				description: `Guaranteed bonus for ${formatCostMultiplier(config.betModes.bonus_pick.cost)}× bet. 50% See No Evil, 45% Hear No Evil, 5% ${SPEAK_NO_EVIL_TITLE}.`,
 			}),
 			modeEntry('bonus_risky', {
 				type: 'buy',

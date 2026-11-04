@@ -30,7 +30,7 @@
 					modeRtpLine('peak_spin', paytableModeLabel('peak_spin')),
 					modeRtpLine('bonus_see', paytableModeLabel('bonus_see')),
 					modeRtpLine('bonus_hear', paytableModeLabel('bonus_hear')),
-					modeRtpLine('bonus_mystery', paytableModeLabel('bonus_mystery')),
+					modeRtpLine('bonus_pick', paytableModeLabel('bonus_pick')),
 					modeRtpLine('bonus_risky', paytableModeLabel('bonus_risky')),
 					modeRtpLine('hunt_2', 'Hunt Spins 2×'),
 					modeRtpLine('hunt_3', 'Hunt Spins 3×'),

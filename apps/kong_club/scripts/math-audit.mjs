@@ -24,16 +24,16 @@ const PUBLISH_DIR = path.resolve(
 const MODE_COST = {
 	base: 1,
 	base_ante: 1.4,
-	hunt_2: 2,
-	hunt_3: 3,
-	hunt_4: 4,
-	hunt_5: 5,
-	feature_spin: 65,
-	peak_spin: 1400,
-	bonus_see: 115,
-	bonus_hear: 250,
-	bonus_mystery: 380,
-	bonus_risky: 380,
+	hunt_2: 5,
+	hunt_3: 6,
+	hunt_4: 10,
+	hunt_5: 25,
+	feature_spin: 125.3726,
+	peak_spin: 7947.4039,
+	bonus_see: 194.364,
+	bonus_hear: 816.5175,
+	bonus_pick: 936.3731,
+	bonus_risky: 1057.9378,
 };
 
 const HARD_FACES = new Set([

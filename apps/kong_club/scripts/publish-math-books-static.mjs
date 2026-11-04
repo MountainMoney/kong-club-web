@@ -21,7 +21,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_mystery',
+	'bonus_pick',
 	'bonus_risky',
 ];
 

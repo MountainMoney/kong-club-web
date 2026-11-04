@@ -183,7 +183,7 @@ const SPEAK_TRIGGER_STATES = new Set([
 	'start_bonus_speak_no_evil',
 	'organic_bonus_speak_no_evil',
 ]);
-const MADNESS_TRIGGER_MODES = ['bonus_mystery', 'base', 'base_ante'] as const;
+const MADNESS_TRIGGER_MODES = ['bonus_pick', 'bonus_risky', 'base', 'base_ante'] as const;
 
 const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');

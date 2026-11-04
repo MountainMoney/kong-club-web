@@ -22,7 +22,20 @@ const DELTAS = [
 const MIN_CLUSTER = 5;
 const PLAY_ROWS = 5;
 
-const MODES = ['base', 'base_ante', 'feature_spin', 'bonus_see', 'bonus_hear', 'bonus_mystery'];
+const MODES = [
+	'base',
+	'base_ante',
+	'hunt_2',
+	'hunt_3',
+	'hunt_4',
+	'hunt_5',
+	'feature_spin',
+	'peak_spin',
+	'bonus_see',
+	'bonus_hear',
+	'bonus_pick',
+	'bonus_risky',
+];
 
 const cellName = (cell) => (cell && typeof cell === 'object' ? String(cell.name || '') : '');
 

@@ -168,12 +168,12 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		buttonColor: '#FF8A3D',
 	},
 	{
-		mode: 'bonus_mystery',
+		mode: 'bonus_pick',
 		title: 'MYSTERY BONUS',
-		description: `Buy Mystery Bonus for ${config.betModes.bonus_mystery.cost}× bet. Guaranteed bonus: 50% See No Evil, 45% Hear No Evil, 5% Speak No Evil.`,
+		description: `Buy Mystery Bonus for ${config.betModes.bonus_pick.cost}× bet. Guaranteed bonus: 50% See No Evil, 45% Hear No Evil, 5% Speak No Evil.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
-		volatility: volatilityForMode('bonus_mystery'),
+		volatility: volatilityForMode('bonus_pick'),
 		buttonColor: '#FF5AD1',
 	},
 ];
@@ -193,7 +193,7 @@ export { isActivateBetMode };
 
 /** Feature and TRIFECTA stay on. See, Hear, and Gamble are scatter buys. */
 export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
-	if (mode === 'bonus_mystery') return 'buy';
+	if (mode === 'bonus_pick') return 'buy';
 	return isActivateBetMode(mode) ? 'activate' : 'buy';
 };
 

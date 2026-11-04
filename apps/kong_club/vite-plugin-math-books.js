@@ -19,23 +19,37 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_mystery',
+	'bonus_pick',
 	'bonus_risky',
 ];
 
 /** Spec: 500 books per mode until ship. A short forced file is only a stand-in. */
 const DEV_BOOK_COUNTS = Object.fromEntries(MATH_MODES.map((mode) => [mode, 500]));
 
-function resolveMathLibraryRoot() {
-	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library');
+/** Vendored publish from kong-club-math. External math-sdk is only a fallback. */
+function resolvePublishDir() {
+	const vendored = path.resolve(__dirname, 'math-publish');
+	if (fs.existsSync(path.join(vendored, 'index.json'))) return vendored;
+	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library/publish_files');
 }
 
-function booksZstPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `books_${mode}.jsonl.zst`);
+function booksZstPath(publishDir, mode) {
+	return path.join(publishDir, `books_${mode}.jsonl.zst`);
 }
 
-function lutPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `lookUpTable_${mode}_0.csv`);
+function lutPath(publishDir, mode) {
+	return path.join(publishDir, `lookUpTable_${mode}_0.csv`);
+}
+
+function publishedModeNames(publishDir) {
+	const indexPath = path.join(publishDir, 'index.json');
+	if (!fs.existsSync(indexPath)) return new Set();
+	try {
+		const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+		return new Set((index.modes ?? []).map((mode) => mode.name));
+	} catch {
+		return new Set();
+	}
 }
 
 function cacheBooksPath(appRoot, mode) {
@@ -77,12 +91,12 @@ function cachedBookCount(cached) {
 	}
 }
 
-function isCacheStale(mode, libraryRoot, appRoot) {
+function isCacheStale(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
 	if (!fs.existsSync(cached)) return true;
 	if (cachedBookCount(cached) === 0) return true;
 
-	const zst = booksZstPath(libraryRoot, mode);
+	const zst = booksZstPath(publishDir, mode);
 	const meta = readCacheMeta(appRoot)[mode];
 	if (!fs.existsSync(zst)) return false;
 	if (meta?.source !== 'zst') return true;
@@ -94,9 +108,9 @@ function isCacheStale(mode, libraryRoot, appRoot) {
 	return zstMtime > cachedMtime;
 }
 
-function extractBooksFromZst(mode, libraryRoot, appRoot) {
+function extractBooksFromZst(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
-	const zst = booksZstPath(libraryRoot, mode);
+	const zst = booksZstPath(publishDir, mode);
 	if (!fs.existsSync(zst)) return null;
 
 	const count = DEV_BOOK_COUNTS[mode] ?? 500;
@@ -151,9 +165,9 @@ print(len(books))
 	return null;
 }
 
-function ensureBooksJson(mode, libraryRoot, appRoot) {
+function ensureBooksJson(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
-	if (isCacheStale(mode, libraryRoot, appRoot)) {
+	if (isCacheStale(mode, publishDir, appRoot)) {
 		if (fs.existsSync(cached)) {
 			console.log(`[math-books] Invalidating stale cache for "${mode}" (publish zst updated)`);
 			fs.unlinkSync(cached);
@@ -164,10 +178,16 @@ function ensureBooksJson(mode, libraryRoot, appRoot) {
 		return cached;
 	}
 
-	const zst = booksZstPath(libraryRoot, mode);
-	const extracted = extractBooksFromZst(mode, libraryRoot, appRoot);
+	const zst = booksZstPath(publishDir, mode);
+	const extracted = extractBooksFromZst(mode, publishDir, appRoot);
 	if (extracted) {
 		return extracted;
+	}
+
+	if (publishedModeNames(publishDir).has(mode) || fs.existsSync(zst)) {
+		throw new Error(
+			`Published books for "${mode}" could not be read (${zst}). Refusing forced/stub fallback.`,
+		);
 	}
 
 	const forced = forcedBooksPath(appRoot, mode);
@@ -253,12 +273,12 @@ function parseLutCsv(text, bookCount) {
 	return entries;
 }
 
-function loadLutEntries(mode, libraryRoot, appRoot, bookCount) {
+function loadLutEntries(mode, publishDir, appRoot, bookCount) {
 	const cacheLut = cacheLutPath(appRoot, mode);
 	if (fs.existsSync(cacheLut)) {
 		return parseLutCsv(fs.readFileSync(cacheLut, 'utf-8'), bookCount);
 	}
-	const lutFile = lutPath(libraryRoot, mode);
+	const lutFile = lutPath(publishDir, mode);
 	if (fs.existsSync(lutFile)) {
 		return parseLutCsv(fs.readFileSync(lutFile, 'utf-8'), bookCount);
 	}
@@ -274,7 +294,7 @@ function uniformLutEntries(bookCount) {
 }
 
 export function mathBooksPlugin() {
-	const libraryRoot = resolveMathLibraryRoot();
+	const publishDir = resolvePublishDir();
 	const appRoot = __dirname;
 
 	return {
@@ -293,15 +313,19 @@ export function mathBooksPlugin() {
 
 				try {
 					if (costsMatch) {
-						const costsFile = path.join(libraryRoot, 'publish_files', 'mode_costs.json');
+						const indexPath = path.join(publishDir, 'index.json');
 						res.setHeader('Content-Type', 'application/json');
 						res.setHeader('Cache-Control', 'no-store');
-						if (!fs.existsSync(costsFile)) {
+						if (!fs.existsSync(indexPath)) {
 							res.statusCode = 404;
 							res.end(JSON.stringify({ error: 'mode costs not published' }));
 							return;
 						}
-						res.end(fs.readFileSync(costsFile, 'utf-8'));
+						const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+						const costs = Object.fromEntries(
+							(index.modes ?? []).map((mode) => [mode.name, mode.cost]),
+						);
+						res.end(JSON.stringify(costs));
 						return;
 					}
 
@@ -326,7 +350,7 @@ export function mathBooksPlugin() {
 					}
 
 					if (booksMatch) {
-						const file = ensureBooksJson(mode, libraryRoot, appRoot);
+						const file = ensureBooksJson(mode, publishDir, appRoot);
 						const body = fs.readFileSync(file, 'utf-8');
 						res.setHeader('Content-Type', 'application/json');
 						res.setHeader('Cache-Control', 'no-store');
@@ -334,9 +358,9 @@ export function mathBooksPlugin() {
 						return;
 					}
 
-					const booksFile = ensureBooksJson(mode, libraryRoot, appRoot);
+					const booksFile = ensureBooksJson(mode, publishDir, appRoot);
 					const books = JSON.parse(fs.readFileSync(booksFile, 'utf-8'));
-					const entries = loadLutEntries(mode, libraryRoot, appRoot, books.length);
+					const entries = loadLutEntries(mode, publishDir, appRoot, books.length);
 
 					res.setHeader('Content-Type', 'application/json');
 					res.setHeader('Cache-Control', 'no-store');

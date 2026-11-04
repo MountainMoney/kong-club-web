@@ -239,7 +239,7 @@ const PAYTABLE_MODE_LABELS = {
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_mystery: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
 	bonus_risky: { default: 'Risky Mystery', social: 'Risky Mystery' },
 } as const;
 
