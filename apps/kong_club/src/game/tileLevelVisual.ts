@@ -1,5 +1,4 @@
 import { coinFaceBands } from './coinFacePools';
-import { usesScaledBaseCoinFaces } from './coinFaceMode';
 
 /** Visual tier for Level-Up Tiles — classic MM Bronze / Silver / Gold. */
 
@@ -79,7 +78,7 @@ export const coinSymbolToTier = (symbol: string): TileTier => {
 	return 'none';
 };
 
-/** Unscaled bands: bronze 1–4, silver 5–20, gold 25+. Scaled base bands are 0.20× (1 / 5). */
+/** Bronze is below 5 (including 0.2 and 0.5). Silver is 5–20. Gold is 25+, including 1000. */
 export const SILVER_FACE_MIN = 5;
 export const GOLD_FACE_MIN = 25;
 
@@ -88,7 +87,7 @@ export const coinMetalForFace = (
 	face: number,
 	currentLevel = 1,
 ): { symbol: 'CB' | 'CS' | 'CG'; tileLevel: number } => {
-	const bands = coinFaceBands(usesScaledBaseCoinFaces());
+	const bands = coinFaceBands();
 	let level = 1;
 	if (face >= bands.gold) level = 3;
 	else if (face >= bands.silver) level = 2;

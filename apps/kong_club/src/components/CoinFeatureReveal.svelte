@@ -36,12 +36,11 @@
 	} from '../game/coinFeatureNormalize';
 	import {
 		beginCoinFeatureDim,
-		beginPreCoinShrink,
 		clearCoinCellCover,
+		stateCoinFeatureCover,
 		completeHeldTileFade,
 		isHeldBoardDismissActive,
 		tryFinishHeldBoardDismiss,
-		PRE_COIN_SHRINK_MS,
 		releaseCoinCellCover,
 		setCoinCellCover,
 	} from '../game/coinFeatureCover.svelte';
@@ -101,6 +100,10 @@
 		labelAlpha?: number;
 		eyeAlpha?: number;
 		showLabel?: boolean;
+		/** 0–1 horizontal flip. 1 after the tile has opened onto its face. */
+		scaleX?: number;
+		/** Result face (coin, clover, pot) is hidden through the first half of the flip. */
+		showFaceArt?: boolean;
 	};
 
 	type Bolt = {
@@ -126,6 +129,8 @@
 
 	const context = getContext();
 	/** Coin spawn + number sweep — top-left → bottom-right. */
+	/** Matches the coin spine flip (`tongbi` / `yinbi` / `jinbi` are 0.533s). */
+	const COIN_FLIP_MS = 533;
 	const WAVE_DIAG_MS = 150;
 	const NUMBER_WAVE_MS = 90;
 	const FACE_POP_MS = 340;
@@ -730,6 +735,8 @@
 					x: home.x,
 					y,
 					scale: 1,
+					scaleX: 1,
+					showFaceArt: true,
 					alpha: 1,
 					labelScale: 0,
 					labelAlpha: 0,
@@ -746,6 +753,8 @@
 						x: home.x,
 						y: home.y,
 						scale: 1,
+						scaleX: 1,
+						showFaceArt: true,
 						alpha: 1,
 						labelScale: 0,
 						showLabel: false,
@@ -759,6 +768,8 @@
 					x: home.x,
 					y: home.y,
 					scale: 1 - e * 0.45,
+					scaleX: 1,
+					showFaceArt: true,
 					alpha: 1 - e,
 					labelScale: 0,
 					showLabel: false,
@@ -775,6 +786,8 @@
 						x: home.x,
 						y: home.y,
 						scale: 1,
+						scaleX: 1,
+						showFaceArt: true,
 						alpha: 1,
 						labelScale: 0,
 						showLabel: false,
@@ -788,6 +801,8 @@
 					x: home.x,
 					y: home.y,
 					scale: 1 - e * 0.45,
+					scaleX: 1,
+					showFaceArt: true,
 					alpha: 1 - e,
 					labelScale: 0,
 					showLabel: false,
@@ -812,8 +827,15 @@
 
 			const popMs = pacedMs(POP_MS);
 			const pulseMs = pacedMs(PULSE_MS);
-			let scale = easeOutCubic(Math.min(1, spawnElapsed / popMs));
+			const flipDur = Math.max(1, pacedMs(COIN_FLIP_MS));
+			const flipElapsed = now - reveal.spawnAt;
+			const flipP = flipElapsed <= 0 ? 0 : Math.min(1, flipElapsed / flipDur);
+			const flipDone = flipP >= 1;
+			const showFaceArt = flipP > 0.5;
+			const openX = !showFaceArt ? 0 : flipDone ? 1 : Math.max(0.04, (flipP - 0.5) * 2);
+			let scale = 1;
 			if (
+				flipDone &&
 				reveal.pulseAt > reveal.spawnAt &&
 				!(reveal.kind === 'multiplier' && reveal.powerResolved)
 			) {
@@ -824,15 +846,17 @@
 					animating = true;
 				}
 			}
+			if (!flipDone) animating = true;
 
-			const faceReady = reveal.showFace !== false;
-			const labelOn = faceReady && (reveal.faceAt == null || now >= reveal.faceAt);
-			if (reveal.faceAt != null && !labelOn) animating = true;
+			const faceReady = reveal.showFace !== false && showFaceArt;
+			const labelOn =
+				flipDone && faceReady && (reveal.faceAt == null || now >= reveal.faceAt);
+			if (!labelOn) animating = true;
 
 			let labelScale = 0;
 			let labelAlpha = 0;
-			if (reveal.kind === 'multiplier' && reveal.showMultiLabel) {
-				const labelAt = reveal.multiLabelAt ?? reveal.spawnAt;
+			if (reveal.kind === 'multiplier' && reveal.showMultiLabel && flipDone) {
+				const labelAt = Math.max(reveal.multiLabelAt ?? reveal.spawnAt, reveal.spawnAt + flipDur);
 				const labelElapsed = now - labelAt;
 				const xnPopMs = pacedMs(XN_POP_MS);
 				if (labelElapsed < 0) {
@@ -916,12 +940,17 @@
 				x: home.x,
 				y: home.y,
 				scale,
-				alpha: Math.min(1, scale),
+				scaleX: openX,
+				showFaceArt,
+				alpha: showFaceArt ? 1 : 0,
 				labelScale,
 				labelAlpha,
 				eyeAlpha,
 				showLabel: labelOn,
 			};
+			if (flipDone) {
+				flipSettled[reveal.key] = true;
+			}
 			if (spawnElapsed < popMs) animating = true;
 		}
 
@@ -974,6 +1003,22 @@
 			}
 			if (t < 1) animating = true;
 		}
+
+		const flipDur = Math.max(1, pacedMs(COIN_FLIP_MS));
+		const nextFlip: Record<string, number> = {};
+		const cover: { reel: number; row: number }[] = [];
+		for (const reveal of activeReveals) {
+			if (clearedKeys.includes(reveal.key)) continue;
+			const elapsed = now - reveal.spawnAt;
+			const flipP = elapsed <= 0 ? 0 : Math.min(1, elapsed / flipDur);
+			if (flipP > 0 && flipP <= 0.5 && reveal.clearAt == null && reveal.drainStart == null) {
+				nextFlip[`${reveal.reel}:${reveal.row}`] = Math.max(0, 1 - flipP * 2);
+			} else if (flipP > 0.5) {
+				cover.push({ reel: reveal.reel, row: reveal.row });
+			}
+		}
+		stateCoinFeatureCover.flipScaleX = nextFlip;
+		setCoinCellCover(cover);
 
 		motions = next;
 		boltMotions = nextBolts;
@@ -1084,14 +1129,16 @@
 				key: `${cellKey(item)}:r${item.round ?? 1}`,
 				spawnAt: at,
 				pulseAt: at,
-				showMultiLabel: freezeSit && item.kind === 'multiplier',
-				multiLabelAt: freezeSit && item.kind === 'multiplier' ? at : undefined,
 				eyeTone: freezeSit && item.kind === 'multiplier' ? multiEyeTone(item.value) : undefined,
+				showMultiLabel: item.kind === 'multiplier',
+				multiLabelAt:
+					item.kind === 'multiplier' ? at + (freezeSit ? 0 : pacedMs(COIN_FLIP_MS)) : undefined,
 				showFace: true,
 				faceAt:
 					isCoin || isPot
-						? at + (freezeSit ? 0 : pacedMs(POP_MS))
+						? at + (freezeSit ? 0 : pacedMs(COIN_FLIP_MS))
 						: undefined,
+				...(isPot ? { potShown: 0 } : {}),
 			};
 		});
 
@@ -1124,9 +1171,10 @@
 		const waveStep = pacedMs(NUMBER_WAVE_MS);
 		activeReveals = activeReveals.map((reveal) => {
 			if (reveal.kind !== 'coin' || reveal.showFace !== false) return reveal;
-			const faceAt = Number.isFinite(minDiag)
+			const waveAt = Number.isFinite(minDiag)
 				? now + (waveIndex(reveal) - minDiag) * waveStep
 				: now;
+			const faceAt = Math.max(waveAt, reveal.spawnAt + pacedMs(COIN_FLIP_MS));
 			return { ...reveal, showFace: true, faceAt };
 		});
 		motions = Object.fromEntries(
@@ -1211,7 +1259,9 @@
 		if (roundItems.length > 0) {
 			const spawnSpan = await spawnItems(roundItems, token, { append });
 			if (token !== runToken) return;
-			await waitMs(60 + spawnSpan + POP_MS + spawnFaceWaitMs(roundItems) + HOLD_AFTER_NUMBERS_MS);
+			await waitMs(
+				60 + spawnSpan + COIN_FLIP_MS + spawnFaceWaitMs(roundItems) + HOLD_AFTER_NUMBERS_MS,
+			);
 			if (token !== runToken) return;
 		}
 
@@ -1388,8 +1438,8 @@
 					return withPotFace(
 						{
 							...reveal,
-							pulseAt: lastHit ? hitAt : reveal.pulseAt,
-							faceAt: lastHit && running >= POT_SMACK_MIN ? hitAt : reveal.faceAt,
+							pulseAt: hitAt,
+							faceAt: hitAt,
 						},
 						running,
 					);
@@ -1887,9 +1937,7 @@
 			return;
 		}
 
-		beginPreCoinShrink(gridItems);
 		beginCoinFeatureDim(gridItems);
-		await waitMs(PRE_COIN_SHRINK_MS);
 		if (token !== runToken) return;
 
 		return new Promise((resolve) => {
@@ -2030,7 +2078,20 @@
 {#snippet coinDisc(name: 'CB' | 'CS' | 'CG', onFlipEnd: () => void)}
 	{@const info = getSymbolInfo({ rawSymbol: { name }, state: 'static' })}
 	{#if info.type === 'spine'}
-		<SymbolSpine symbolInfo={info} loop={false} listener={{ complete: onFlipEnd }} />
+		<SymbolSpine
+			symbolInfo={info}
+			loop={false}
+			listener={{
+				start: (entry) => {
+					const end = entry?.animationEnd;
+					if (end) {
+						entry.trackTime = end;
+						entry.timeScale = 0;
+					}
+				},
+				complete: onFlipEnd,
+			}}
+		/>
 	{:else}
 		<SymbolSprite symbolInfo={info} />
 	{/if}
@@ -2059,10 +2120,12 @@
 			x={motion.x}
 			y={motion.y}
 			zIndex={20}
-			scale={motion.scale}
+			scale={{ x: (motion.scaleX ?? 1) * motion.scale, y: motion.scale }}
 			alpha={motion.alpha}
 		>
-			{#if blank}
+			{#if !motion.showFaceArt}
+				<!-- Ranked tile is still the back of the flip. -->
+			{:else if blank}
 				{@render coinDisc(displaySymbol(reveal), () => {})}
 			{:else if reveal.kind === 'multiplier'}
 				<Sprite

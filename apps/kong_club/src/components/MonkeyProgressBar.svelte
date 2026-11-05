@@ -13,7 +13,7 @@
 
 	/** Live bar view — Mechanics writes, this presenter reads (can remount during tease). */
 	export const stateProgressBar = $state({
-		zIndex: 12,
+		zIndex: 90,
 		barX: 0,
 		barY: 0,
 		trackX: 0,
@@ -25,14 +25,14 @@
 		fillVisual: 0,
 		dumpRed: false,
 		armed: false,
-		/** Rainbow fill — 5-scatter Monkey Madness only. */
+		/** Rainbow fill — Speak No Evil only. */
 		scatterRainbow: false,
 		/** Slow gold hue wash — SUMMIT / peak_spin (not dump). */
 		goldWash: false,
 		modeLabel: '',
 		sparks: [] as ProgressBarSpark[],
 		barPhase: 0,
-		/** Slow hue wash for Madness fill (0–1). Separate from spark twinkle. */
+		/** Slow hue wash for the Speak No Evil fill (0–1). */
 		rainbowPhase: 0,
 		boardW: 0,
 		punchScale: 1,

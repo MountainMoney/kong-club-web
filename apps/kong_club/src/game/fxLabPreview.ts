@@ -306,24 +306,24 @@ export const previewForceBonusHearSpin = () =>
 
 export const previewForceGambleHearSpin = () =>
 	runFxLabPreview(
-		'Force Gamble Hear book',
+		'Force Mystery Bonus Hear book',
 		async () => {
-			const index = await findFirstBookWithModeState('bonus_gamble', 'start_bonus_hear');
-			await forceBookAndSpin('bonus_gamble', index, 'bonus_gamble hear');
+			const index = await findFirstBookWithModeState('bonus_pick', 'start_bonus_hear');
+			await forceBookAndSpin('bonus_pick', index, 'bonus_pick hear');
 		},
 		sticky,
 	);
 
 export const previewForceBonusMadnessSpin = () =>
 	runFxLabPreview(
-		'Force 5 ST Madness',
+		'Force 5 ST Speak No Evil',
 		async () => {
 			const hit = await findFirstMadnessTriggerBook();
 			if (!hit) {
-				if (import.meta.env.DEV) console.warn('[FxLab] No 5-scatter Madness trigger book');
+				if (import.meta.env.DEV) console.warn('[FxLab] No 5-scatter Speak No Evil trigger book');
 				return;
 			}
-			await forceBookAndSpin(hit.mode, hit.index, `${hit.mode} start Madness`);
+			await forceBookAndSpin(hit.mode, hit.index, `${hit.mode} start Speak No Evil`);
 		},
 		sticky,
 	);

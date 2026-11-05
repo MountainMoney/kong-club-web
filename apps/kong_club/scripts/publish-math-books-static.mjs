@@ -13,11 +13,16 @@ const outRoot = path.join(appRoot, 'build', '__math');
 const MATH_MODES = [
 	'base',
 	'base_ante',
+	'hunt_2',
+	'hunt_3',
+	'hunt_4',
+	'hunt_5',
 	'feature_spin',
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_pick',
+	'bonus_risky',
 ];
 
 const parseLutCsv = (text, bookCount) => {

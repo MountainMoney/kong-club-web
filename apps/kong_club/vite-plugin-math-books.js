@@ -11,33 +11,45 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MATH_MODES = [
 	'base',
 	'base_ante',
+	'hunt_2',
+	'hunt_3',
+	'hunt_4',
+	'hunt_5',
 	'feature_spin',
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_gamble',
+	'bonus_pick',
+	'bonus_risky',
 ];
 
-const DEV_BOOK_COUNTS = {
-	base: 500,
-	base_ante: 500,
-	feature_spin: 100,
-	peak_spin: 100,
-	bonus_see: 100,
-	bonus_hear: 100,
-	bonus_gamble: 80,
-};
+/** Spec: 500 books per mode until ship. A short forced file is only a stand-in. */
+const DEV_BOOK_COUNTS = Object.fromEntries(MATH_MODES.map((mode) => [mode, 500]));
 
-function resolveMathLibraryRoot() {
-	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library');
+/** Vendored publish from kong-club-math. External math-sdk is only a fallback. */
+function resolvePublishDir() {
+	const vendored = path.resolve(__dirname, 'math-publish');
+	if (fs.existsSync(path.join(vendored, 'index.json'))) return vendored;
+	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library/publish_files');
 }
 
-function booksZstPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `books_${mode}.jsonl.zst`);
+function booksZstPath(publishDir, mode) {
+	return path.join(publishDir, `books_${mode}.jsonl.zst`);
 }
 
-function lutPath(libraryRoot, mode) {
-	return path.join(libraryRoot, 'publish_files', `lookUpTable_${mode}_0.csv`);
+function lutPath(publishDir, mode) {
+	return path.join(publishDir, `lookUpTable_${mode}_0.csv`);
+}
+
+function publishedModeNames(publishDir) {
+	const indexPath = path.join(publishDir, 'index.json');
+	if (!fs.existsSync(indexPath)) return new Set();
+	try {
+		const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+		return new Set((index.modes ?? []).map((mode) => mode.name));
+	} catch {
+		return new Set();
+	}
 }
 
 function cacheBooksPath(appRoot, mode) {
@@ -62,10 +74,10 @@ function readCacheMeta(appRoot) {
 	}
 }
 
-function writeCacheMeta(appRoot, mode, sourceMtimeMs) {
+function writeCacheMeta(appRoot, mode, sourceMtimeMs, source) {
 	const metaPath = cacheMetaPath(appRoot);
 	const meta = readCacheMeta(appRoot);
-	meta[mode] = { sourceMtimeMs, cachedAt: Date.now() };
+	meta[mode] = { sourceMtimeMs, source, cachedAt: Date.now() };
 	fs.mkdirSync(path.dirname(metaPath), { recursive: true });
 	fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
 }
@@ -79,25 +91,26 @@ function cachedBookCount(cached) {
 	}
 }
 
-function isCacheStale(mode, libraryRoot, appRoot) {
+function isCacheStale(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
 	if (!fs.existsSync(cached)) return true;
 	if (cachedBookCount(cached) === 0) return true;
 
-	const zst = booksZstPath(libraryRoot, mode);
+	const zst = booksZstPath(publishDir, mode);
+	const meta = readCacheMeta(appRoot)[mode];
 	if (!fs.existsSync(zst)) return false;
+	if (meta?.source !== 'zst') return true;
 
 	const zstMtime = fs.statSync(zst).mtimeMs;
-	const meta = readCacheMeta(appRoot)[mode];
 	if (meta?.sourceMtimeMs === zstMtime) return false;
 
 	const cachedMtime = fs.statSync(cached).mtimeMs;
 	return zstMtime > cachedMtime;
 }
 
-function extractBooksFromZst(mode, libraryRoot, appRoot) {
+function extractBooksFromZst(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
-	const zst = booksZstPath(libraryRoot, mode);
+	const zst = booksZstPath(publishDir, mode);
 	if (!fs.existsSync(zst)) return null;
 
 	const count = DEV_BOOK_COUNTS[mode] ?? 500;
@@ -124,7 +137,10 @@ with open(out_path, "w", encoding="utf-8") as f:
 print(len(books))
 `;
 
-	const result = spawnSync('python', ['-c', script], {
+	const python = spawnSync('python3', ['-c', 'import zstandard'], { encoding: 'utf-8' }).status === 0
+		? 'python3'
+		: 'python';
+	const result = spawnSync(python, ['-c', script], {
 		env: { ...process.env, ZST: zst, OUT: cached, LIMIT: String(count) },
 		encoding: 'utf-8',
 	});
@@ -140,7 +156,7 @@ print(len(books))
 			}
 			return null;
 		}
-		writeCacheMeta(appRoot, mode, fs.statSync(zst).mtimeMs);
+		writeCacheMeta(appRoot, mode, fs.statSync(zst).mtimeMs, 'zst');
 		console.log(`[math-books] Cached ${count} books for "${mode}" → ${cached}`);
 		return cached;
 	}
@@ -149,9 +165,9 @@ print(len(books))
 	return null;
 }
 
-function ensureBooksJson(mode, libraryRoot, appRoot) {
+function ensureBooksJson(mode, publishDir, appRoot) {
 	const cached = cacheBooksPath(appRoot, mode);
-	if (isCacheStale(mode, libraryRoot, appRoot)) {
+	if (isCacheStale(mode, publishDir, appRoot)) {
 		if (fs.existsSync(cached)) {
 			console.log(`[math-books] Invalidating stale cache for "${mode}" (publish zst updated)`);
 			fs.unlinkSync(cached);
@@ -162,10 +178,16 @@ function ensureBooksJson(mode, libraryRoot, appRoot) {
 		return cached;
 	}
 
-	const zst = booksZstPath(libraryRoot, mode);
-	const extracted = extractBooksFromZst(mode, libraryRoot, appRoot);
+	const zst = booksZstPath(publishDir, mode);
+	const extracted = extractBooksFromZst(mode, publishDir, appRoot);
 	if (extracted) {
 		return extracted;
+	}
+
+	if (publishedModeNames(publishDir).has(mode) || fs.existsSync(zst)) {
+		throw new Error(
+			`Published books for "${mode}" could not be read (${zst}). Refusing forced/stub fallback.`,
+		);
 	}
 
 	const forced = forcedBooksPath(appRoot, mode);
@@ -176,11 +198,57 @@ function ensureBooksJson(mode, libraryRoot, appRoot) {
 			: [raw.book ?? raw];
 		fs.mkdirSync(path.dirname(cached), { recursive: true });
 		fs.writeFileSync(cached, JSON.stringify(books));
-		console.log(`[math-books] Using forced books fallback for "${mode}" (${books.length} books)`);
+		writeCacheMeta(appRoot, mode, 0, 'forced');
+		console.warn(
+			`[math-books] "${mode}" has no publish library. Serving ${books.length} forced book(s). Full 500-book sets land with the new math.`,
+		);
 		return cached;
 	}
 
-	throw new Error(`Math books not found for mode "${mode}" (missing ${zst} and ${forced}).`);
+	const stub = [stubBook(mode)];
+	fs.mkdirSync(path.dirname(cached), { recursive: true });
+	fs.writeFileSync(cached, JSON.stringify(stub));
+	writeCacheMeta(appRoot, mode, 0, 'stub');
+	console.warn(
+		`[math-books] "${mode}" has no publish library and no forced books. Serving 1 playable stub so the mode loads. Real books are blocked on the math publish.`,
+	);
+	return cached;
+}
+
+function stubBoard() {
+	const rows = [
+		['K', 'K', 'J', 'J', 'J', 'K', 'LE'],
+		['A', 'T', 'T', 'A', 'T', 'GR', 'GR'],
+		['K', 'K', 'T', 'T', 'Q', 'T', 'BA'],
+		['GR', 'Q', 'Q', 'Q', 'OR', 'K', 'J'],
+		['A', 'A', 'A', 'Q', 'K', 'T', 'T'],
+		['GR', 'GR', 'K', 'LE', 'K', 'K', 'K'],
+	];
+	return rows.map((reel) => reel.map((name) => ({ name })));
+}
+
+/** Dead spin: valid reveal, no cluster, no bonus. Keeps the mode selectable. */
+function stubBook(mode) {
+	return {
+		id: 0,
+		payoutMultiplier: 0,
+		events: [
+			{
+				index: 0,
+				type: 'reveal',
+				board: stubBoard(),
+				paddingPositions: [0, 0, 0, 0, 0, 0],
+				gameType: 'basegame',
+				anticipation: [0, 0, 0, 0, 0, 0],
+			},
+			{ index: 1, type: 'setTotalWin', amount: 0 },
+			{ index: 2, type: 'finalWin', amount: 0 },
+		],
+		criteria: 'basegame',
+		baseGameWins: 0,
+		freeGameWins: 0,
+		mode,
+	};
 }
 
 function cacheLutPath(appRoot, mode) {
@@ -205,12 +273,12 @@ function parseLutCsv(text, bookCount) {
 	return entries;
 }
 
-function loadLutEntries(mode, libraryRoot, appRoot, bookCount) {
+function loadLutEntries(mode, publishDir, appRoot, bookCount) {
 	const cacheLut = cacheLutPath(appRoot, mode);
 	if (fs.existsSync(cacheLut)) {
 		return parseLutCsv(fs.readFileSync(cacheLut, 'utf-8'), bookCount);
 	}
-	const lutFile = lutPath(libraryRoot, mode);
+	const lutFile = lutPath(publishDir, mode);
 	if (fs.existsSync(lutFile)) {
 		return parseLutCsv(fs.readFileSync(lutFile, 'utf-8'), bookCount);
 	}
@@ -226,7 +294,7 @@ function uniformLutEntries(bookCount) {
 }
 
 export function mathBooksPlugin() {
-	const libraryRoot = resolveMathLibraryRoot();
+	const publishDir = resolvePublishDir();
 	const appRoot = __dirname;
 
 	return {
@@ -235,14 +303,32 @@ export function mathBooksPlugin() {
 			server.middlewares.use(async (req, res, next) => {
 				const pathname = (req.url || '').split('?')[0];
 				const metaMatch = pathname === '/__math/meta';
-				const booksMatch = pathname.match(/^\/__math\/books\/([a-z_]+)$/);
-				const lutMatch = pathname.match(/^\/__math\/lut\/([a-z_]+)$/);
+				const costsMatch = pathname === '/__math/costs';
+				const booksMatch = pathname.match(/^\/__math\/books\/([a-z0-9_]+)$/);
+				const lutMatch = pathname.match(/^\/__math\/lut\/([a-z0-9_]+)$/);
 
-				if (!metaMatch && !booksMatch && !lutMatch) {
+				if (!metaMatch && !costsMatch && !booksMatch && !lutMatch) {
 					return next();
 				}
 
 				try {
+					if (costsMatch) {
+						const indexPath = path.join(publishDir, 'index.json');
+						res.setHeader('Content-Type', 'application/json');
+						res.setHeader('Cache-Control', 'no-store');
+						if (!fs.existsSync(indexPath)) {
+							res.statusCode = 404;
+							res.end(JSON.stringify({ error: 'mode costs not published' }));
+							return;
+						}
+						const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+						const costs = Object.fromEntries(
+							(index.modes ?? []).map((mode) => [mode.name, mode.cost]),
+						);
+						res.end(JSON.stringify(costs));
+						return;
+					}
+
 					if (metaMatch) {
 						const metaPath = cacheMetaPath(appRoot);
 						let revision = String(Date.now());
@@ -264,7 +350,7 @@ export function mathBooksPlugin() {
 					}
 
 					if (booksMatch) {
-						const file = ensureBooksJson(mode, libraryRoot, appRoot);
+						const file = ensureBooksJson(mode, publishDir, appRoot);
 						const body = fs.readFileSync(file, 'utf-8');
 						res.setHeader('Content-Type', 'application/json');
 						res.setHeader('Cache-Control', 'no-store');
@@ -272,9 +358,9 @@ export function mathBooksPlugin() {
 						return;
 					}
 
-					const booksFile = ensureBooksJson(mode, libraryRoot, appRoot);
+					const booksFile = ensureBooksJson(mode, publishDir, appRoot);
 					const books = JSON.parse(fs.readFileSync(booksFile, 'utf-8'));
-					const entries = loadLutEntries(mode, libraryRoot, appRoot, books.length);
+					const entries = loadLutEntries(mode, publishDir, appRoot, books.length);
 
 					res.setHeader('Content-Type', 'application/json');
 					res.setHeader('Cache-Control', 'no-store');

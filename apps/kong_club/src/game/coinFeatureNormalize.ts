@@ -1,9 +1,6 @@
-import { usesScaledBaseCoinFaces } from './coinFaceMode';
 import {
-	BASE_COIN_FACE_VALUES,
 	COIN_FACE_VALUES,
 	bookCoinKind,
-	coinFaceValuesFor,
 	formatCoinFaceLabel,
 	roundCoinFace,
 } from './coinFacePools';
@@ -13,7 +10,6 @@ import type { CoinFeatureActivation, CoinFeatureItem } from './typesBookEvent';
 import { capWinMultiplier } from './winCountTier';
 
 export {
-	BASE_COIN_FACE_VALUES,
 	COIN_FACE_VALUES,
 	formatCoinFaceLabel,
 } from './coinFacePools';
@@ -75,13 +71,10 @@ const ALL_COIN_FACES = new Set<number>([
 	...COIN_FACE_VALUES.CB,
 	...COIN_FACE_VALUES.CS,
 	...COIN_FACE_VALUES.CG,
-	...BASE_COIN_FACE_VALUES.CB,
-	...BASE_COIN_FACE_VALUES.CS,
-	...BASE_COIN_FACE_VALUES.CG,
 ]);
 
-/** Pool for the spin that is on screen. Base / Extra Chance shrink; free spins do not. */
-export const activeCoinFaceValues = () => coinFaceValuesFor(usesScaledBaseCoinFaces());
+/** The one coin table. Every mode uses it. */
+export const activeCoinFaceValues = () => COIN_FACE_VALUES;
 
 const coinSymbolForLevel = (level: number): CoinFeatureItem['symbol'] =>
 	tileLevelToCoinSymbol(level) ?? 'CB';
@@ -89,6 +82,9 @@ const coinSymbolForLevel = (level: number): CoinFeatureItem['symbol'] =>
 const formatNumericDisplay = (value: number): number => Math.round(value);
 
 const parseCoinFace = (raw: unknown): number => roundCoinFace(Number(raw));
+
+/** Every face in the shared bronze / silver / gold table. */
+type CoinFaceValue = (typeof COIN_FACE_VALUES)[keyof typeof COIN_FACE_VALUES][number];
 
 /** Snap a corrupted whole face onto the pool for this spin. Fractional book faces stay. */
 export const snapCoinFace = (raw: number, symbol: CoinFeatureItem['symbol']): number => {
@@ -98,7 +94,7 @@ export const snapCoinFace = (raw: number, symbol: CoinFeatureItem['symbol']): nu
 	const pool = activeCoinFaceValues();
 	const faces =
 		symbol === 'CG' ? pool.CG : symbol === 'CS' ? pool.CS : pool.CB;
-	let best = faces[0]!;
+	let best: CoinFaceValue = faces[0]!;
 	let bestDist = Math.abs(n - best);
 	for (const face of faces) {
 		const dist = Math.abs(n - face);
@@ -129,7 +125,7 @@ const powerSymbol = (kind: CoinFeatureItem['kind']): CoinFeatureItem['symbol'] =
 const normalizePowerItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatureItem => {
 	const kind = asKind(raw.kind);
 	const tileLevel = raw.tileLevel ?? raw.level ?? 1;
-	// Clovers are whole multipliers. Pots can hold a scaled sum (1.4, 0.6).
+	// Clovers are whole multipliers. Pots can hold a summed face (0.2, 0.5, 1000).
 	const readPower = kind === 'collector' ? parseCoinFace : formatNumericDisplay;
 	const value = capWinMultiplier(readPower(raw.value ?? raw.displayValue ?? 0));
 	const resolved = capWinMultiplier(
@@ -167,7 +163,7 @@ const normalizeCoinItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatu
 	const wholeFace = Math.round(rawFace);
 	const inPool = isWhole && ALL_COIN_FACES.has(wholeFace);
 
-	// Trust book faces (mode-scaled bonuses, MULTI products). Snap only corrupted whole ints.
+	// Trust book faces (0.2, 0.5, and MULTI products). Snap only corrupted whole ints.
 	const face = capWinMultiplier(
 		powerResolved || !isWhole || inPool
 			? rawFace

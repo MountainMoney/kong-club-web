@@ -882,10 +882,10 @@
 						Hear bonus
 					</button>
 					<button type="button" class="primary" disabled={busy} onclick={() => previewForceBonusMadnessSpin()}>
-						5 ST Madness
+						5 ST Speak No Evil
 					</button>
 					<button type="button" class="primary" disabled={busy} onclick={() => previewForceGambleHearSpin()}>
-						Gamble Hear
+						Mystery Bonus Hear
 					</button>
 					<button type="button" class="primary" disabled={busy} onclick={() => previewForceLiveMultiBook()}>
 						Live MULTI

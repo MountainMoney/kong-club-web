@@ -7,6 +7,7 @@
 	import SymbolWrap from './SymbolWrap.svelte';
 	import { getSymbolInfo, getSymbolX, getSymbolY } from '../game/utils';
 	import {
+		cellCoverKey,
 		isCoinCellCovered,
 		isPreCoinShrinkCell,
 		PRE_COIN_SHRINK_MS,
@@ -47,7 +48,11 @@
 	const shrinkScale = new Tween(1);
 	const shrinkAlpha = new Tween(1);
 	const coverAlpha = $derived(hideSitting ? 0 : 1);
+	const tileFlipX = $derived(
+		stateCoinFeatureCover.flipScaleX[cellCoverKey(props.reelIndex, homeRow)],
+	);
 	let connectScale = $state(1);
+	let linkAlpha = $state(1);
 	let landBreathe = $state(1);
 	let landBreatheArmed = false;
 	let landBreatheRaf = 0;
@@ -88,15 +93,14 @@
 	};
 
 	onMount(() => () => cancelAnimationFrame(landBreatheRaf));
-	const connectBeat = $derived.by(() => {
-		stateClusterConnectMotion.epoch;
-		return stateClusterConnectMotion.byKey[`${props.reelIndex}:${homeRow}`];
-	});
-
 	$effect(() => {
-		const beat = connectBeat;
+		const beat = stateClusterConnectMotion.byKey[`${props.reelIndex}:${homeRow}`];
+		const others =
+			stateClusterConnectMotion.epoch >= 0 &&
+			Object.keys(stateClusterConnectMotion.byKey).length > 0;
 		if (isPadding || !beat) {
 			connectScale = 1;
+			linkAlpha = others ? 0.55 : 1;
 			return;
 		}
 
@@ -104,15 +108,19 @@
 		const tick = () => {
 			if (stateSpinSkip.forceSkip || beat.duration <= 0) {
 				connectScale = 1;
+				linkAlpha = 1;
 				return;
 			}
 			const t = Math.min(1, (performance.now() - beat.startedAt) / beat.duration);
+			const eased = t * t * (3 - 2 * t);
+			linkAlpha = 0.72 + 0.28 * eased;
 			connectScale = 1 + (CLUSTER_CONNECT_SCALE_PEAK - 1) * Math.sin(t * Math.PI);
 			if (t < 1) {
 				raf = requestAnimationFrame(tick);
 				return;
 			}
 			connectScale = 1;
+			linkAlpha = 1;
 		};
 		tick();
 		return () => cancelAnimationFrame(raf);
@@ -171,8 +179,9 @@
 <SymbolWrap
 	x={getSymbolX(props.reelIndex)}
 	y={props.reelSymbol.symbolY.current}
-	scale={shrinkScale.current * connectScale * landBreathe}
-	alpha={shrinkAlpha.current * coverAlpha}
+	scaleX={(tileFlipX ?? 1) * shrinkScale.current * connectScale * landBreathe}
+	scaleY={shrinkScale.current * connectScale * landBreathe}
+	alpha={shrinkAlpha.current * coverAlpha * linkAlpha}
 	animating={symbolInfo.type === 'spine' &&
 		symbolInfo.assetKey !== 'coinMetal' &&
 		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}

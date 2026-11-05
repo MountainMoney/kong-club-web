@@ -175,8 +175,15 @@ export async function findFirstBookWithScatterCount(
 	return idx >= 0 ? idx : null;
 }
 
-const MADNESS_TRIGGER_STATES = new Set(['start_bonus_madness', 'organic_bonus_madness']);
-const MADNESS_TRIGGER_MODES = ['bonus_gamble', 'base', 'base_ante'] as const;
+const SPEAK_TRIGGER_STATES = new Set([
+	'start_bonus_madness',
+	'organic_bonus_madness',
+	'start_bonus_speak',
+	'organic_bonus_speak',
+	'start_bonus_speak_no_evil',
+	'organic_bonus_speak_no_evil',
+]);
+const MADNESS_TRIGGER_MODES = ['bonus_pick', 'bonus_risky', 'base', 'base_ante'] as const;
 
 const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');
@@ -184,7 +191,7 @@ const isMadnessTriggerBook = (book: MathBook) => {
 	if (scatterPositionsFromBoard(reveal.board).length < 5) return false;
 	const modeEvent = book.events.find(isModeStateBookEvent);
 	if (!modeEvent) return false;
-	return MADNESS_TRIGGER_STATES.has(modeEvent.state);
+	return SPEAK_TRIGGER_STATES.has(modeEvent.state) || modeEvent.state.toLowerCase().includes('speak');
 };
 
 /** Trigger book only — not a mid-bonus FS row that still has tablets on a kept board. */

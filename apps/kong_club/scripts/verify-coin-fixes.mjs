@@ -8,13 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 import { shouldRetireCoinView } from '../src/game/coinViewLifetime.ts';
 import {
-	BASE_COIN_FACE_VALUES,
 	COIN_FACE_VALUES,
 	bookCoinKind,
+	coinFaceBands,
 	coinValueRulesSentence,
 	formatCoinFaceLabel,
-	roundCoinFace,
-	scaledBaseCoinFaces,
 } from '../src/game/coinFacePools.ts';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -115,30 +113,33 @@ for (const entry of books) {
 }
 if (activations === 0) fail('no feature-spin activations scanned');
 
-const scaleFace = (face) => roundCoinFace(face * 0.2);
+const EXPECTED_FACES = {
+	CB: [0.2, 0.5, 1, 2, 3, 4],
+	CS: [5, 10, 15, 20],
+	CG: [25, 50, 100, 250, 500, 1000],
+};
 for (const symbol of ['CB', 'CS', 'CG']) {
-	const scaled = COIN_FACE_VALUES[symbol].map(scaleFace);
-	const expected = BASE_COIN_FACE_VALUES[symbol];
-	if (scaled.length !== expected.length || scaled.some((face, i) => face !== expected[i])) {
-		fail(`${symbol} scaled pool ${scaled} != ${expected}`);
+	const faces = COIN_FACE_VALUES[symbol];
+	const expected = EXPECTED_FACES[symbol];
+	if (faces.length !== expected.length || faces.some((face, i) => face !== expected[i])) {
+		fail(`${symbol} pool ${faces} != ${expected}`);
 	}
 }
-if (!scaledBaseCoinFaces('base', 'basegame') || !scaledBaseCoinFaces('base_ante', 'basegame')) {
-	fail('base and base_ante base games must use the 0.20× faces');
+const bands = coinFaceBands();
+if (bands.silver !== 5 || bands.gold !== 25) {
+	fail(`metal bands must stay 5 / 25, got ${bands.silver} / ${bands.gold}`);
 }
-if (scaledBaseCoinFaces('base', 'freegame') || scaledBaseCoinFaces('base_ante', 'freegame')) {
-	fail('free spins inside base and ante keep the integer faces');
+if (
+	formatCoinFaceLabel(0.2) !== '0.2' ||
+	formatCoinFaceLabel(0.5) !== '0.5' ||
+	formatCoinFaceLabel(1000) !== '1000'
+) {
+	fail(
+		`new face labels got ${formatCoinFaceLabel(0.2)}, ${formatCoinFaceLabel(0.5)}, ${formatCoinFaceLabel(1000)}`,
+	);
 }
-for (const mode of ['feature_spin', 'peak_spin', 'bonus_see', 'bonus_hear', 'bonus_gamble']) {
-	if (scaledBaseCoinFaces(mode, 'basegame') || scaledBaseCoinFaces(mode, 'freegame')) {
-		fail(`${mode} must keep the integer faces`);
-	}
-}
-if (formatCoinFaceLabel(0.2) !== '0.2' || formatCoinFaceLabel(1.4) !== '1.4') {
-	fail(`decimal labels got ${formatCoinFaceLabel(0.2)} and ${formatCoinFaceLabel(1.4)}`);
-}
-if (formatCoinFaceLabel(1) !== '1' || formatCoinFaceLabel(100) !== '100' || formatCoinFaceLabel(0.6) !== '0.6') {
-	fail('face labels dropped an integer or a tenth');
+if (formatCoinFaceLabel(1) !== '1' || formatCoinFaceLabel(100) !== '100' || formatCoinFaceLabel(20) !== '20') {
+	fail('face labels dropped an integer');
 }
 if (bookCoinKind('clover') !== 'multiplier' || bookCoinKind('pot') !== 'collector') {
 	fail('live book kinds clover/pot must map to multiplier/collector');
@@ -147,8 +148,15 @@ if (bookCoinKind('coin') !== 'coin' || bookCoinKind('multiplier') !== 'multiplie
 	fail('older book kinds must stay');
 }
 const rules = coinValueRulesSentence(false);
-if (!rules.includes('0.2, 0.4, 0.6, 0.8') || !rules.includes('1, 1.4, 2, 3, 4') || !rules.includes('25, 50, 100, 250, 500')) {
-	fail(`rules sentence missing a pool: ${rules}`);
+if (
+	!rules.includes('0.2, 0.5, 1, 2, 3, 4') ||
+	!rules.includes('5, 10, 15, 20') ||
+	!rules.includes('25, 50, 100, 250, 500, 1000')
+) {
+	fail(`rules sentence missing the shared pool: ${rules}`);
+}
+if (/0\.4|0\.6|0\.8|1\.4|\b7\b/.test(rules)) {
+	fail(`rules sentence still lists a retired face: ${rules}`);
 }
 
-console.log(`ok: coin lifetime, winInfo call, ${activations} feature-spin payouts match, base faces ×0.20`);
+console.log(`ok: coin lifetime, winInfo call, ${activations} feature-spin payouts match, one coin table`);

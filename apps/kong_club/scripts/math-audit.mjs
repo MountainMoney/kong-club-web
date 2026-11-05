@@ -24,17 +24,20 @@ const PUBLISH_DIR = path.resolve(
 const MODE_COST = {
 	base: 1,
 	base_ante: 1.4,
-	feature_spin: 65,
-	peak_spin: 1400,
-	bonus_see: 115,
-	bonus_hear: 250,
-	bonus_gamble: 380,
+	hunt_2: 5,
+	hunt_3: 6,
+	hunt_4: 10,
+	hunt_5: 25,
+	feature_spin: 75,
+	peak_spin: 1000,
+	bonus_see: 100,
+	bonus_hear: 300,
+	bonus_pick: 330,
+	bonus_risky: 500,
 };
 
 const HARD_FACES = new Set([
-	1, 2, 3, 4, 5, 7, 10, 15, 20, 25, 50, 100, 250, 500,
-	// Base / Extra Chance base-game faces are the integer pool × 0.20.
-	0.2, 0.4, 0.6, 0.8, 1.4,
+	0.2, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000,
 ]);
 
 export function lutPathForMode(mode) {

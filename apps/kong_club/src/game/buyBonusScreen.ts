@@ -90,7 +90,7 @@ const MEASURED_PAYOUT_STD: Record<string, number> = {
 	peak_spin: 1463.12,
 	bonus_see: 398.66,
 	bonus_hear: 546.97,
-	bonus_gamble: 4468.38,
+	bonus_mystery: 4468.38,
 };
 
 export const volatilityLabelFromStd = (std: number): string => {
@@ -100,8 +100,12 @@ export const volatilityLabelFromStd = (std: number): string => {
 	return 'Volatility: Very High';
 };
 
-export const volatilityForMode = (mode: string): string =>
-	volatilityLabelFromStd(MEASURED_PAYOUT_STD[mode] ?? 0);
+export const volatilityForMode = (mode: string): string => {
+	const key = mode === 'hunt' ? 'base' : mode;
+	const std = MEASURED_PAYOUT_STD[key];
+	if (std == null) return '';
+	return volatilityLabelFromStd(std);
+};
 
 /** GG-style star row: Low 2, Medium 3, High 4, Very High 5. */
 export const volatilityStarCount = (label: string) => {
@@ -120,8 +124,8 @@ export const volatilityCaps = (label: string) =>
 export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: ANTE_BET_MODE_KEY,
-		title: 'EXTRA CHANCE',
-		description: `Double the base bonus chance: about 1 in 130 spins instead of about 1 in 260, for ${extraChanceCostLabel()} base bet.`,
+		title: 'ANTE',
+		description: `Extra Chance. Raises the bonus chance for ${extraChanceCostLabel()} bet. The bar fills at 10.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'extraChance' },
 		volatility: volatilityForMode(ANTE_BET_MODE_KEY),
@@ -130,7 +134,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: 'feature_spin',
 		title: 'FEATURE SPIN',
-		description: `Each spin costs ${config.betModes.feature_spin.cost}× bet with the Progress Bar filled. Every spin lands a 5+ cluster, then the coin game after tumbles stop.`,
+		description: `Each spin costs ${config.betModes.feature_spin.cost}× bet and lands at least one connection. It cannot trigger a bonus.`,
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'featureSpin' },
 		volatility: volatilityForMode('feature_spin'),
@@ -139,7 +143,7 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 	{
 		mode: 'peak_spin',
 		title: 'TRIFECTA SPIN',
-		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts Gold. After it lands the bar fills. It can dump, or hit full and play the coin game.`,
+		description: `Each spin costs ${config.betModes.peak_spin.cost}× bet. The whole board starts gold. A connection plays one coin game. It cannot trigger a bonus.`,
 		imageSrc: '/assets/sprites/monkeySymbols/CG.png',
 		iconLayout: { kind: 'summitSpin' },
 		volatility: volatilityForMode('peak_spin'),
@@ -164,12 +168,12 @@ export const BUY_BONUS_CARDS: BuyBonusCardDef[] = [
 		buttonColor: '#FF8A3D',
 	},
 	{
-		mode: 'bonus_gamble',
-		title: 'GAMBLE',
-		description: `Each spin costs ${config.betModes.bonus_gamble.cost}× bet. 50% dead spin, 40% 4 scatters (Hear No Evil), 10% 5 scatters (Monkey Madness).`,
+		mode: 'bonus_pick',
+		title: 'MYSTERY BONUS',
+		description: `Buy Mystery Bonus for ${config.betModes.bonus_pick.cost}× bet. Guaranteed bonus: 50% See No Evil, 45% Hear No Evil, 5% Speak No Evil.`,
 		imageSrc: '/assets/sprites/monkeySymbols/ST.png',
 		iconLayout: { kind: 'scatter', count: 5 },
-		volatility: volatilityForMode('bonus_gamble'),
+		volatility: volatilityForMode('bonus_pick'),
 		buttonColor: '#FF5AD1',
 	},
 ];
@@ -189,7 +193,7 @@ export { isActivateBetMode };
 
 /** Feature and TRIFECTA stay on. See, Hear, and Gamble are scatter buys. */
 export const buyBonusCardActionKind = (mode: string): 'buy' | 'activate' => {
-	if (mode === 'bonus_gamble') return 'buy';
+	if (mode === 'bonus_pick') return 'buy';
 	return isActivateBetMode(mode) ? 'activate' : 'buy';
 };
 

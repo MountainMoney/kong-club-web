@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import type { Container as PixiContainer, FederatedPointerEvent } from 'pixi.js';
 	import { Container, Graphics, Rectangle } from 'pixi-svelte';
-	import { Tween } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
 
 	import { BONUS_BUY, BONUS_BUY_COLOR } from '../../game/ggUi/constants';
 
@@ -26,16 +24,20 @@
 	const S = BONUS_BUY.slider;
 	const seg = S.segment;
 
-	const shown = new Tween(
-		untrack(() => level),
-		{ duration: 150, easing: cubicOut },
-	);
-	$effect(() => {
-		shown.set(level);
-	});
-
 	const pitch = $derived((width - seg.inset * 2) / levels);
 	const zone = $derived(width / levels);
+	const hitHeight = S.height + S.hit * 2;
+
+	const levelAt = (localX: number) => {
+		const index = Math.min(levels - 1, Math.max(0, Math.floor(localX / zone)));
+		return index + 1;
+	};
+
+	let dragging = false;
+	const pick = (event: FederatedPointerEvent) => {
+		const localX = event.getLocalPosition(event.currentTarget as PixiContainer).x;
+		onslide(levelAt(localX));
+	};
 </script>
 
 <Container {x} {y}>
@@ -64,11 +66,11 @@
 			}
 			graphics.fill({ color: BONUS_BUY_COLOR.ink, alpha: seg.alpha });
 			graphics
-				.roundRect(seg.inset, seg.inset, shown.current * pitch, seg.height, seg.radius)
+				.roundRect(seg.inset, seg.inset, level * pitch, seg.height, seg.radius)
 				.fill({ color: BONUS_BUY_COLOR.text, alpha: seg.fillAlpha });
 			graphics
 				.roundRect(
-					seg.inset + shown.current * pitch - S.thumb.size / 2,
+					seg.inset + level * pitch - S.thumb.size / 2,
 					(S.height - S.thumb.size) / 2,
 					S.thumb.size,
 					S.thumb.size,
@@ -77,19 +79,24 @@
 				.fill(BONUS_BUY_COLOR.text);
 		}}
 	/>
-	<!-- One hit zone per level: press or drag across them to pick one. -->
-	{#each Array.from({ length: levels }, (__, index) => index) as index (index)}
-		<Rectangle
-			x={index * zone}
-			y={-S.hit}
-			width={zone}
-			height={S.height + S.hit * 2}
-			backgroundColor={0x000000}
-			backgroundAlpha={0.001}
-			eventMode="static"
-			cursor="pointer"
-			onpointerdown={() => onslide(index + 1)}
-			onpointerover={(event) => event.buttons & 1 && onslide(index + 1)}
-		/>
-	{/each}
+	<!-- One track. A press or a drag snaps to the segment under the pointer. -->
+	<Rectangle
+		y={-S.hit}
+		{width}
+		height={hitHeight}
+		backgroundColor={0x000000}
+		backgroundAlpha={0.001}
+		eventMode="static"
+		cursor="pointer"
+		onpointerdown={(event) => {
+			dragging = true;
+			pick(event);
+		}}
+		onglobalpointermove={(event) => {
+			if (!dragging) return;
+			pick(event);
+		}}
+		onpointerup={() => (dragging = false)}
+		onpointerupoutside={() => (dragging = false)}
+	/>
 </Container>

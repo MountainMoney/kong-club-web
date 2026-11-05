@@ -157,15 +157,19 @@ export const MONKEY_MASCOT = {
 	spineSize: { w: 647.1044, h: 933.3954 },
 	/** Setup-pose AABB min Y. Root is above the soles; pin soles to the stump. */
 	spineBoundsMinY: -70.52268,
-	/** Spine sit on the stump (lab 2026-08-30). Extra on top of stumpNudge. */
-	spineNudge: { x: 39, y: -32 },
 	/**
-	 * Stump cut-face center in `jungle_bg.png` (cover-fitted).
-	 * Y is the flat top — not the grass at the stump base.
+	 * Vertical sit only. X stays 0 so the feet stay on the plate point below
+	 * at every aspect — a main-pixel X nudge drifts off the stump when the
+	 * playfield is contain-fit and the jungle is cover-fit.
 	 */
-	stumpBgRatio: { x: 0.912, y: 0.84 },
-	/** Fine-tune after bg→main conversion (main-layout px at 1422×800). */
-	stumpNudge: { x: 8, y: 18 },
+	spineNudge: { x: 0, y: -32 },
+	/**
+	 * Pale cut-face center of `jungle_bg_layer5.png` (1920×1080).
+	 * Measured ellipse bbox 1538–1891 × 850–948. Y is on the standing surface.
+	 */
+	stumpBgRatio: { x: 0.893, y: 0.84 },
+	/** Vertical only, in main px. Horizontal seat is `stumpBgRatio`. */
+	stumpNudge: { x: 0, y: 18 },
 } as const;
 
 /**
@@ -199,7 +203,8 @@ export const PROGRESS_BAR_FILL_RECT = { x: 334, y: 138, w: 897, h: 34 } as const
 
 /** Top-slot meter — board-local, same transform as wood/vines. */
 export const MONKEY_PROGRESS_BAR = {
-	zIndex: 12,
+	/** Under the vine frame (z 100) so the meter shows through the top slot. */
+	zIndex: 90,
 } as const;
 
 /** Full-canvas bar overlay aligned to BOARD_FRAME_INNER (slot sits above the 6×5). */
@@ -295,17 +300,12 @@ export const getMonkeyMascotLayout = (
 	const mainY = 'y' in main && 'scale' in main ? main.y : canvasH / 2;
 	const mainScale = 'scale' in main ? main.scale : 1;
 
-	let feetX =
+	// Do not clamp into the main rect. On a wide fullscreen the cover-fitted
+	// stump sits past the 16:9 playfield, and clamping walked the monkey off it.
+	const feetX =
 		main.width * 0.5 + (stumpCanvasX - mainX) / mainScale + m.stumpNudge.x;
-	let feetY =
+	const feetY =
 		main.height * 0.5 + (stumpCanvasY - mainY) / mainScale + m.stumpNudge.y;
-
-	const maxX = main.width - width * 0.35;
-	const minX = width * 0.35;
-	const maxY = main.height - 8;
-	const minY = height * 0.55;
-	feetX = Math.min(maxX, Math.max(minX, feetX));
-	feetY = Math.min(maxY, Math.max(minY, feetY));
 
 	return { x: feetX, y: feetY, width, height };
 };

@@ -1,12 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { Container, Graphics } from 'pixi-svelte';
-	import { GlowFilter } from 'pixi-filters';
-
 	import SymbolSpine from './SymbolSpine.svelte';
 	import SymbolSprite from './SymbolSprite.svelte';
 	import type { SymbolState, RawSymbol } from '../game/types';
-	import { SYMBOL_SIZE } from '../game/constants';
 	import { getSymbolInfo } from '../game/utils';
 	import { getContext } from '../game/context';
 
@@ -34,40 +29,6 @@
 		if (!spineLoops && !coinHandshake) return;
 		queueMicrotask(() => props.oncomplete?.());
 	});
-	const showWinFrame = $derived(
-		['win', 'postWinStatic'].includes(props.state) &&
-			!['ST', 'MW'].includes(props.rawSymbol.name),
-	);
-
-	const frameW = SYMBOL_SIZE * 0.92;
-	const frameH = SYMBOL_SIZE * 0.92;
-	let edgeAlpha = $state(0.85);
-	let raf = 0;
-	const frameGlow = new GlowFilter({
-		distance: 14,
-		outerStrength: 1.35,
-		innerStrength: 0.12,
-		color: 0xffd56a,
-		quality: 0.3,
-	});
-
-	const drawWinFrame = $derived((g: import('pixi.js').Graphics) => {
-		g.clear();
-		g.roundRect(-frameW / 2, -frameH / 2, frameW, frameH, 10);
-		g.stroke({ color: 0xffe08a, width: 3, alpha: edgeAlpha });
-	});
-
-	onMount(() => {
-		const start = performance.now();
-		const tick = () => {
-			const wave = (Math.sin(((performance.now() - start) / 1000) * Math.PI * 2) + 1) / 2;
-			edgeAlpha = 0.55 + wave * 0.4;
-			frameGlow.outerStrength = 1.05 + wave * 0.7;
-			raf = requestAnimationFrame(tick);
-		};
-		tick();
-		return () => cancelAnimationFrame(raf);
-	});
 </script>
 
 {#if isSprite && symbolInfo}
@@ -76,7 +37,6 @@
 		x={props.x}
 		y={props.y}
 		state={props.state}
-		highlight={['win', 'postWinStatic'].includes(props.state)}
 		oncomplete={props.oncomplete}
 	/>
 {:else if symbolInfo}
@@ -94,10 +54,4 @@
 			},
 		}}
 	/>
-{/if}
-
-{#if showWinFrame}
-	<Container x={props.x ?? 0} y={props.y ?? 0} filters={[frameGlow]}>
-		<Graphics draw={drawWinFrame} />
-	</Container>
 {/if}
