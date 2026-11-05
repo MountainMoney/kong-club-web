@@ -17,7 +17,7 @@ import {
 	volatilityStarCount,
 } from '../buyBonusScreen';
 import { bonusDescriptionCopy, paytableModeLabel, type PaytableModeKey } from '../socialCopy';
-import { HUNT_LEVELS, stateHunt, statePublishedCosts } from '../stateHunt.svelte';
+import { HUNT_LEVELS, huntOddsLine, stateHunt, statePublishedCosts } from '../stateHunt.svelte';
 import { BONUS_BUY } from './constants';
 
 export type CardCut = 'desktop' | 'wide' | 'mobile' | 'confirm';
@@ -112,8 +112,8 @@ const offerSeeds = (): OfferSeed[] => {
 			artSize: { width: 512, height: 512 },
 			theme: 'Hear',
 			title: 'Hunt Spins',
-			body: `${times(hunt)} bet. Higher stops raise the bonus chance.`,
-			detail: `Hunt Spins stay on until you turn them off. This stop costs ${times(hunt)} bet. The bar fills at 10, same as the base game. It cannot be on together with Ante, Feature Spin or Trifecta.`,
+			body: `${times(config.betModes.hunt_2.cost)}–${times(config.betModes.hunt_5.cost)}× cost with more exclusive bonus access.`,
+			detail: huntOddsLine(huntLevel),
 			price: hunt,
 			slider: {
 				level: huntIndex + 1,
@@ -180,13 +180,13 @@ const offerSeeds = (): OfferSeed[] => {
 };
 
 /**
- * Same GG grid as Gaia's Grotto: a wide Ante card and a wide Hunt Spins
- * card on top, then two rows of three. Only one toggle is on at a time.
+ * Mystery and the big buys sit on the top row. Ante and Hunt are the wide
+ * modifier row underneath. Only one toggle is on at a time.
  */
 const GRID: { ids: string[]; wide: boolean }[] = [
+	{ ids: [GAMBLE_BET_MODE_KEY, RISKY_MYSTERY_BET_MODE_KEY, 'bonus_hear'], wide: false },
+	{ ids: ['bonus_see', FEATURE_SPIN_BET_MODE_KEY, PEAK_SPIN_BET_MODE_KEY], wide: false },
 	{ ids: [ANTE_BET_MODE_KEY, HUNT_BET_MODE_KEY], wide: true },
-	{ ids: [FEATURE_SPIN_BET_MODE_KEY, PEAK_SPIN_BET_MODE_KEY, 'bonus_see'], wide: false },
-	{ ids: ['bonus_hear', GAMBLE_BET_MODE_KEY, RISKY_MYSTERY_BET_MODE_KEY], wide: false },
 ];
 
 export const slotOf = (offer: BonusOffer) => {

@@ -21,8 +21,12 @@ const symbolSprite = (file: string) => ({
 const uiSprite = (file: string) => sprite(`monkey/ui/${file}`);
 
 export default {
+	/**
+	 * Mid forest only (`jungle_bg_layer2`). The flattened `jungle_bg.png`
+	 * bakes the foreground trunks, which then sit beside the swaying spine.
+	 */
 	jungleBackground: {
-		...sprite('sprites/background/jungle_bg.png'),
+		...sprite('sprites/background/jungle_bg_layer2.png'),
 		preload: true,
 	},
 	/** Painted sky — clouds and far hills, behind the transparent forest plate. */

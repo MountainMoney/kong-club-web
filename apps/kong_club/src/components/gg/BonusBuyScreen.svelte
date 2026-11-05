@@ -210,6 +210,7 @@
 
 <Container
 	visible={open}
+	zIndex={200}
 	eventMode="static"
 	onpointerdown={(event) => {
 		if (layout.compact) drag = { from: event.global.y, scroll: offset };
@@ -263,7 +264,7 @@
 					style={{
 						fontFamily: UI_FONT_FAMILY,
 						fontSize: BONUS_BUY.detail.size,
-						fontWeight: '600',
+						fontWeight: '700',
 						fill: BONUS_BUY_COLOR.text,
 						align: 'center',
 						lineHeight: BONUS_BUY.detail.lineHeight,

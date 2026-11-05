@@ -28,6 +28,7 @@
 		tileLevelToTier,
 	} from '../game/tileLevelVisual';
 	import { getSymbolX } from '../game/utils';
+	import { CLUSTER_CONNECT_MOTION_MS } from '../game/clusterConnectionTempo';
 	import { getContext } from '../game/context';
 	import { stateGame } from '../game/stateGame.svelte';
 	import {
@@ -205,24 +206,25 @@
 		y0: number,
 		tier: 'bronze' | 'silver' | 'gold',
 		scaleX = 1,
+		alpha = 1,
 	) => {
 		const style = TIER_CELL_STYLE[tier];
 		const width = CELL * scaleX;
 		const left = x0 + (CELL - width) / 2;
 		g.rect(left, y0, width, CELL);
-		g.fill({ color: style.frame, alpha: style.alpha });
+		g.fill({ color: style.frame, alpha: style.alpha * alpha });
 		const innerW = Math.max(0, width - FRAME * 2);
 		const inner = CELL - FRAME * 2;
 		g.rect(left + FRAME * scaleX, y0 + FRAME, innerW, inner);
-		g.fill({ texture: wellTextures[tier], textureSpace: 'local' });
+		g.fill({ texture: wellTextures[tier], textureSpace: 'local', alpha });
 		g.rect(left, y0, width, 1);
-		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
+		g.fill({ color: 0x2a1a0c, alpha: 0.7 * alpha });
 		g.rect(left, y0, Math.max(1, scaleX), CELL);
-		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
+		g.fill({ color: 0x2a1a0c, alpha: 0.7 * alpha });
 		g.rect(left, y0 + CELL - 1, width, 1);
-		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
+		g.fill({ color: 0x2a1a0c, alpha: 0.7 * alpha });
 		g.rect(left + width - Math.max(1, scaleX), y0, Math.max(1, scaleX), CELL);
-		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
+		g.fill({ color: 0x2a1a0c, alpha: 0.7 * alpha });
 	};
 
 	/** Cached — `draw` can run every frame; a new FillGradient each time leaks textures. */
@@ -313,9 +315,12 @@
 				if (peakPlate && pulse <= 0 && bump <= 0) continue;
 
 				const stored = reel[rowIndex] ?? 0;
-				const level = stored > 0 ? stored : pendingMap[key] ?? 0;
+				const pendingLevel = pendingMap[key] ?? 0;
+				const level = stored > 0 ? stored : pendingLevel;
 				const tier = tileLevelToTier(level);
 				if (tier === 'none') continue;
+				const plaqueAlpha = stored > 0 ? 1 : pulse;
+				if (plaqueAlpha <= 0.02) continue;
 
 				const x = getSymbolX(reelIndex);
 				const y = (rowIndex + 0.5) * SYMBOL_SIZE;
@@ -337,7 +342,7 @@
 					});
 				}
 				if (!peakPlate) {
-					drawPlaque(g, x0, y0, tier, flipX ?? 1);
+					drawPlaque(g, x0, y0, tier, flipX ?? 1, plaqueAlpha);
 				} else {
 					g.rect(x0 + 1, y0 + 1, CELL - 2, CELL - 2);
 					g.stroke({
@@ -410,27 +415,34 @@
 			fadeTilesAway();
 		},
 		monkeyTileWinPulse: (event) => {
-			const nextPulse = { ...winPulse };
+			const keys: string[] = [];
 			const nextPending = { ...pending };
 			for (const pos of event.positions) {
 				const reel = pos.reel;
 				const row = pos.row;
 				if (reel < 0 || row < 0) continue;
 				const key = cellKey(reel, row);
-				nextPulse[key] = 1;
+				keys.push(key);
 				if ((tileLevels[reel]?.[row] ?? 0) <= 0) {
 					nextPending[key] = stateGame.sessionBonusTier === 3 ? 2 : 1;
 				}
 			}
-			winPulse = nextPulse;
 			pending = nextPending;
+			const started = performance.now();
+			const fadeIn = () => {
+				const t = Math.min(1, (performance.now() - started) / CLUSTER_CONNECT_MOTION_MS);
+				const eased = t * t * (3 - 2 * t);
+				const nextPulse = { ...winPulse };
+				for (const key of keys) nextPulse[key] = eased;
+				winPulse = nextPulse;
+				if (t < 1) requestAnimationFrame(fadeIn);
+			};
+			fadeIn();
 			setTimeout(() => {
 				const faded = { ...winPulse };
-				for (const pos of event.positions) {
-					delete faded[cellKey(pos.reel, pos.row)];
-				}
+				for (const key of keys) delete faded[key];
 				winPulse = faded;
-			}, 520);
+			}, CLUSTER_CONNECT_MOTION_MS + 200);
 		},
 		monkeyTileWinPulseClear: () => {
 			winPulse = {};
