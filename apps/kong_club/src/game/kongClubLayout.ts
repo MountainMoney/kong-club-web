@@ -157,15 +157,19 @@ export const MONKEY_MASCOT = {
 	spineSize: { w: 647.1044, h: 933.3954 },
 	/** Setup-pose AABB min Y. Root is above the soles; pin soles to the stump. */
 	spineBoundsMinY: -70.52268,
-	/** Spine sit on the stump (lab 2026-08-30). Extra on top of stumpNudge. */
-	spineNudge: { x: 39, y: -32 },
 	/**
-	 * Stump cut-face center in `jungle_bg.png` (cover-fitted).
-	 * Y is the flat top — not the grass at the stump base.
+	 * Vertical sit only. X stays 0 so the feet stay on the plate point below
+	 * at every aspect — a main-pixel X nudge drifts off the stump when the
+	 * playfield is contain-fit and the jungle is cover-fit.
 	 */
-	stumpBgRatio: { x: 0.912, y: 0.84 },
-	/** Fine-tune after bg→main conversion (main-layout px at 1422×800). */
-	stumpNudge: { x: 8, y: 18 },
+	spineNudge: { x: 0, y: -32 },
+	/**
+	 * Pale cut-face center of `jungle_bg_layer5.png` (1920×1080).
+	 * Measured ellipse bbox 1538–1891 × 850–948. Y is on the standing surface.
+	 */
+	stumpBgRatio: { x: 0.893, y: 0.84 },
+	/** Vertical only, in main px. Horizontal seat is `stumpBgRatio`. */
+	stumpNudge: { x: 0, y: 18 },
 } as const;
 
 /**

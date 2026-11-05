@@ -49,20 +49,25 @@ export const coverPlate = (
 	canvasH: number,
 	plateW: number,
 	plateH: number,
+	/** Extra canvas pixels past the viewport so a subpixel edge cannot show the page. */
+	bleed = 0,
 ): CoverRect => {
-	const scale = Math.max(canvasW / plateW, canvasH / plateH);
+	const scale = Math.max((canvasW + bleed) / plateW, (canvasH + bleed) / plateH);
 	return {
 		x: canvasW / 2,
 		y: canvasH / 2,
-		width: plateW * scale,
-		height: plateH * scale,
+		width: Math.ceil(plateW * scale),
+		height: Math.ceil(plateH * scale),
 		anchor: 0.5,
 		scale,
 	};
 };
 
+/** Two pixels past every edge. Kills the left-edge seam without a second scale. */
+export const JUNGLE_COVER_BLEED = 4;
+
 export const jungleCover = (canvasW: number, canvasH: number): CoverRect =>
-	coverPlate(canvasW, canvasH, JUNGLE_PLATE.w, JUNGLE_PLATE.h);
+	coverPlate(canvasW, canvasH, JUNGLE_PLATE.w, JUNGLE_PLATE.h, JUNGLE_COVER_BLEED);
 
 /**
  * Park a spine whose marker attachment is the jungle plate.
