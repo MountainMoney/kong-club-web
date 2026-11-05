@@ -28,12 +28,12 @@ const MODE_COST = {
 	hunt_3: 6,
 	hunt_4: 10,
 	hunt_5: 25,
-	feature_spin: 125.3726,
-	peak_spin: 7947.4039,
-	bonus_see: 194.364,
-	bonus_hear: 816.5175,
-	bonus_pick: 936.3731,
-	bonus_risky: 1057.9378,
+	feature_spin: 75,
+	peak_spin: 1000,
+	bonus_see: 100,
+	bonus_hear: 300,
+	bonus_pick: 330,
+	bonus_risky: 500,
 };
 
 const HARD_FACES = new Set([
