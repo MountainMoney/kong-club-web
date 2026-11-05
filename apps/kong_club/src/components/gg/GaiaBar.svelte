@@ -13,6 +13,7 @@
 	import { getSpinSpeedDisplayTier } from '../../game/spinSpeed.svelte';
 	import { isAutoplayDisabled, isSpinSpeedControlDisabled } from '../../game/jurisdiction';
 	import { isActivateBetMode } from '../../game/betModes';
+	import { huntLevelFromModeKey } from '../../game/stateHunt.svelte';
 	import {
 		freeSpinProgressLabel,
 		freeSpinsToolbarLabel,
@@ -121,6 +122,8 @@
 	const modeOn = $derived(isActivateBetMode(stateBet.activeBetModeKey));
 	const betLabel = $derived.by(() => {
 		if (!modeOn) return toolbarLabel('bet');
+		const huntLevel = huntLevelFromModeKey(stateBet.activeBetModeKey);
+		if (huntLevel) return `HUNT SPINS ${huntLevel}`;
 		const key = stateBet.activeBetModeKey as PaytableModeKey;
 		return paytableModeLabel(key).toUpperCase();
 	});
@@ -219,6 +222,36 @@
 	/>
 {/snippet}
 
+{#snippet bonusButton(x: number, y: number, compact = false)}
+	<UiButton onpress={bonusPress} disabled={locked}>
+		<Sprite key={compact ? 'ggUiMobileLogo' : 'ggUiLogo'} {x} {y} />
+		{#if modeOn}
+			<Rectangle
+				x={x + (compact ? 10 : 36)}
+				y={y + (compact ? 16 : 28)}
+				width={compact ? 49 : 88}
+				height={compact ? 44 : 72}
+				borderRadius={compact ? 8 : 12}
+				backgroundColor={0x101010}
+			/>
+			<Text
+				text="×"
+				x={x + (compact ? 34 : 80)}
+				y={y + (compact ? 28 : 46)}
+				anchor={0.5}
+				style={font(compact ? 22 : 32, UI_COLOR.accent)}
+			/>
+			<Text
+				text="DISABLE"
+				x={x + (compact ? 34 : 80)}
+				y={y + (compact ? 48 : 78)}
+				anchor={0.5}
+				style={font(compact ? 9 : 14, UI_COLOR.value)}
+			/>
+		{/if}
+	</UiButton>
+{/snippet}
+
 {#snippet betZone(zone: { x: number; y: number; width: number; height: number })}
 	<Rectangle
 		x={zone.x}
@@ -291,9 +324,7 @@
 				{@render balance(P, P.left)}
 				{@render readout(P, P.right, 1, toolbarLabel('bet'), UI_COLOR.label, betText)}
 			{:else}
-				<UiButton onpress={bonusPress} disabled={locked}>
-					<Sprite key="ggUiMobileLogo" x={P.logo.x} y={P.logo.y} />
-				</UiButton>
+				{@render bonusButton(P.logo.x, P.logo.y, true)}
 				<Sprite key="ggUiMobilePanel" x={P.panel.x} y={P.panel.y} />
 				<UiButton onpress={() => (popup = popup === 'menu' ? null : 'menu')}>
 					<Sprite key="ggUiMobileMenu" x={P.menuPanel.x} y={P.menuPanel.y} />
@@ -367,9 +398,7 @@
 				{@render readout(UI_BAR, B.spins, 0, freeSpinsToolbarLabel(), UI_COLOR.label, spinsText)}
 				{@render win(UI_BAR, B.win, 1, toolbarLabel('totalWin'))}
 			{:else}
-				<UiButton onpress={bonusPress} disabled={locked}>
-					<Sprite key="ggUiLogo" x={UI_BAR.logo.x} y={UI_BAR.logo.y} />
-				</UiButton>
+				{@render bonusButton(UI_BAR.logo.x, UI_BAR.logo.y)}
 				<Sprite key="ggUiPanelInfo" x={UI_BAR.panelInfo.x} y={UI_BAR.panelInfo.y} />
 				<Sprite key="ggUiPanelBet" x={UI_BAR.panelBet.x} y={UI_BAR.panelBet.y} />
 				<UiButton onpress={spin} disabled={replay && idle}>

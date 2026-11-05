@@ -296,17 +296,12 @@ export const getMonkeyMascotLayout = (
 	const mainY = 'y' in main && 'scale' in main ? main.y : canvasH / 2;
 	const mainScale = 'scale' in main ? main.scale : 1;
 
-	let feetX =
+	// Do not clamp into the main rect. On a wide fullscreen the cover-fitted
+	// stump sits past the 16:9 playfield, and clamping walked the monkey off it.
+	const feetX =
 		main.width * 0.5 + (stumpCanvasX - mainX) / mainScale + m.stumpNudge.x;
-	let feetY =
+	const feetY =
 		main.height * 0.5 + (stumpCanvasY - mainY) / mainScale + m.stumpNudge.y;
-
-	const maxX = main.width - width * 0.35;
-	const minX = width * 0.35;
-	const maxY = main.height - 8;
-	const minY = height * 0.55;
-	feetX = Math.min(maxX, Math.max(minX, feetX));
-	feetY = Math.min(maxY, Math.max(minY, feetY));
 
 	return { x: feetX, y: feetY, width, height };
 };

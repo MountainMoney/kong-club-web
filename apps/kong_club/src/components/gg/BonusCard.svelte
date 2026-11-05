@@ -99,6 +99,18 @@
 	});
 
 	const centre = $derived({ x: button.x + button.width / 2, y: button.y + button.height / 2 });
+	const boltCount = $derived(offer.slider ? offer.slider.levels : B.pips.count);
+	const boltLit = $derived(offer.slider ? offer.slider.level : tier);
+	const boltRow = $derived(boltCount * B.pips.pitch);
+	const boltX = $derived(
+		offer.slider && L.slider
+			? L.slider.x + (L.slider.width - boltRow) / 2
+			: L.pips.x + ((B.pips.count - boltCount) * B.pips.pitch) / 2,
+	);
+	const boltY = $derived(
+		offer.slider && L.slider ? L.slider.y + B.slider.height + 16 : L.pips.y,
+	);
+	const huntConfirm = $derived(cut === 'confirm' && Boolean(offer.slider));
 
 	const text = (size: number, fill: number, extra: Record<string, unknown> = {}) => ({
 		fontFamily: UI_FONT_FAMILY,
@@ -159,13 +171,29 @@
 					scale={{ x: prop.scale, y: prop.scale }}
 				/>
 			{/if}
-			<Sprite
-				key={offer.art}
-				x={art.x}
-				y={art.y}
-				anchor={0.5}
-				scale={{ x: art.scale, y: art.scale }}
-			/>
+			{#if huntConfirm}
+				<Graphics
+					draw={(graphics) => {
+						const cx = L.art.x;
+						const cy = L.art.y;
+						graphics.circle(cx, cy, 34).stroke({ width: 7, color: 0xd01212 });
+						graphics.circle(cx, cy, 14).stroke({ width: 6, color: 0xd01212 });
+						graphics.circle(cx, cy, 4).fill(0xd01212);
+						graphics.moveTo(cx - 48, cy).lineTo(cx - 16, cy).stroke({ width: 6, color: 0xd01212 });
+						graphics.moveTo(cx + 16, cy).lineTo(cx + 48, cy).stroke({ width: 6, color: 0xd01212 });
+						graphics.moveTo(cx, cy - 48).lineTo(cx, cy - 16).stroke({ width: 6, color: 0xd01212 });
+						graphics.moveTo(cx, cy + 16).lineTo(cx, cy + 48).stroke({ width: 6, color: 0xd01212 });
+					}}
+				/>
+			{:else}
+				<Sprite
+					key={offer.art}
+					x={art.x}
+					y={art.y}
+					anchor={0.5}
+					scale={{ x: art.scale, y: art.scale }}
+				/>
+			{/if}
 		</Container>
 	</Container>
 
@@ -220,8 +248,7 @@
 			width={L.slider.width}
 			level={offer.slider.level}
 			levels={offer.slider.levels}
-			labels={offer.slider.labels}
-			onslide={(level) => onslide?.(level)}
+			onslide={(next) => onslide?.(next)}
 		/>
 	{:else if L.label && offer.volatility}
 		<Text
@@ -233,15 +260,13 @@
 		/>
 	{/if}
 
-	{#if !(offer.slider && L.slider)}
-	{#each Array.from({ length: B.pips.count }, (__, index) => index) as index (index)}
+	{#each Array.from({ length: boltCount }, (__, index) => index) as index (index)}
 		<Container
-			x={L.pips.x + index * B.pips.pitch}
-			y={L.pips.y}
-			eventMode={onslide ? 'static' : 'none'}
-			cursor={onslide ? 'pointer' : undefined}
-			onpointerdown={() => onslide?.(index + 1)}
-			onpointerover={(event) => event.buttons & 1 && onslide?.(index + 1)}
+			x={boltX + index * B.pips.pitch}
+			y={boltY}
+			eventMode={offer.slider && onslide ? 'static' : 'none'}
+			cursor={offer.slider && onslide ? 'pointer' : undefined}
+			onpointerdown={() => offer.slider && onslide?.(index + 1)}
 		>
 			<Rectangle
 				x={-B.pips.slack}
@@ -255,11 +280,10 @@
 				key="ggUiIconBolt"
 				width={B.pips.width}
 				height={B.pips.height}
-				alpha={index < tier ? 1 : B.pips.dimAlpha}
+				alpha={index < boltLit ? 1 : B.pips.dimAlpha}
 			/>
 		</Container>
 	{/each}
-	{/if}
 
 	{#if L.body}
 		<Text

@@ -17,11 +17,7 @@ import {
 	stripScattersFromBoard,
 } from './scatterAnticipation';
 import { scaleFeatureMs } from './winPresentationTempo';
-import {
-	beginFullBoardShrink,
-	endFullBoardShrink,
-	PRE_COIN_SHRINK_MS,
-} from './coinFeatureCover.svelte';
+import { endFullBoardShrink } from './coinFeatureCover.svelte';
 import { clearLastTileLevels } from './lastTileLevels';
 import { playBlackScreenTransition } from './blackScreenTransition';
 import { prepareBonusEntryUnderBlack } from './bonusIntroPresentation.svelte';
@@ -136,13 +132,13 @@ export const presentScatterFreeSpinIntro = async ({
 	positions,
 	animateSymbols,
 	tier = 1,
-	keepBoard = false,
+	keepBoard: _keepBoard = false,
 }: {
 	totalFs: number;
 	positions: Position[];
 	animateSymbols: AnimateSymbols;
 	tier?: number;
-	/** Gamble / organic land: leave the 4/5 ST on screen under the card. */
+	/** Kept for callers. Entry no longer shrinks the board away before the bonus. */
 	keepBoard?: boolean;
 }) => {
 	beginFsIntroBlock();
@@ -153,11 +149,11 @@ export const presentScatterFreeSpinIntro = async ({
 			eventEmitter.broadcast({ type: 'monkeyTilesClear' });
 		}
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
-		if (!keepBoard) {
-			await animateSymbols({ positions });
-			beginFullBoardShrink();
-			await skippableDelay(scaleFeatureMs(PRE_COIN_SHRINK_MS, 0));
-		}
+		// Leave the scatter-trigger board up. Shrinking it stuck every symbol at
+		// scale 0, so the bonus opened on empty wood. The first bonus spin falls
+		// this board out as the new one drops in.
+		await animateSymbols({ positions });
+		void _keepBoard;
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_superfreespin' });
 		await playBlackScreenTransition(
 			() => {

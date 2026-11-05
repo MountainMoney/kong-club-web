@@ -19,3 +19,19 @@ export const huntLevelFromModeKey = (key: string): HuntLevel | null => {
 	const level = Number(match[1]);
 	return isHuntLevel(level) ? level : null;
 };
+
+/**
+ * Bonus-entry weight versus the base game, from the vendored math-publish
+ * lookup tables (freegame criteria ÷ base freegame criteria):
+ * hunt_2 9% / 0.2% = 45×, hunt_3 13% = 65×, hunt_4 18% = 90×, hunt_5 45% = 225×.
+ * Those entries are tagged See No Evil. Hear and Speak have no weight in the hunt books.
+ */
+export const HUNT_BONUS_CHANCE_MULTIPLIER: Record<HuntLevel, number> = {
+	2: 45,
+	3: 65,
+	4: 90,
+	5: 225,
+};
+
+export const huntOddsLine = (level: HuntLevel) =>
+	`Hunt Spins ${level}: Increases the chances of triggering See No Evil by ${HUNT_BONUS_CHANCE_MULTIPLIER[level]}×.`;
