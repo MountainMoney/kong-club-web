@@ -13,12 +13,17 @@ type BetModeKey = keyof typeof config.betModes;
 
 const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
 	base: { default: 'Base game', social: 'Base game' },
-	base_ante: { default: 'Extra Chance', social: 'Extra Chance' },
+	base_ante: { default: 'Ante (Extra Chance)', social: 'Ante (Extra Chance)' },
+	hunt_2: { default: 'Hunt Spins 2×', social: 'Hunt Spins 2×' },
+	hunt_3: { default: 'Hunt Spins 3×', social: 'Hunt Spins 3×' },
+	hunt_4: { default: 'Hunt Spins 4×', social: 'Hunt Spins 4×' },
+	hunt_5: { default: 'Hunt Spins 5×', social: 'Hunt Spins 5×' },
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
 	bonus_hear: { default: 'Hear No Evil', social: 'Hear No Evil' },
-	bonus_mystery: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_risky: { default: 'Risky Mystery Bonus', social: 'Risky Mystery Bonus' },
 };
 
 const modeLabel = (modeKey: BetModeKey) =>
@@ -36,14 +41,8 @@ const modeRtpMaxLine = (modeKey: BetModeKey) => {
 
 const rtpBlock = () => {
 	if (shouldDisplayRtp()) {
-		return `\n\nReturn to Player (RTP) and maximum win by mode:
-${modeRtpMaxLine('base')}
-${modeRtpMaxLine('base_ante')}
-${modeRtpMaxLine('feature_spin')}
-${modeRtpMaxLine('peak_spin')}
-${modeRtpMaxLine('bonus_see')}
-${modeRtpMaxLine('bonus_hear')}
-${modeRtpMaxLine('bonus_mystery')}`;
+		const lines = (Object.keys(MODE_LABELS) as BetModeKey[]).map(modeRtpMaxLine).join('\n');
+		return `\n\nReturn to Player (RTP) and maximum win by mode:\n${lines}`;
 	}
 
 	return isSocialMode()
@@ -93,76 +92,74 @@ const buildProgressBarSection = (): GameRuleData =>
 	ruleSection(
 		'PROGRESS BAR & BOARD ACTIVATION',
 		isSocialMode()
-			? `On regular plays, each winning tumble fills the Progress Bar by one step. In See and Hear free games, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free game. When the bar fills (5 steps), Board Activation starts the coin collect.
+			? `The bar sits above the reels. In the base game, Ante and Hunt Spins it fills at 10 connections. In See No Evil and Hear No Evil it fills at 5. Speak No Evil refills the bar full on every play and the fill fades through a rainbow, so every play has one coin game.
 
-On regular base plays, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Play and free games, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per play.
+Only one coin game can play per spin. The bar empties after that coin game. Clusters still pay in a bonus, and they fill the bar. Scatters that land in tumbles count.
 
-${coinValueRulesSentence(true)}`
-			: `On regular spins, each winning tumble fills the Progress Bar by one step. In See and Hear free spins, each winning cluster fills the bar by one step. Hear pays at most 3 Board Activations per free spin. When the bar fills (5 steps), Board Activation starts the coin collect.
+On regular base plays, coin values are revealed on bronze, silver and gold tiles. Plain tiles do not flip. ${coinValueRulesSentence(true)}`
+			: `The bar sits above the reels. In the base game, Ante and Hunt Spins it fills at 10 connections. In See No Evil and Hear No Evil it fills at 5. Speak No Evil refills the bar full on every spin and the fill fades through a rainbow, so every spin has one coin game.
 
-On regular base spins, coin values are revealed on active Level-Up Tiles (no Bronze/Silver/Gold coin symbols on the board). In Feature Spin and free spins, Bronze/Silver/Gold coins can land on the grid and pay when Activation fires. Tile multipliers apply. Physical coins are then removed; Level-Up Tiles stay lit. Base game: one Board Activation per spin.
+Only one coin game can play per spin. The bar empties after that coin game. Clusters still pay in a bonus, and they fill the bar. Scatters that land in tumbles count.
 
-${coinValueRulesSentence(false)}`
+On regular base spins, coin values are revealed on bronze, silver and gold tiles. Plain tiles do not flip. ${coinValueRulesSentence(false)}`
 	);
 
 const buildFeatureSpinSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'FEATURE PLAY' : 'FEATURE SPIN',
 		isSocialMode()
-			? `Toggle Feature Play from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× play amount per play). The Progress Bar starts full. Every play lands a 5+ cluster, then the coin game after tumbles stop.
-
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`
-			: `Toggle Feature Spin from the bonus menu or the FEAT toolbar button (${config.betModes.feature_spin.cost}× bet per spin). The Progress Bar starts full. Every spin lands a 5+ cluster, then the coin game after tumbles stop.
-
-Toggle off from the bonus button, toolbar FEAT button, or bonus menu.`,
+			? `Toggle Feature Play from the bonus menu (${config.betModes.feature_spin.cost}× play amount per play). Every play lands at least one connection, or a tumble chain. It cannot start a bonus. Ante, Hunt Spins, Feature Play and TRIFECTA are mutually exclusive: only one can be on.`
+			: `Toggle Feature Spin from the bonus menu (${config.betModes.feature_spin.cost}× bet per spin). Every spin lands at least one connection, or a tumble chain. It cannot trigger a bonus. Ante, Hunt Spins, Feature Spin and TRIFECTA are mutually exclusive: only one can be on.`,
 	);
 
 const buildPeakSpinSection = (): GameRuleData =>
 	ruleSection(
 		'TRIFECTA SPIN',
 		isSocialMode()
-			? `Toggle TRIFECTA from the bonus menu (${config.betModes.peak_spin.cost}× play amount per play). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
-
-Gold coin prizes land on every lit tile when the bar fills all the way.`
-			: `Toggle TRIFECTA from the bonus menu (${config.betModes.peak_spin.cost}× bet per spin). Every cell starts Gold. After the board lands the Progress Bar fills — it can dump, or hit full and play the coin game.
-
-Gold coin prizes land on every lit tile when the bar fills all the way.`,
+			? `Toggle TRIFECTA from the bonus menu (${config.betModes.peak_spin.cost}× play amount per play). Every cell starts gold. When the board connects, one coin game plays. It cannot start a bonus.`
+			: `Toggle TRIFECTA from the bonus menu (${config.betModes.peak_spin.cost}× bet per spin). Every cell starts gold. When the board connects, one coin game plays. It cannot trigger a bonus.`,
 	);
 
 const buildScatterSection = (): GameRuleData =>
 	ruleSection(
 		isSocialMode() ? 'SCATTER & FREE GAMES' : 'SCATTER & FREE SPINS',
 		isSocialMode()
-			? `Stone tablet scatters do not pay. They start a bonus:
-• 1–2 scatters do not start a bonus
-• 3 scatters → See No Evil (${RULES_FREE_SPINS} free games; board clears; each winning cluster fills the Progress Bar; threshold 5)
-• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free games, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free game)
-• 5+ scatters → Monkey Madness (${RULES_FREE_SPINS} free games; board stays; tiles go silver then gold, no bronze; coin game every play)
+			? `Stone tablet scatters do not pay. They start a ${RULES_FREE_SPINS}-play bonus. Scatters that land in tumbles count. A bonus ends immediately at ${RULES_MAX_WIN_X}×.
+• 3 scatters → See No Evil. The board clears. Ranks reset after every coin game. The bar fills at 5.
+• 4 scatters → Hear No Evil. The board stays and ranks carry. The bar fills at 5.
+• 5 scatters → Speak No Evil. The board stays, ranks carry, and the bar is full every play (rainbow fade), so there is one coin game every play. A direct entry pays at least 1,000×. An upgrade from Hear does not.
 
-Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 plays to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
+During See No Evil, 4 scatters upgrade the bonus to Hear No Evil and add 4 plays. Current ranks are kept.
+During Hear No Evil, 5 scatters upgrade the bonus to Speak No Evil and add 4 plays. Current ranks are kept.
+Retriggers: 2 scatters add 2 plays, 3 or more scatters add 4 plays. There is no cap on total plays.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Mystery Bonus (${config.betModes.bonus_mystery.cost}×): 50% dead play, 40% Hear, 10% Monkey Madness.
+Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Play and TRIFECTA can be on.
 
-Level-Up Tiles reset on bonus entry, then carry across free games within that bonus.`
-			: `Stone tablet scatters do not pay. They start a bonus:
-• 1–2 scatters do not start a bonus
-• 3 scatters → See No Evil (${RULES_FREE_SPINS} free spins; board clears; each winning cluster fills the Progress Bar; threshold 5)
-• 4 scatters → Hear No Evil (${RULES_FREE_SPINS} free spins, board stays, each winning cluster fills the Progress Bar, threshold 5, at most 3 Board Activations per free spin)
-• 5+ scatters → Monkey Madness (${RULES_FREE_SPINS} free spins; board stays; tiles go silver then gold, no bronze; coin game every spin)
+Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_pick.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
 
-Extra Chance (${config.betModes.base_ante.cost}×) doubles the bonus chance from about 1 in 260 spins to about 1 in 130. The 3, 4, and 5 scatter mix stays the same.
+In the base game, tiles return to plain when the play ends. Nothing carries to the next play.`
+			: `Stone tablet scatters do not pay. They start a ${RULES_FREE_SPINS}-spin bonus. Scatters that land in tumbles count. A bonus ends immediately at ${RULES_MAX_WIN_X}×.
+• 3 scatters → See No Evil. The board clears. Ranks reset after every coin game. The bar fills at 5.
+• 4 scatters → Hear No Evil. The board stays and ranks carry. The bar fills at 5.
+• 5 scatters → Speak No Evil. The board stays, ranks carry, and the bar is full every spin (rainbow fade), so there is one coin game every spin. A direct entry pays at least 1,000×. An upgrade from Hear does not.
 
-You can buy See No Evil (${config.betModes.bonus_see.cost}×) or Hear No Evil (${config.betModes.bonus_hear.cost}×), or activate Mystery Bonus (${config.betModes.bonus_mystery.cost}×): 50% dead spin, 40% Hear, 10% Monkey Madness.
+During See No Evil, 4 scatters upgrade the bonus to Hear No Evil and add 4 spins. Current ranks are kept.
+During Hear No Evil, 5 scatters upgrade the bonus to Speak No Evil and add 4 spins. Current ranks are kept.
+Retriggers: 2 scatters add 2 spins, 3 or more scatters add 4 spins. There is no cap on total spins.
 
-Level-Up Tiles reset on bonus entry, then carry across free spins within that bonus.`,
+Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Spin and TRIFECTA can be on.
+
+Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_pick.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
+
+In the base game, tiles return to plain when the spin ends. Nothing carries to the next spin.`,
 	);
 
 const buildWildsSection = (): GameRuleData =>
 	ruleSection(
 		'WILDS',
 		isSocialMode()
-			? `Monkey wild (MW) substitutes for all winning symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`
-			: `Monkey wild (MW) substitutes for all paying symbols except scatters and coins. Wilds appear on the initial drop only (not during tumble refills), with at most two on the board at once.`,
+			? `Monkey wild (MW) substitutes for winning symbols except scatters and coins, and one wild can count in more than one cluster. Wilds can land on the opening drop and in tumbles. More than four wilds can land in any mode; that is rare. A wild lights its own tile when it wins. Wilds have no multiplier.`
+			: `Monkey wild (MW) substitutes for paying symbols except scatters and coins, and one wild can count in more than one cluster. Wilds can land on the opening drop and in tumbles. More than four wilds can land in any mode; that is rare. A wild lights its own tile when it wins. Wilds have no multiplier.`,
 	);
 
 const buildSymbolPaysSection = (): GameRuleData =>

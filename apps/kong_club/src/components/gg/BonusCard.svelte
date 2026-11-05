@@ -213,16 +213,17 @@
 		/>
 	{/if}
 
-	{#if onslide && L.slider}
+	{#if offer.slider && L.slider}
 		<HuntSlider
 			x={L.slider.x}
 			y={L.slider.y}
 			width={L.slider.width}
-			level={tier}
-			levels={B.pips.count}
-			{onslide}
+			level={offer.slider.level}
+			levels={offer.slider.levels}
+			labels={offer.slider.labels}
+			onslide={(level) => onslide?.(level)}
 		/>
-	{:else if L.label}
+	{:else if L.label && offer.volatility}
 		<Text
 			text={offer.volatility}
 			x={L.title.x}
@@ -232,6 +233,7 @@
 		/>
 	{/if}
 
+	{#if !(offer.slider && L.slider)}
 	{#each Array.from({ length: B.pips.count }, (__, index) => index) as index (index)}
 		<Container
 			x={L.pips.x + index * B.pips.pitch}
@@ -257,6 +259,7 @@
 			/>
 		</Container>
 	{/each}
+	{/if}
 
 	{#if L.body}
 		<Text

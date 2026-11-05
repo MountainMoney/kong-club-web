@@ -199,7 +199,8 @@ export const PROGRESS_BAR_FILL_RECT = { x: 334, y: 138, w: 897, h: 34 } as const
 
 /** Top-slot meter — board-local, same transform as wood/vines. */
 export const MONKEY_PROGRESS_BAR = {
-	zIndex: 12,
+	/** Under the vine frame (z 100) so the meter shows through the top slot. */
+	zIndex: 90,
 } as const;
 
 /** Full-canvas bar overlay aligned to BOARD_FRAME_INNER (slot sits above the 6×5). */

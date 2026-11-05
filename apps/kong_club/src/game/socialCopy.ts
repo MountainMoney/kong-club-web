@@ -192,9 +192,9 @@ const PAYTABLE_COPY = {
 	},
 	scatter: {
 		default:
-			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
+			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5 start Speak No Evil. During See, 4 scatters upgrade to Hear and add 4 spins. During Hear, 5 scatters upgrade to Speak No Evil and add 4 spins. Retriggers: 2 scatters add 2 spins, 3 or more add 4.',
 		social:
-			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5+ start Monkey Madness.',
+			'Scatter (stone tablet): does not pay. 3 scatters start See No Evil; 4 start Hear No Evil; 5 start Speak No Evil. During See, 4 scatters upgrade to Hear and add 4 plays. During Hear, 5 scatters upgrade to Speak No Evil and add 4 plays. Retriggers: 2 scatters add 2 plays, 3 or more add 4.',
 	},
 	levelUpTiles: {
 		default:
@@ -209,8 +209,8 @@ const PAYTABLE_COPY = {
 			'MULTI (XM): rare Board Activation prize. Multiplies coin faces on the 8 adjacent tiles (×2 / ×3 / ×4 / ×5 / ×10 / ×20). The MULTI itself does not award a value.',
 	},
 	peakSpin: {
-		default: `TRIFECTA Spin (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
-		social: `TRIFECTA Play (${config.betModes.peak_spin.cost}×): the whole board starts Gold. After it lands the Progress Bar fills — it can dump, or hit full and play the coin game with Gold prizes on every tile.`,
+		default: `TRIFECTA Spin (${config.betModes.peak_spin.cost}×): the whole board starts gold. When it connects, one coin game plays. It cannot trigger a bonus.`,
+		social: `TRIFECTA Play (${config.betModes.peak_spin.cost}×): the whole board starts gold. When it connects, one coin game plays. It cannot start a bonus.`,
 	},
 	collectorPower: {
 		default:
@@ -230,12 +230,17 @@ export const paytableCopy = (key: PaytableCopyKey) => {
 
 const PAYTABLE_MODE_LABELS = {
 	base: 'Base game',
-	base_ante: 'Extra Chance',
+	base_ante: 'Ante',
+	hunt_2: 'Hunt Spins',
+	hunt_3: 'Hunt Spins',
+	hunt_4: 'Hunt Spins',
+	hunt_5: 'Hunt Spins',
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',
 	bonus_hear: 'Hear No Evil',
-	bonus_mystery: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_pick: { default: 'Mystery Bonus', social: 'Mystery Bonus' },
+	bonus_risky: { default: 'Risky Mystery', social: 'Risky Mystery' },
 } as const;
 
 export type PaytableModeKey = keyof typeof PAYTABLE_MODE_LABELS;

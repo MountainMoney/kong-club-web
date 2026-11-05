@@ -33,6 +33,8 @@ export const stateCoinFeatureCover = $state<{
 	tileFadeActive: boolean;
 	/** Plaques + gold plate fade while the next drop comes in. */
 	tileFadeAlpha: number;
+	/** Horizontal squash of a ranked tile during the first half of its coin flip. */
+	flipScaleX: Record<string, number>;
 }>({
 	keys: new Set(),
 	litKeys: new Set(),
@@ -43,6 +45,7 @@ export const stateCoinFeatureCover = $state<{
 	heldDismissActive: false,
 	tileFadeActive: false,
 	tileFadeAlpha: 1,
+	flipScaleX: {},
 });
 
 export const cellCoverKey = (reel: number, row: number) => `${reel}:${row}`;
@@ -104,6 +107,7 @@ export const beginCoinFeatureDim = (positions: Array<{ reel: number; row: number
 };
 
 export const clearCoinCellCover = () => {
+	stateCoinFeatureCover.flipScaleX = {};
 	stateCoinFeatureCover.keys = new Set();
 	stateCoinFeatureCover.litKeys = new Set();
 	stateCoinFeatureCover.shrinkKeys = new Set();

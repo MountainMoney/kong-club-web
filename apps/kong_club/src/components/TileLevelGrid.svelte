@@ -204,20 +204,24 @@
 		x0: number,
 		y0: number,
 		tier: 'bronze' | 'silver' | 'gold',
+		scaleX = 1,
 	) => {
 		const style = TIER_CELL_STYLE[tier];
-		g.rect(x0, y0, CELL, CELL);
+		const width = CELL * scaleX;
+		const left = x0 + (CELL - width) / 2;
+		g.rect(left, y0, width, CELL);
 		g.fill({ color: style.frame, alpha: style.alpha });
+		const innerW = Math.max(0, width - FRAME * 2);
 		const inner = CELL - FRAME * 2;
-		g.rect(x0 + FRAME, y0 + FRAME, inner, inner);
+		g.rect(left + FRAME * scaleX, y0 + FRAME, innerW, inner);
 		g.fill({ texture: wellTextures[tier], textureSpace: 'local' });
-		g.rect(x0, y0, CELL, 1);
+		g.rect(left, y0, width, 1);
 		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
-		g.rect(x0, y0, 1, CELL);
+		g.rect(left, y0, Math.max(1, scaleX), CELL);
 		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
-		g.rect(x0, y0 + CELL - 1, CELL, 1);
+		g.rect(left, y0 + CELL - 1, width, 1);
 		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
-		g.rect(x0 + CELL - 1, y0, 1, CELL);
+		g.rect(left + width - Math.max(1, scaleX), y0, Math.max(1, scaleX), CELL);
 		g.fill({ color: 0x2a1a0c, alpha: 0.7 });
 	};
 
@@ -319,6 +323,11 @@
 				const breathe = pulse > 0 ? 0.5 + 0.5 * Math.sin(pulsePhase * Math.PI * 2) : 0;
 				const x0 = x - HALF;
 				const y0 = y - HALF;
+				const flipKey = `${reelIndex}:${rowIndex}`;
+				const flipX = stateCoinFeatureCover.flipScaleX[flipKey];
+				const covered = stateCoinFeatureCover.keys.has(flipKey);
+				if (covered && flipX == null) continue;
+				if (flipX != null && flipX <= 0.02) continue;
 				if (pulse > 0 || bump > 0) {
 					const glowPad = 3 + breathe * 2 + bump * 2;
 					g.rect(x0 - glowPad, y0 - glowPad, CELL + glowPad * 2, CELL + glowPad * 2);
@@ -328,7 +337,7 @@
 					});
 				}
 				if (!peakPlate) {
-					drawPlaque(g, x0, y0, tier);
+					drawPlaque(g, x0, y0, tier, flipX ?? 1);
 				} else {
 					g.rect(x0 + 1, y0 + 1, CELL - 2, CELL - 2);
 					g.stroke({
@@ -451,7 +460,8 @@
 						(stateCoinFeatureCover.summitPlateActive ? 2 : 0) +
 						(hideSummitCells ? 4 : 0) +
 						stateCoinFeatureCover.shrinkKeys.size +
-						stateCoinFeatureCover.keys.size,
+						stateCoinFeatureCover.keys.size +
+						Object.values(stateCoinFeatureCover.flipScaleX).reduce((sum, scale) => sum + scale, 0),
 					peakPlate,
 					hideSummitCells,
 				)

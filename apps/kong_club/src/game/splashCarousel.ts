@@ -13,9 +13,7 @@ export const splashFeaturePanels = (): SplashFeaturePanel[] => [
 	{
 		id: 'hidden_bonus',
 		title: 'HIDDEN BONUS',
-		subtitle: isSocialMode()
-			? 'Land scatters for See, Hear, or Monkey Madness'
-			: 'Land scatters for See, Hear, or Monkey Madness',
+		subtitle: 'Land scatters for See, Hear, or Speak No Evil',
 	},
 	{
 		id: 'max_win',
