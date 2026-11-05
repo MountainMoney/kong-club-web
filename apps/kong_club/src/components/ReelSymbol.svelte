@@ -7,6 +7,7 @@
 	import SymbolWrap from './SymbolWrap.svelte';
 	import { getSymbolInfo, getSymbolX, getSymbolY } from '../game/utils';
 	import {
+		cellCoverKey,
 		isCoinCellCovered,
 		isPreCoinShrinkCell,
 		PRE_COIN_SHRINK_MS,
@@ -47,6 +48,9 @@
 	const shrinkScale = new Tween(1);
 	const shrinkAlpha = new Tween(1);
 	const coverAlpha = $derived(hideSitting ? 0 : 1);
+	const tileFlipX = $derived(
+		stateCoinFeatureCover.flipScaleX[cellCoverKey(props.reelIndex, homeRow)],
+	);
 	let connectScale = $state(1);
 	let landBreathe = $state(1);
 	let landBreatheArmed = false;
@@ -171,7 +175,8 @@
 <SymbolWrap
 	x={getSymbolX(props.reelIndex)}
 	y={props.reelSymbol.symbolY.current}
-	scale={shrinkScale.current * connectScale * landBreathe}
+	scaleX={(tileFlipX ?? 1) * shrinkScale.current * connectScale * landBreathe}
+	scaleY={shrinkScale.current * connectScale * landBreathe}
 	alpha={shrinkAlpha.current * coverAlpha}
 	animating={symbolInfo.type === 'spine' &&
 		symbolInfo.assetKey !== 'coinMetal' &&
