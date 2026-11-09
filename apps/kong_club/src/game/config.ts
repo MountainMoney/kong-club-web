@@ -9,16 +9,16 @@ export default {
 	numRows: [5, 5, 5, 5, 5, 5],
 	/**
 	 * Bet multipliers copied from math-publish/index.json (96.3% publish).
-	 * Hunt keys stay hunt_2..hunt_5. Those stops cost 5, 6, 10, and 25.
+	 * Hunt keys stay hunt_2..hunt_5. Those stops cost 2, 3, 4, and 5 (locked grid).
 	 * Mystery's math key is bonus_mystery. `/__math/costs` reads the same index.
 	 */
 	betModes: {
 		base: { cost: 1.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		base_ante: { cost: 1.4, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
-		hunt_2: { cost: 5.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
-		hunt_3: { cost: 6.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
-		hunt_4: { cost: 10.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
-		hunt_5: { cost: 25.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
+		hunt_2: { cost: 2.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
+		hunt_3: { cost: 3.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
+		hunt_4: { cost: 4.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
+		hunt_5: { cost: 5.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		feature_spin: { cost: 75.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		peak_spin: { cost: 1000.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		bonus_see: { cost: 100.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
