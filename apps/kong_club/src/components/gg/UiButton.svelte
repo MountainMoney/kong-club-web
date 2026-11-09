@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { Container as PixiContainer } from 'pixi.js';
+	import type { Container as PixiContainer, FederatedPointerEvent } from 'pixi.js';
 	import { Container } from 'pixi-svelte';
 
 	import { createPress } from '../../game/ggUi/press.svelte';
@@ -23,13 +23,14 @@
 	// The children sit wherever the bar put them: the press shrinks about their middle, read on the first touch.
 	let centre = $state({ x: 0, y: 0 });
 	let measured = false;
-	const down = (target: PixiContainer) => {
+	const down = (event: FederatedPointerEvent) => {
+		const target = event.currentTarget as PixiContainer;
 		if (!measured) {
 			const { x, y, width, height } = target.getLocalBounds();
 			centre = { x: x + width / 2, y: y + height / 2 };
 			measured = true;
 		}
-		press.down();
+		press.down(event);
 	};
 </script>
 
@@ -41,12 +42,15 @@
 	eventMode={disabled ? 'none' : 'static'}
 	cursor="pointer"
 	{alpha}
-	onpointerdown={(event) => down(event.currentTarget as PixiContainer)}
+	onpointerdown={down}
 	onpointerup={() => {
+		press.disarm();
 		press.up();
 		onpress?.();
 	}}
-	onpointerupoutside={press.up}
+	onpointerupoutside={(event) => {
+		if (press.releasedInside(event)) onpress?.();
+	}}
 	onpointerout={press.up}
 >
 	{@render children()}

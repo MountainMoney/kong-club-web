@@ -310,10 +310,13 @@
 		alpha={active ? B.button.activeAlpha : 1}
 		onpointerdown={press.down}
 		onpointerup={() => {
+			press.disarm();
 			press.up();
 			onpress?.();
 		}}
-		onpointerupoutside={press.up}
+		onpointerupoutside={(event) => {
+			if (press.releasedInside(event)) onpress?.();
+		}}
 		onpointerout={press.up}
 	>
 		<Graphics
