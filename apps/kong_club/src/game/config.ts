@@ -10,7 +10,7 @@ export default {
 	/**
 	 * Bet multipliers copied from math-publish/index.json (96.3% publish).
 	 * Hunt keys stay hunt_2..hunt_5. Those stops cost 5, 6, 10, and 25.
-	 * Mystery's math key is bonus_pick. `/__math/costs` reads the same index.
+	 * Mystery's math key is bonus_mystery. `/__math/costs` reads the same index.
 	 */
 	betModes: {
 		base: { cost: 1.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
@@ -23,7 +23,7 @@ export default {
 		peak_spin: { cost: 1000.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		bonus_see: { cost: 100.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
 		bonus_hear: { cost: 300.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
-		bonus_pick: { cost: 330.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
+		bonus_mystery: { cost: 330.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
 		bonus_risky: { cost: 500.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
 	},
 	symbols: {

@@ -1,6 +1,6 @@
 import type { BookEvent } from './typesBookEvent';
 import { isModeStateBookEvent } from './modeStateEvent';
-import { normalizeLegacyBetModeKey } from './betModes';
+import { mathBookKeysForMode, normalizeLegacyBetModeKey } from './betModes';
 import { scatterPositionsFromBoard } from './scatterAnticipation';
 import { startMathBooksLoading, stopMathBooksLoading } from './stateMathBooksLoading.svelte';
 
@@ -38,6 +38,31 @@ async function getBooksRevision(): Promise<string> {
 	return String(Date.now());
 }
 
+async function fetchModePayload(mode: string, fileKey: string, revision: string): Promise<ModeCache> {
+	const [booksRes, lutRes] = await Promise.all([
+		fetch(`/__math/books/${fileKey}?v=${encodeURIComponent(revision)}`),
+		fetch(`/__math/lut/${fileKey}?v=${encodeURIComponent(revision)}`),
+	]);
+
+	if (!booksRes.ok) {
+		throw new Error(`Failed to load math books for "${mode}" (${fileKey}): ${booksRes.status}`);
+	}
+	if (!lutRes.ok) {
+		throw new Error(`Failed to load math LUT for "${mode}" (${fileKey}): ${lutRes.status}`);
+	}
+
+	const books = (await booksRes.json()) as MathBook[];
+	if (!Array.isArray(books) || books.length === 0) {
+		throw new Error(`Invalid math books payload for mode "${mode}" (${fileKey}).`);
+	}
+
+	const { entries } = (await lutRes.json()) as { entries: LutEntry[] };
+	if (!Array.isArray(entries) || entries.length === 0) {
+		throw new Error(`Invalid math LUT payload for mode "${mode}" (${fileKey}).`);
+	}
+	return { books, lutEntries: entries };
+}
+
 async function loadModeData(rawMode: string): Promise<ModeCache> {
 	const mode = normalizeLegacyBetModeKey(rawMode);
 	const revision = await getBooksRevision();
@@ -51,27 +76,21 @@ async function loadModeData(rawMode: string): Promise<ModeCache> {
 
 	startMathBooksLoading(mode);
 	try {
-		const [booksRes, lutRes] = await Promise.all([
-			fetch(`/__math/books/${mode}?v=${encodeURIComponent(revision)}`),
-			fetch(`/__math/lut/${mode}?v=${encodeURIComponent(revision)}`),
-		]);
-
-		if (!booksRes.ok) {
-			throw new Error(`Failed to load math books for "${mode}": ${booksRes.status}`);
+		// Mystery tries `bonus_mystery`, then legacy `bonus_pick` (pr7-963 books).
+		// Static hosts may answer a missing file with index.html (200), so a key only
+		// counts once both payloads parse and validate.
+		let loaded: ModeCache | null = null;
+		let lastError: unknown = null;
+		for (const fileKey of mathBookKeysForMode(mode)) {
+			try {
+				loaded = await fetchModePayload(mode, fileKey, revision);
+				break;
+			} catch (error) {
+				lastError = error;
+			}
 		}
-		if (!lutRes.ok) {
-			throw new Error(`Failed to load math LUT for "${mode}": ${lutRes.status}`);
-		}
-
-		const books = (await booksRes.json()) as MathBook[];
-		if (!Array.isArray(books) || books.length === 0) {
-			throw new Error(`Invalid math books payload for mode "${mode}".`);
-		}
-
-		const { entries } = (await lutRes.json()) as { entries: LutEntry[] };
-		if (!Array.isArray(entries) || entries.length === 0) {
-			throw new Error(`Invalid math LUT payload for mode "${mode}".`);
-		}
+		if (!loaded) throw lastError ?? new Error(`Failed to load math books for "${mode}".`);
+		const { books, lutEntries: entries } = loaded;
 
 		const data: ModeCacheEntry = { books, lutEntries: entries, revision };
 		modeCache.set(mode, data);
@@ -183,7 +202,7 @@ const SPEAK_TRIGGER_STATES = new Set([
 	'start_bonus_speak_no_evil',
 	'organic_bonus_speak_no_evil',
 ]);
-const MADNESS_TRIGGER_MODES = ['bonus_pick', 'bonus_risky', 'base', 'base_ante'] as const;
+const MADNESS_TRIGGER_MODES = ['bonus_mystery', 'bonus_risky', 'base', 'base_ante'] as const;
 
 const isMadnessTriggerBook = (book: MathBook) => {
 	const reveal = book.events.find((event) => event.type === 'reveal');

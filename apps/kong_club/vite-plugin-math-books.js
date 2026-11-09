@@ -19,7 +19,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_pick',
+	'bonus_mystery',
 	'bonus_risky',
 ];
 
@@ -33,12 +33,27 @@ function resolvePublishDir() {
 	return path.resolve(__dirname, '../../../math-sdk/games/kong_club/library/publish_files');
 }
 
+/** Mystery was published as `bonus_pick` through math pr7-963. */
+const LEGACY_PUBLISH_KEYS = { bonus_mystery: ['bonus_pick'] };
+/** Old routes still served (e.g. cached clients asking for `/__math/books/bonus_pick`). */
+const LEGACY_ROUTE_MODES = { bonus_pick: 'bonus_mystery' };
+
+/** Publish file key for a mode: its own name, else a legacy name that exists on disk. */
+function publishKeyFor(publishDir, mode) {
+	const canonical = LEGACY_ROUTE_MODES[mode] ?? mode;
+	const candidates = [canonical, ...(LEGACY_PUBLISH_KEYS[canonical] ?? [])];
+	for (const key of candidates) {
+		if (fs.existsSync(path.join(publishDir, `books_${key}.jsonl.zst`))) return key;
+	}
+	return canonical;
+}
+
 function booksZstPath(publishDir, mode) {
-	return path.join(publishDir, `books_${mode}.jsonl.zst`);
+	return path.join(publishDir, `books_${publishKeyFor(publishDir, mode)}.jsonl.zst`);
 }
 
 function lutPath(publishDir, mode) {
-	return path.join(publishDir, `lookUpTable_${mode}_0.csv`);
+	return path.join(publishDir, `lookUpTable_${publishKeyFor(publishDir, mode)}_0.csv`);
 }
 
 function publishedModeNames(publishDir) {
@@ -184,7 +199,7 @@ function ensureBooksJson(mode, publishDir, appRoot) {
 		return extracted;
 	}
 
-	if (publishedModeNames(publishDir).has(mode) || fs.existsSync(zst)) {
+	if (publishedModeNames(publishDir).has(publishKeyFor(publishDir, mode)) || fs.existsSync(zst)) {
 		throw new Error(
 			`Published books for "${mode}" could not be read (${zst}). Refusing forced/stub fallback.`,
 		);
@@ -342,7 +357,8 @@ export function mathBooksPlugin() {
 						return;
 					}
 
-					const mode = (booksMatch || lutMatch)[1];
+					const routeMode = (booksMatch || lutMatch)[1];
+					const mode = LEGACY_ROUTE_MODES[routeMode] ?? routeMode;
 					if (!MATH_MODES.includes(mode)) {
 						res.statusCode = 404;
 						res.end(JSON.stringify({ error: `Unknown mode: ${mode}` }));

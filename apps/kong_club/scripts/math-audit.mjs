@@ -32,7 +32,7 @@ const MODE_COST = {
 	peak_spin: 1000,
 	bonus_see: 100,
 	bonus_hear: 300,
-	bonus_pick: 330,
+	bonus_mystery: 330,
 	bonus_risky: 500,
 };
 
@@ -40,7 +40,14 @@ const HARD_FACES = new Set([
 	0.2, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000,
 ]);
 
+/** Mystery was published as `bonus_pick` through math pr7-963. */
+const LEGACY_PUBLISH_KEYS = { bonus_mystery: ['bonus_pick'] };
+
 export function lutPathForMode(mode) {
+	for (const key of [mode, ...(LEGACY_PUBLISH_KEYS[mode] ?? [])]) {
+		const file = path.join(PUBLISH_DIR, `lookUpTable_${key}_0.csv`);
+		if (fs.existsSync(file)) return file;
+	}
 	return path.join(PUBLISH_DIR, `lookUpTable_${mode}_0.csv`);
 }
 

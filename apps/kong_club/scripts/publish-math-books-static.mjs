@@ -21,7 +21,7 @@ const MATH_MODES = [
 	'peak_spin',
 	'bonus_see',
 	'bonus_hear',
-	'bonus_pick',
+	'bonus_mystery',
 	'bonus_risky',
 ];
 
@@ -49,9 +49,18 @@ fs.mkdirSync(path.join(outRoot, 'books'), { recursive: true });
 fs.mkdirSync(path.join(outRoot, 'lut'), { recursive: true });
 fs.writeFileSync(path.join(outRoot, 'meta'), JSON.stringify({ revision: String(Date.now()) }));
 
+/** Mystery was cached / published as `bonus_pick` through math pr7-963. */
+const LEGACY_KEYS = { bonus_mystery: ['bonus_pick'] };
+
+const cacheKeyFor = (mode) =>
+	[mode, ...(LEGACY_KEYS[mode] ?? [])].find((key) =>
+		fs.existsSync(path.join(cacheDir, `books_${key}.json`)),
+	) ?? mode;
+
 let written = 0;
 for (const mode of MATH_MODES) {
-	const booksPath = path.join(cacheDir, `books_${mode}.json`);
+	const cacheKey = cacheKeyFor(mode);
+	const booksPath = path.join(cacheDir, `books_${cacheKey}.json`);
 	if (!fs.existsSync(booksPath)) {
 		console.warn(`[publish-math-books] skip ${mode} — no cache`);
 		continue;
@@ -60,13 +69,18 @@ for (const mode of MATH_MODES) {
 	if (!Array.isArray(books) || books.length === 0) {
 		throw new Error(`Invalid books cache for ${mode}`);
 	}
-	fs.writeFileSync(path.join(outRoot, 'books', mode), JSON.stringify(books));
-
-	const csvPath = path.join(cacheDir, `lookUpTable_${mode}_0.csv`);
+	const csvPath = path.join(cacheDir, `lookUpTable_${cacheKey}_0.csv`);
 	const entries = fs.existsSync(csvPath)
 		? parseLutCsv(fs.readFileSync(csvPath, 'utf8'), books.length)
 		: books.map((_, index) => ({ index, weight: 1, payout: 0 }));
-	fs.writeFileSync(path.join(outRoot, 'lut', mode), JSON.stringify({ entries, bookCount: books.length }));
+	// Write the canonical name plus legacy aliases so older clients keep loading.
+	for (const outKey of [mode, ...(LEGACY_KEYS[mode] ?? [])]) {
+		fs.writeFileSync(path.join(outRoot, 'books', outKey), JSON.stringify(books));
+		fs.writeFileSync(
+			path.join(outRoot, 'lut', outKey),
+			JSON.stringify({ entries, bookCount: books.length }),
+		);
+	}
 	written += 1;
 }
 

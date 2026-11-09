@@ -92,7 +92,7 @@ const offerSeeds = (): OfferSeed[] => {
 	const peak = config.betModes.peak_spin.cost;
 	const see = config.betModes.bonus_see.cost;
 	const hear = config.betModes.bonus_hear.cost;
-	const mystery = config.betModes.bonus_pick.cost;
+	const mystery = config.betModes.bonus_mystery.cost;
 	const risky = config.betModes.bonus_risky.cost;
 	const hunt = config.betModes[`hunt_${huntLevel}`].cost;
 	return [
