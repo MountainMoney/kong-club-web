@@ -10,15 +10,18 @@
 		onpress,
 		disabled = false,
 		active = true,
+		disabledAlpha = 0.25,
 	}: {
 		children: Snippet;
 		onpress?: () => void;
 		disabled?: boolean;
 		active?: boolean;
+		/** Whole-button alpha while disabled. 1 = the children draw their own disabled look. */
+		disabledAlpha?: number;
 	} = $props();
 
 	const press = createPress();
-	const alpha = $derived(disabled ? 0.25 : active ? 1 : 0.45);
+	const alpha = $derived(disabled ? disabledAlpha : active ? 1 : 0.45);
 
 	// The children sit wherever the bar put them: the press shrinks about their middle, read on the first touch.
 	let centre = $state({ x: 0, y: 0 });

@@ -129,7 +129,22 @@
 	});
 	const betFill = $derived(modeOn || popup === 'bets' ? UI_COLOR.accent : UI_COLOR.label);
 
+	/**
+	 * Bonus / DISABLE button states, GG pattern (shaft-ui UiChip): the dark body stays
+	 * opaque and only the content dims to UI_COLOR.disabledIconAlpha while controls are
+	 * locked. The plain logo and the DISABLE face crossfade instead of hard-cutting.
+	 */
+	const BONUS_FACE_MS = 160;
+	const bonusModeFade = new Tween(0, { duration: BONUS_FACE_MS });
+	const bonusLockDim = new Tween(1, { duration: BONUS_FACE_MS });
+
 	const locked = $derived(controlsLocked() || replay);
+	$effect(() => {
+		void bonusModeFade.set(modeOn ? 1 : 0);
+	});
+	$effect(() => {
+		void bonusLockDim.set(locked ? UI_COLOR.disabledIconAlpha : 1);
+	});
 	const betLocked = $derived(locked || inBonus);
 	const turboLocked = $derived(stateBet.isSpaceHold || isSpinSpeedControlDisabled());
 	const autoLocked = $derived(isAutoplayDisabled());
@@ -223,31 +238,41 @@
 {/snippet}
 
 {#snippet bonusButton(x: number, y: number, compact = false)}
-	<UiButton onpress={bonusPress} disabled={locked}>
-		<Sprite key={compact ? 'ggUiMobileLogo' : 'ggUiLogo'} {x} {y} />
-		{#if modeOn}
-			<Rectangle
-				x={x + (compact ? 10 : 36)}
-				y={y + (compact ? 16 : 28)}
-				width={compact ? 49 : 88}
-				height={compact ? 44 : 72}
-				borderRadius={compact ? 8 : 12}
-				backgroundColor={0x101010}
-			/>
-			<Text
-				text="×"
-				x={x + (compact ? 34 : 80)}
-				y={y + (compact ? 28 : 46)}
-				anchor={0.5}
-				style={font(compact ? 22 : 32, UI_COLOR.accent)}
-			/>
-			<Text
-				text="DISABLE"
-				x={x + (compact ? 34 : 80)}
-				y={y + (compact ? 48 : 78)}
-				anchor={0.5}
-				style={font(compact ? 9 : 14, UI_COLOR.value)}
-			/>
+	<UiButton onpress={bonusPress} disabled={locked} disabledAlpha={1}>
+		<!-- Logo stays opaque once DISABLE covers it, so a lock never shows the triangle through. -->
+		<Sprite
+			key={compact ? 'ggUiMobileLogo' : 'ggUiLogo'}
+			{x}
+			{y}
+			alpha={1 - (1 - bonusModeFade.current) * (1 - bonusLockDim.current)}
+		/>
+		{#if bonusModeFade.current > 0.01}
+			<Container alpha={bonusModeFade.current}>
+				<Rectangle
+					x={x + (compact ? 10 : 36)}
+					y={y + (compact ? 16 : 28)}
+					width={compact ? 49 : 88}
+					height={compact ? 44 : 72}
+					borderRadius={compact ? 8 : 12}
+					backgroundColor={0x101010}
+				/>
+				<Container alpha={bonusLockDim.current}>
+					<Text
+						text="×"
+						x={x + (compact ? 34 : 80)}
+						y={y + (compact ? 28 : 46)}
+						anchor={0.5}
+						style={font(compact ? 22 : 32, UI_COLOR.accent)}
+					/>
+					<Text
+						text="DISABLE"
+						x={x + (compact ? 34 : 80)}
+						y={y + (compact ? 48 : 78)}
+						anchor={0.5}
+						style={font(compact ? 9 : 14, UI_COLOR.value)}
+					/>
+				</Container>
+			</Container>
 		{/if}
 	</UiButton>
 {/snippet}
