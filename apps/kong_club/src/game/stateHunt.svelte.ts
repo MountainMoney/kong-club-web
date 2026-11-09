@@ -21,18 +21,17 @@ export const huntLevelFromModeKey = (key: string): HuntLevel | null => {
 };
 
 /**
- * Locked Hunt price grid (spec 2026-11-04): stop Nx costs N x bet and multiplies the
- * base game's See / Hear / Speak No Evil trigger odds by these factors. Math reads the
- * same grid (game_criteria.HUNT_LEVELS).
+ * Bonus-entry weight versus the base game, from the vendored math-publish
+ * lookup tables (freegame criteria ÷ base freegame criteria):
+ * hunt_2 9% / 0.2% = 45×, hunt_3 13% = 65×, hunt_4 18% = 90×, hunt_5 45% = 225×.
+ * Those entries are tagged See No Evil. Hear and Speak have no weight in the hunt books.
  */
-export const HUNT_BONUS_CHANCE_MULTIPLIER: Record<HuntLevel, { see: number; hear: number; speak: number }> = {
-	2: { see: 3, hear: 5, speak: 10 },
-	3: { see: 5, hear: 6, speak: 10 },
-	4: { see: 7, hear: 10, speak: 18 },
-	5: { see: 8.5, hear: 15, speak: 30 },
+export const HUNT_BONUS_CHANCE_MULTIPLIER: Record<HuntLevel, number> = {
+	2: 45,
+	3: 65,
+	4: 90,
+	5: 225,
 };
 
-export const huntOddsLine = (level: HuntLevel) => {
-	const boost = HUNT_BONUS_CHANCE_MULTIPLIER[level];
-	return `Hunt Spins ${level}: Increases the chances of triggering See No Evil by ${boost.see}×, Hear No Evil by ${boost.hear}× and Speak No Evil by ${boost.speak}×.`;
-};
+export const huntOddsLine = (level: HuntLevel) =>
+	`Hunt Spins ${level}: Increases the chances of triggering See No Evil by ${HUNT_BONUS_CHANCE_MULTIPLIER[level]}×.`;
