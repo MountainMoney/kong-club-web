@@ -19,7 +19,7 @@
 		"@storybook/builder-vite": "9.0.15",
 		"@storybook/svelte": "9.0.15",
 		"@storybook/sveltekit": "9.0.15",
-		"@sveltejs/adapter-static": "latest",
+		"@sveltejs/adapter-static": "3.0.8",
 		"vite": "6.2.0"
 	}
 }
