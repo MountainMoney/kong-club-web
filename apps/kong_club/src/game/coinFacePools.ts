@@ -8,9 +8,12 @@
  * Clovers stay integer multipliers.
  */
 
-/** Bronze, silver, and gold faces, in bet multiples. Same list in every mode. */
+/**
+ * Bronze, silver, and gold faces, in bet multiples. Same list in every mode.
+ * Whole numbers only (math 9f5778f, 2026-11-09): bronze dropped 0.2 / 0.5.
+ */
 export const COIN_FACE_VALUES = {
-	CB: [0.2, 0.5, 1, 2, 3, 4],
+	CB: [1, 2, 3, 4],
 	CS: [5, 10, 15, 20],
 	CG: [25, 50, 100, 250, 500, 1000],
 } as const;
@@ -19,14 +22,14 @@ export type CoinFaceSymbol = keyof typeof COIN_FACE_VALUES;
 
 const MAX_FACE = 25000;
 
-/** Two-decimal coin face. 0.5 stays 0.5, not 1 or 0.50. */
+/** Two-decimal coin face. Spawned faces are whole; a max-win trimmed coin or pot can carry cents. */
 export const roundCoinFace = (value: number): number => {
 	const n = Number(value);
 	if (!Number.isFinite(n)) return 0;
 	return Math.round(n * 100) / 100;
 };
 
-/** Coin face label. 0.2 and 0.5 keep one decimal; 1000 stays a whole number. */
+/** Coin face label. Whole faces print as integers; a max-win trim keeps its cents (24996.1). */
 export const formatCoinFaceLabel = (value: number): string => {
 	const capped = Math.min(MAX_FACE, Math.max(0, Number(value)));
 	const n = roundCoinFace(capped);

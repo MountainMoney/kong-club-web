@@ -78,7 +78,7 @@ export const coinSymbolToTier = (symbol: string): TileTier => {
 	return 'none';
 };
 
-/** Bronze is below 5 (including 0.2 and 0.5). Silver is 5–20. Gold is 25+, including 1000. */
+/** Bronze is 1–4. Silver is 5–20. Gold is 25+, including 1000. */
 export const SILVER_FACE_MIN = 5;
 export const GOLD_FACE_MIN = 25;
 

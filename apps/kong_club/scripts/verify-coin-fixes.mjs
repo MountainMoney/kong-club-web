@@ -114,7 +114,7 @@ for (const entry of books) {
 if (activations === 0) fail('no feature-spin activations scanned');
 
 const EXPECTED_FACES = {
-	CB: [0.2, 0.5, 1, 2, 3, 4],
+	CB: [1, 2, 3, 4],
 	CS: [5, 10, 15, 20],
 	CG: [25, 50, 100, 250, 500, 1000],
 };
@@ -149,13 +149,13 @@ if (bookCoinKind('coin') !== 'coin' || bookCoinKind('multiplier') !== 'multiplie
 }
 const rules = coinValueRulesSentence(false);
 if (
-	!rules.includes('0.2, 0.5, 1, 2, 3, 4') ||
+	!rules.includes('(CB) 1, 2, 3, 4;') ||
 	!rules.includes('5, 10, 15, 20') ||
 	!rules.includes('25, 50, 100, 250, 500, 1000')
 ) {
 	fail(`rules sentence missing the shared pool: ${rules}`);
 }
-if (/0\.4|0\.6|0\.8|1\.4|\b7\b/.test(rules)) {
+if (/0\.2|0\.4|0\.5|0\.6|0\.8|1\.4|\b7\b/.test(rules)) {
 	fail(`rules sentence still lists a retired face: ${rules}`);
 }
 

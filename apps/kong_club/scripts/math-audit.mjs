@@ -29,16 +29,16 @@ const MODE_COST = {
 	hunt_4: 4,
 	hunt_5: 5,
 	hunt_6: 18,
-	feature_spin: 40,
+	feature_spin: 60,
 	peak_spin: 1083,
-	bonus_see: 120,
-	bonus_hear: 328,
-	bonus_mystery: 395,
-	bonus_risky: 506,
+	bonus_see: 127,
+	bonus_hear: 347,
+	bonus_mystery: 399,
+	bonus_risky: 498,
 };
 
 const HARD_FACES = new Set([
-	0.2, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000,
+	1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000,
 ]);
 
 /** Mystery was published as `bonus_pick` through math pr7-963. */

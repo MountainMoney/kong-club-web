@@ -17,7 +17,7 @@ const configPath = path.resolve(
 );
 
 const EXPECTED = {
-	CB: [0.2, 0.5, 1, 2, 3, 4],
+	CB: [1, 2, 3, 4],
 	CS: [5, 10, 15, 20],
 	CG: [25, 50, 100, 250, 500, 1000],
 };

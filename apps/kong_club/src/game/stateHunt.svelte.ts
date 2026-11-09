@@ -26,14 +26,14 @@ export const huntLevelFromModeKey = (key: string): HuntLevel | null => {
  * Locked Hunt price grid (spec 2026-11-04): stop Nx costs N x bet and multiplies the
  * base game's See / Hear / Speak No Evil trigger odds by these factors. Math reads the
  * same grid (game_criteria.HUNT_LEVELS). 2026-11-09: whole-number boosts, 5x See 9, and
- * hunt_6 = L5 (spec boosts 32/210/420 at 18x); every stop returns 96.3%.
+ * hunt_6 = L5 at 18x: base bar pace, boosts raised from spec 32/210/420 to 33/221/420; every stop returns 96.3%.
  */
 export const HUNT_BONUS_CHANCE_MULTIPLIER: Record<HuntLevel, { see: number; hear: number; speak: number }> = {
 	2: { see: 3, hear: 4, speak: 7 },
 	3: { see: 5, hear: 10, speak: 13 },
 	4: { see: 7, hear: 10, speak: 18 },
 	5: { see: 9, hear: 15, speak: 30 },
-	6: { see: 32, hear: 210, speak: 420 },
+	6: { see: 33, hear: 221, speak: 420 },
 };
 
 export const huntOddsLine = (level: HuntLevel) => {

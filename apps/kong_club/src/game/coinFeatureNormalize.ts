@@ -125,7 +125,7 @@ const powerSymbol = (kind: CoinFeatureItem['kind']): CoinFeatureItem['symbol'] =
 const normalizePowerItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatureItem => {
 	const kind = asKind(raw.kind);
 	const tileLevel = raw.tileLevel ?? raw.level ?? 1;
-	// Clovers are whole multipliers. Pots can hold a summed face (0.2, 0.5, 1000).
+	// Clovers are whole multipliers. Pots hold a summed face (whole, or cents after a max-win trim).
 	const readPower = kind === 'collector' ? parseCoinFace : formatNumericDisplay;
 	const value = capWinMultiplier(readPower(raw.value ?? raw.displayValue ?? 0));
 	const resolved = capWinMultiplier(
@@ -163,7 +163,7 @@ const normalizeCoinItem = (raw: LegacyCoinFeatureItem, round: number): CoinFeatu
 	const wholeFace = Math.round(rawFace);
 	const inPool = isWhole && ALL_COIN_FACES.has(wholeFace);
 
-	// Trust book faces (0.2, 0.5, and MULTI products). Snap only corrupted whole ints.
+	// Trust book faces (max-win trims with cents, and MULTI products). Snap only corrupted whole ints.
 	const face = capWinMultiplier(
 		powerResolved || !isWhole || inPool
 			? rawFace
