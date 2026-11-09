@@ -28,7 +28,7 @@ const MODE_COST = {
 	hunt_3: 3,
 	hunt_4: 4,
 	hunt_5: 5,
-	feature_spin: 40.5,
+	feature_spin: 40,
 	peak_spin: 1083,
 	bonus_see: 120,
 	bonus_hear: 328,

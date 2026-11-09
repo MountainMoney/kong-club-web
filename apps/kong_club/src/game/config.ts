@@ -19,7 +19,7 @@ export default {
 		hunt_3: { cost: 3.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		hunt_4: { cost: 4.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		hunt_5: { cost: 5.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
-		feature_spin: { cost: 40.5, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
+		feature_spin: { cost: 40.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		peak_spin: { cost: 1083.0, feature: true, buyBonus: false, rtp: 0.963, max_win: 25000.0 },
 		bonus_see: { cost: 120.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
 		bonus_hear: { cost: 328.0, feature: true, buyBonus: true, rtp: 0.963, max_win: 25000.0 },
