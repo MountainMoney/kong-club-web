@@ -1130,9 +1130,10 @@
 				spawnAt: at,
 				pulseAt: at,
 				eyeTone: freezeSit && item.kind === 'multiplier' ? multiEyeTone(item.value) : undefined,
-				showMultiLabel: item.kind === 'multiplier',
-				multiLabelAt:
-					item.kind === 'multiplier' ? at + (freezeSit ? 0 : pacedMs(COIN_FLIP_MS)) : undefined,
+				// Clover value stays hidden through the flip; revealOneMulti pops it on that
+				// clover's own multi round, one at a time (FX Lab forced labels excepted).
+				showMultiLabel: item.kind === 'multiplier' && freezeSit,
+				multiLabelAt: item.kind === 'multiplier' && freezeSit ? at : undefined,
 				showFace: true,
 				faceAt:
 					isCoin || isPot
