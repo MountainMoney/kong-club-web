@@ -1,7 +1,7 @@
 import type { LayoutMode } from './responsiveManager';
 import { jungleCover } from './backgroundCover';
 import { DESIGN_PORTRAIT, UI_BAR_PORTRAIT } from './ggUi/constants';
-import { BOARD_FRAME_INNER } from './uiAssetSizes';
+import { BOARD_FRAME_INNER, INTRO_LOGO_RENDER_SCALE, UI_ASSET_PIXELS } from './uiAssetSizes';
 
 /** Logical 6×5 grid at 80px cells — scale via `MonkeyBoardLayout.scale`. */
 export const MM_BASE_GRID = { w: 480, h: 400 } as const;
@@ -188,12 +188,49 @@ export const getMonkeyTitleLayout = (board: MonkeyBoardLayout, portrait = false)
 			anchor: { x: 0.5, y: 0.46 } as const,
 		};
 	}
-	return {
-		x: centerX,
-		y: topY + frame.height * 0.02,
-		width: Math.round(frame.width * 0.36),
-		anchor: { x: 0.5, y: 0.48 } as const,
-	};
+	return fitTitleBelowTop(
+		{
+			x: centerX,
+			y: topY + frame.height * 0.02,
+			width: Math.round(frame.width * 0.36),
+			anchor: { x: 0.5, y: 0.48 } as const,
+		},
+		board.y - (board.height * (board.scale ?? 1)) / 2,
+	);
+};
+
+/**
+ * Painted rows of title_art.png (1408×1408, alpha > 16): the wordmark plate only
+ * fills rows 391–970, the rest of the square is transparent.
+ */
+export const TITLE_ART_PAINT = { top: 391 / 1408, bottom: 970 / 1408 } as const;
+/** Gap kept between the main-layout top (the screen top when height-fitted) and the wordmark. */
+export const TITLE_TOP_PAD = 14;
+/** Gap kept between the wordmark and the first symbol row when it has to move down. */
+export const TITLE_GRID_GAP = 6;
+
+/**
+ * Layout/scale only: the wide layout fills the full 1080 height, so the beam-centred logo
+ * put its wordmark top above y = 0 (cut off at the default window). Keep the design
+ * place and size when the wordmark fits; otherwise move it down to the pad, and only if
+ * it would then reach the symbol grid, shrink it to fit between the pad and the grid.
+ */
+export const fitTitleBelowTop = <T extends { y: number; width: number; anchor: { y: number } }>(
+	layout: T,
+	gridTopY: number,
+): T => {
+	const heightFor = (width: number) =>
+		width * (UI_ASSET_PIXELS.title_art.h / UI_ASSET_PIXELS.title_art.w) * INTRO_LOGO_RENDER_SCALE;
+	const paintTop = (y: number, h: number) => y + (TITLE_ART_PAINT.top - layout.anchor.y) * h;
+	const paintBottom = (y: number, h: number) => y + (TITLE_ART_PAINT.bottom - layout.anchor.y) * h;
+	const h0 = heightFor(layout.width);
+	if (paintTop(layout.y, h0) >= TITLE_TOP_PAD) return layout;
+	const lowestBottom = Math.max(paintBottom(layout.y, h0), gridTopY - TITLE_GRID_GAP);
+	const paintSpan = TITLE_ART_PAINT.bottom - TITLE_ART_PAINT.top;
+	const fitH = Math.min(h0, (lowestBottom - TITLE_TOP_PAD) / paintSpan);
+	const width = Math.round((layout.width * fitH) / h0);
+	const h = heightFor(width);
+	return { ...layout, width, y: TITLE_TOP_PAD - (TITLE_ART_PAINT.top - layout.anchor.y) * h };
 };
 
 /** Empty / fill bar art shares the board/border canvas (1564×1194). */
