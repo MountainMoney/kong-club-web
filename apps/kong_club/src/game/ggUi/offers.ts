@@ -112,7 +112,7 @@ const offerSeeds = (): OfferSeed[] => {
 			artSize: { width: 512, height: 512 },
 			theme: 'Hear',
 			title: 'Hunt Spins',
-			body: `${times(config.betModes.hunt_2.cost)}–${times(config.betModes.hunt_5.cost)}× cost with more exclusive bonus access.`,
+			body: `${times(config.betModes.hunt_2.cost)}–${times(config.betModes.hunt_6.cost)} cost with more exclusive bonus access.`,
 			detail: huntOddsLine(huntLevel),
 			price: hunt,
 			slider: {
