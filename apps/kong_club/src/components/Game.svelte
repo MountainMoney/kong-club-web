@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Tween } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import { BlurFilter } from 'pixi.js';
 
 	import { EnablePixiExtension } from 'components-pixi';
 	import { EnableHotkey } from 'components-shared';
@@ -130,6 +133,34 @@
 	/** GG-ported intro cinematic (replaces the HTML OpeningSplash); stays up through its exit. */
 	const showIntro = $derived(summitFontReady && stateIntroCinematic.active && !isReplayUrl());
 
+	/**
+	 * Light blur on the game layer (background + playfield) while the buy menu or its
+	 * confirm step is open. Same idea as the GG buy-screen scrim blur, but a plain
+	 * BlurFilter on the game layer: the menu's BackdropBlurFilter needs a back buffer
+	 * that this app does not create, so it never blurred anything. Follows the modal
+	 * state, so every close path (buy, activate, close button, outside tap, bonus start)
+	 * clears it. The buy UI itself sits outside the filtered layers.
+	 */
+	const GAME_BLUR_PX = 5;
+	const GAME_BLUR_MS = 200;
+	const buyMenuOpen = $derived(
+		stateModal.modal?.name === 'buyBonus' || stateModal.modal?.name === 'buyBonusConfirm',
+	);
+	const gameBlur = new Tween(0, { duration: GAME_BLUR_MS, easing: cubicOut });
+	const gameBlurFilter = new BlurFilter({ strength: 0, quality: 2 });
+	$effect(() => {
+		void gameBlur.set(buyMenuOpen ? GAME_BLUR_PX : 0);
+	});
+	$effect(() => {
+		gameBlurFilter.strength = gameBlur.current;
+	});
+	const gameLayerFilters = $derived(gameBlur.current > 0.05 ? [gameBlurFilter] : undefined);
+	/** Background layer: buy-menu blur plus the intro cinematic's background blur. */
+	const backgroundFilters = $derived([
+		...(gameLayerFilters ?? []),
+		...(stateIntroCinematic.blur > 0.001 ? [introBackgroundBlur] : []),
+	]);
+
 	const playfieldAlpha = $derived(stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha);
 
 	const beginSplashHandoff = () => {
@@ -200,18 +231,20 @@
 		<EnableGameActor />
 		<EnablePixiExtension />
 
-		<!-- GG intro camera [ja]: background zooms 1 → 1.1 → 1 about the canvas centre; darkened under the intro. -->
-		<Container
-			zIndex={-3}
-			sortableChildren={true}
-			x={canvasSizes.width / 2}
-			y={canvasSizes.height / 2}
-			pivot={{ x: canvasSizes.width / 2, y: canvasSizes.height / 2 }}
-			scale={stateIntroCinematic.zoom}
-			filters={stateIntroCinematic.blur > 0.001 ? [introBackgroundBlur] : []}
-		>
-			<Background />
-			<IntroBackdropDim />
+		<!-- Buy-menu blur (item 9) on the whole background layer; the GG intro camera [ja]
+		     zooms the background 1 → 1.1 → 1 about the canvas centre inside it, darkened
+		     under the intro. Both blurs share one filter list on this layer. -->
+		<Container zIndex={-2} sortableChildren={true} filters={backgroundFilters}>
+			<Container
+				sortableChildren={true}
+				x={canvasSizes.width / 2}
+				y={canvasSizes.height / 2}
+				pivot={{ x: canvasSizes.width / 2, y: canvasSizes.height / 2 }}
+				scale={stateIntroCinematic.zoom}
+			>
+				<Background />
+				<IntroBackdropDim />
+			</Container>
 		</Container>
 
 		{#if showPlayfield}
@@ -224,6 +257,7 @@
 				<!-- Intro entrance (GG Dce): the board drops in from above; title + mascot are counter-offset. -->
 				<Container
 					alpha={playfieldAlpha}
+					filters={gameLayerFilters}
 					sortableChildren={true}
 					x={stateSummitTease.shakeX}
 					y={stateSummitTease.shakeY + stateIntroCinematic.boardY}
