@@ -7,8 +7,8 @@
 	import { EnablePixiExtension } from 'components-pixi';
 	import { EnableHotkey } from 'components-shared';
 	import { MainContainer } from 'components-layout';
-	import { App, Container } from 'pixi-svelte';
-	import { stateModal, stateUi } from 'state-shared';
+	import { App, Container, Rectangle } from 'pixi-svelte';
+	import { stateBet, stateModal, stateUi } from 'state-shared';
 	import { GameVersion } from 'components-ui-html';
 
 	import MonkeyModals from './MonkeyModals.svelte';
@@ -30,6 +30,7 @@
 	import { isReplayUrl } from '../game/replayMode.svelte';
 	import { stateSummitTease } from '../game/summitTease.svelte';
 	import { introBackgroundBlur, stateIntroCinematic } from '../game/introCinematicState.svelte';
+	import { isPeakSpinBetMode } from '../game/betModes';
 
 	import EnableSound from './EnableSound.svelte';
 	import EnableGameActor from './EnableGameActor.svelte';
@@ -161,6 +162,18 @@
 		...(stateIntroCinematic.blur > 0.001 ? [introBackgroundBlur] : []),
 	]);
 
+	/**
+	 * Trifecta Spins on: a light black wash over the background only (under the board),
+	 * same 200 ms ease as the buy blur. Follows the active bet mode, so it clears when
+	 * Trifecta is turned off or the mode ends.
+	 */
+	const TRIFECTA_BG_DIM = 0.3;
+	const trifectaOn = $derived(isPeakSpinBetMode(stateBet.activeBetModeKey ?? ''));
+	const trifectaDim = new Tween(0, { duration: GAME_BLUR_MS, easing: cubicOut });
+	$effect(() => {
+		void trifectaDim.set(trifectaOn ? TRIFECTA_BG_DIM : 0);
+	});
+
 	const playfieldAlpha = $derived(stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha);
 
 	const beginSplashHandoff = () => {
@@ -245,6 +258,15 @@
 				<Background />
 				<IntroBackdropDim />
 			</Container>
+			{#if trifectaDim.current > 0.005}
+				<Rectangle
+					{...context.stateLayoutDerived.canvasSizes()}
+					backgroundColor={0x000000}
+					backgroundAlpha={trifectaDim.current}
+					zIndex={0}
+					eventMode="none"
+				/>
+			{/if}
 		</Container>
 
 		{#if showPlayfield}
@@ -281,8 +303,9 @@
 						>
 							<MonkeyMascot />
 						</Container>
-						<BoardBorderOverlay />
 					{/if}
+					<!-- Stays here during the Trifecta tease so the vine frame never pops over the UI. -->
+					<BoardBorderOverlay />
 					{#if SHOW_PLAYFIELD_TITLE}
 						<!-- Logo fades in with the background unblur (no slide). -->
 						<Container
@@ -311,7 +334,6 @@
 							y={stateSummitTease.shakeY}
 						>
 							<MonkeyProgressBar />
-							<BoardBorderOverlay />
 							<MonkeyMascot />
 						</Container>
 					</MainContainer>
