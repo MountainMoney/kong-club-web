@@ -11,7 +11,8 @@
 	import MonkeyModals from './MonkeyModals.svelte';
 	import BonusBuyScreen from './gg/BonusBuyScreen.svelte';
 	import GaiaBar from './gg/GaiaBar.svelte';
-	import OpeningSplash from './OpeningSplash.svelte';
+	import IntroCinematic from './IntroCinematic.svelte';
+	import IntroBackdropDim from './IntroBackdropDim.svelte';
 	import './ui/summit/summitType.css';
 
 	import { getContext } from '../game/context';
@@ -25,6 +26,7 @@
 	import { stateBonusIntro } from '../game/bonusIntroPresentation.svelte';
 	import { isReplayUrl } from '../game/replayMode.svelte';
 	import { stateSummitTease } from '../game/summitTease.svelte';
+	import { introBackgroundBlur, stateIntroCinematic } from '../game/introCinematicState.svelte';
 
 	import EnableSound from './EnableSound.svelte';
 	import EnableGameActor from './EnableGameActor.svelte';
@@ -113,7 +115,20 @@
 	 * wide layout it sits over the progress bar. Set true to bring it back. Splash and
 	 * loading screens draw their own logo and are not affected.
 	 */
-	const SHOW_PLAYFIELD_TITLE = false;
+	/**
+	 * Intro logo at the end of the cinematic. 'fade': the intro logo fades out in place
+	 * and the in-play title stays off. 'title': the intro logo hands over to the in-play
+	 * title (it fades in with the unblur, as in the Nov 6 work) and the title is back on.
+	 */
+	const INTRO_LOGO_END: 'fade' | 'title' = 'fade';
+	const SHOW_PLAYFIELD_TITLE = INTRO_LOGO_END === 'title';
+	/** Hop wrapper takes the mascot's own layer (portrait sits above the vine frame). */
+	const introHopZ = $derived(
+		canvasSizes.height > canvasSizes.width * 1.05 ? zIndexes.boardBorder + 15 : zIndexes.mascot,
+	);
+
+	/** GG-ported intro cinematic (replaces the HTML OpeningSplash); stays up through its exit. */
+	const showIntro = $derived(summitFontReady && stateIntroCinematic.active && !isReplayUrl());
 
 	const playfieldAlpha = $derived(stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha);
 
@@ -165,6 +180,7 @@
 			return;
 		}
 		stateFxLab.forceEnterPlayfield = false;
+		stateIntroCinematic.active = false;
 		revealPlayfield();
 	});
 
@@ -184,7 +200,19 @@
 		<EnableGameActor />
 		<EnablePixiExtension />
 
-		<Background />
+		<!-- GG intro camera [ja]: background zooms 1 → 1.1 → 1 about the canvas centre; darkened under the intro. -->
+		<Container
+			zIndex={-3}
+			sortableChildren={true}
+			x={canvasSizes.width / 2}
+			y={canvasSizes.height / 2}
+			pivot={{ x: canvasSizes.width / 2, y: canvasSizes.height / 2 }}
+			scale={stateIntroCinematic.zoom}
+			filters={stateIntroCinematic.blur > 0.001 ? [introBackgroundBlur] : []}
+		>
+			<Background />
+			<IntroBackdropDim />
+		</Container>
 
 		{#if showPlayfield}
 			{#if !isReplayUrl()}
@@ -193,11 +221,12 @@
 			<Sound />
 
 			<MainContainer>
+				<!-- Intro entrance (GG Dce): the board drops in from above; title + mascot are counter-offset. -->
 				<Container
 					alpha={playfieldAlpha}
 					sortableChildren={true}
 					x={stateSummitTease.shakeX}
-					y={stateSummitTease.shakeY}
+					y={stateSummitTease.shakeY + stateIntroCinematic.boardY}
 				>
 					<!-- Back → front: board bg → symbols → vine border → title -->
 					<BoardFrame />
@@ -207,11 +236,29 @@
 					<TumbleBoard />
 					<KongClubMechanics />
 					{#if !stateSummitTease.active}
-						<MonkeyMascot />
+						<!-- Intro entrance (GG Jqe): mascot hops in from the right, squash on landing. -->
+						<Container
+							zIndex={introHopZ}
+							sortableChildren={true}
+							pivot={{ x: stateIntroCinematic.hero.px, y: stateIntroCinematic.hero.py }}
+							x={stateIntroCinematic.hero.px + stateIntroCinematic.hero.x}
+							y={stateIntroCinematic.hero.py + stateIntroCinematic.hero.y - stateIntroCinematic.boardY}
+							scale={{ x: stateIntroCinematic.hero.sx, y: stateIntroCinematic.hero.sy }}
+						>
+							<MonkeyMascot />
+						</Container>
 						<BoardBorderOverlay />
 					{/if}
 					{#if SHOW_PLAYFIELD_TITLE}
-						<PlayfieldTitle />
+						<!-- Logo fades in with the background unblur (no slide). -->
+						<Container
+							zIndex={zIndexes.playfieldTitle}
+							sortableChildren={true}
+							y={-stateIntroCinematic.boardY}
+							alpha={stateIntroCinematic.uiAlpha}
+						>
+							<PlayfieldTitle />
+						</Container>
 					{/if}
 					<CoinFeatureDim />
 					<CoinFeatureReveal />
@@ -238,7 +285,10 @@
 			{/if}
 
 			{#if summitFontReady}
-				<GaiaBar replay={isReplayUrl()} />
+				<!-- UI fades in with the background unblur (layout untouched). -->
+				<Container alpha={stateIntroCinematic.uiAlpha}>
+					<GaiaBar replay={isReplayUrl()} />
+				</Container>
 			{/if}
 			<ClickToSkip />
 			<SpinWinOverlay />
@@ -251,18 +301,24 @@
 			{/if}
 		{/if}
 
+		{#if showIntro}
+			<Container zIndex={zIndexes.blackScreen - 5} sortableChildren={true}>
+				<IntroCinematic
+					onleavestart={beginSplashHandoff}
+					oncontinue={revealPlayfield}
+					ondone={() => (stateIntroCinematic.active = false)}
+				/>
+			</Container>
+		{/if}
+
 		<ReplayMode />
 	</App>
-
-	{#if summitFontReady && showSplash}
-		<OpeningSplash onleavestart={beginSplashHandoff} oncontinue={revealPlayfield} />
-	{/if}
 
 	{#if summitFontReady && showCornerCredits}
 		<div
 			class="corner-credits summit-ui-type"
 			class:behind-overlay={!!stateModal.modal}
-			style={`opacity:${playfieldAlpha}`}
+			style={`opacity:${playfieldAlpha * stateIntroCinematic.uiAlpha}`}
 			aria-hidden="true"
 		>
 			<span class="corner-credits-left">KONG CLUB</span>

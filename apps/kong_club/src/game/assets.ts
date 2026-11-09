@@ -63,6 +63,11 @@ export default {
 	hearMonkey: { ...sprite('sprites/monkeySymbols/HEAR.png'), preload: true },
 	speakMonkey: { ...sprite('sprites/monkeySymbols/SPEAK.png'), preload: true },
 	mmMascot: spineAsset('mmMascot', 'MM_Mascot_2', 'MM_Mascot_2.atlas', 1),
+	/** Gaia's Grotto top + bottom foliage frame (intro splash + bonus intro only). */
+	ggFoliage: {
+		...spineAsset('ggFoliage', 'cinematic-overlay', 'cinematic-overlay.atlas', 1),
+		preload: true,
+	},
 	/** Bronze / silver / gold coin discs (`tongbi` / `yinbi` / `jinbi`). */
 	coinMetal: {
 		...spineAsset('coin', 'coin', 'coin.atlas', 1),

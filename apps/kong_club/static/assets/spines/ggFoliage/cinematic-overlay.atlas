@@ -1,0 +1,73 @@
+cinematic-overlay.webp
+size:2218,1500
+filter:Linear,Linear
+pma:true
+co niz 1
+bounds:2088,270,118,118
+co niz main
+bounds:2,266,1920,307
+offsets:1,1,1922,309
+co niz main2
+bounds:2,927,1920,571
+offsets:0,0,1920,1080
+co niz10
+bounds:1924,753,219,234
+rotate:90
+co niz11
+bounds:2160,810,52,162
+offsets:1,1,53,163
+co niz12
+bounds:1924,1178,216,267
+rotate:90
+co niz2
+bounds:1924,974,243,202
+co niz3
+bounds:1924,478,170,186
+offsets:1,0,171,186
+rotate:90
+co niz4
+bounds:2024,10,131,93
+rotate:90
+co niz5
+bounds:1924,5,98,136
+offsets:0,0,99,136
+co niz6
+bounds:2119,138,58,82
+offsets:1,0,59,82
+rotate:90
+co niz7
+bounds:2136,609,80,142
+co niz8
+bounds:2119,71,65,76
+offsets:1,0,77,76
+rotate:90
+co niz9
+bounds:1924,239,159,162
+rotate:90
+co verh main
+bounds:2,2,1920,262
+offsets:1,1,1922,264
+co verh main2
+bounds:2,575,1920,350
+offsets:0,730,1920,1080
+co verh1
+bounds:1924,143,162,94
+offsets:1,0,163,99
+co verh2
+bounds:1924,650,101,210
+rotate:90
+co verh3
+bounds:2088,198,70,110
+offsets:0,0,70,111
+rotate:90
+co verh4
+bounds:1924,400,164,76
+offsets:1,0,166,76
+co verh5
+bounds:2112,390,86,99
+rotate:90
+co verh6
+bounds:2112,478,100,129
+offsets:0,0,100,130
+co verh7
+bounds:1924,1396,282,102

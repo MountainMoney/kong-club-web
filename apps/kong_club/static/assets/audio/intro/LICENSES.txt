@@ -1,0 +1,21 @@
+Kong Club intro cinematic sounds
+================================
+
+intro_whoosh.(webm|mp3)
+  Source : "Swishes Sound Pack" by artisticdude, OpenGameArt.org
+           https://opengameart.org/content/swishes-sound-pack  (file swish-9.wav)
+  Licence: CC0 1.0 (public domain dedication)
+  Edits  : slowed to 0.62x, low-passed, faded; encoded Opus 96k / MP3.
+
+intro_card.(webm|mp3)
+  Source : Kenney "Impact Sounds" (www.kenney.nl), impactPlank_medium_000.ogg
+  Licence: CC0 1.0 (public domain dedication)
+  Edits  : trimmed to 0.5s; encoded Opus 96k / MP3.
+
+intro_click.(webm|mp3)
+  Source : Gaia's Grotto (Trifecta, our own game) live build sound sprite
+           sounds.opus, sprite "sfx_click" [0 ms - 238.667 ms]
+  Licence: first-party (Trifecta-owned asset)
+  Edits  : extracted from the sprite; encoded Opus 96k / MP3.
+
+Particle sheet ../../sprites/intro/fx.(json|webp) is Gaia's Grotto's own intro fx sheet (first-party).

@@ -42,6 +42,7 @@
 	import { getPixiTextResolution } from '../game/pixiTextCrisp';
 	import BonusIntroTierHero from './BonusIntroTierHero.svelte';
 	import PressToContinue from './PressToContinue.svelte';
+	import GgFoliage from './GgFoliage.svelte';
 
 	const context = getContext();
 
@@ -265,6 +266,12 @@
 
 {#if show && content}
 	{#if fontReady}
+		<!-- GG foliage frame, mounted before the texts so it stays behind them. -->
+		<GgFoliage
+			variant="bonusIntro"
+			alpha={stateBonusIntro.overlayAlpha}
+			play={stateBonusIntro.overlayAlpha > 0.01}
+		/>
 		<MainContainer>
 			<Container
 				x={layout.x}
