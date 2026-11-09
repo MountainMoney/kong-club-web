@@ -108,6 +108,12 @@
 	let splashHandoff = $state(false);
 	const showPlayfield = $derived(!showSplash || splashHandoff);
 	const showCornerCredits = $derived(!isShortLandscape(canvasSizes.width, canvasSizes.height));
+	/**
+	 * In-play title card (title_art above the reels). Off for now (Ryan, 2026-11-09): in the
+	 * wide layout it sits over the progress bar. Set true to bring it back. Splash and
+	 * loading screens draw their own logo and are not affected.
+	 */
+	const SHOW_PLAYFIELD_TITLE = false;
 
 	const playfieldAlpha = $derived(stateBonusOutro.playfieldAlpha * stateBonusIntro.playfieldAlpha);
 
@@ -204,7 +210,9 @@
 						<MonkeyMascot />
 						<BoardBorderOverlay />
 					{/if}
-					<PlayfieldTitle />
+					{#if SHOW_PLAYFIELD_TITLE}
+						<PlayfieldTitle />
+					{/if}
 					<CoinFeatureDim />
 					<CoinFeatureReveal />
 					<ClusterWinAmounts />
