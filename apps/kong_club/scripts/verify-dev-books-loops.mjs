@@ -29,6 +29,7 @@ const MODES = [
 	'hunt_3',
 	'hunt_4',
 	'hunt_5',
+	'hunt_6',
 	'feature_spin',
 	'peak_spin',
 	'bonus_see',

@@ -235,6 +235,7 @@ const PAYTABLE_MODE_LABELS = {
 	hunt_3: 'Hunt Spins',
 	hunt_4: 'Hunt Spins',
 	hunt_5: 'Hunt Spins',
+	hunt_6: 'Hunt Spins',
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: 'See No Evil',

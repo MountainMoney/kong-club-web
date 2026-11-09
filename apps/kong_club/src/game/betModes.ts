@@ -102,6 +102,7 @@ export const ACTIVATE_BET_MODE_KEYS = [
 	'hunt_3',
 	'hunt_4',
 	'hunt_5',
+	'hunt_6',
 	FEATURE_SPIN_BET_MODE_KEY,
 	PEAK_SPIN_BET_MODE_KEY,
 ] as const;
@@ -141,6 +142,7 @@ const BET_MODE_ALIASES: Record<string, string> = {
 	bonus_hunt_3: huntModeKeyFor(3),
 	bonus_hunt_4: huntModeKeyFor(4),
 	bonus_hunt_5: huntModeKeyFor(5),
+	bonus_hunt_6: huntModeKeyFor(6),
 };
 
 /**
@@ -447,6 +449,13 @@ export function initKongClubBetModes() {
 				type: 'activate',
 				costMultiplier: config.betModes.hunt_5.cost,
 				title: `Hunt Spins (${formatCostMultiplier(config.betModes.hunt_5.cost)}×)`,
+				button: 'Hunt',
+				parent: 'base',
+			}),
+			modeEntry('hunt_6', {
+				type: 'activate',
+				costMultiplier: config.betModes.hunt_6.cost,
+				title: `Hunt Spins (${formatCostMultiplier(config.betModes.hunt_6.cost)}×)`,
 				button: 'Hunt',
 				parent: 'base',
 			}),

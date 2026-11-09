@@ -18,6 +18,7 @@ const MODE_LABELS: Record<BetModeKey, { default: string; social: string }> = {
 	hunt_3: { default: 'Hunt Spins 3×', social: 'Hunt Spins 3×' },
 	hunt_4: { default: 'Hunt Spins 4×', social: 'Hunt Spins 4×' },
 	hunt_5: { default: 'Hunt Spins 5×', social: 'Hunt Spins 5×' },
+	hunt_6: { default: 'Hunt Spins 18×', social: 'Hunt Spins 18×' },
 	feature_spin: { default: 'Feature Spin', social: 'Feature Play' },
 	peak_spin: { default: 'TRIFECTA Spin', social: 'TRIFECTA Play' },
 	bonus_see: { default: 'See No Evil', social: 'See No Evil' },
@@ -133,7 +134,7 @@ During See No Evil, 4 scatters upgrade the bonus to Hear No Evil and add 4 plays
 During Hear No Evil, 5 scatters upgrade the bonus to Speak No Evil and add 4 plays. Current ranks are kept.
 Retriggers: 2 scatters add 2 plays, 3 or more scatters add 4 plays. There is no cap on total plays.
 
-Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Play and TRIFECTA can be on.
+Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}× / ${config.betModes.hunt_6.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Play and TRIFECTA can be on.
 
 Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_mystery.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
 
@@ -147,7 +148,7 @@ During See No Evil, 4 scatters upgrade the bonus to Hear No Evil and add 4 spins
 During Hear No Evil, 5 scatters upgrade the bonus to Speak No Evil and add 4 spins. Current ranks are kept.
 Retriggers: 2 scatters add 2 spins, 3 or more scatters add 4 spins. There is no cap on total spins.
 
-Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Spin and TRIFECTA can be on.
+Ante (${config.betModes.base_ante.cost}×, Extra Chance) raises the bonus chance. Hunt Spins is a slider at ${config.betModes.hunt_2.cost}× / ${config.betModes.hunt_3.cost}× / ${config.betModes.hunt_4.cost}× / ${config.betModes.hunt_5.cost}× / ${config.betModes.hunt_6.cost}×. Higher stops raise the bonus chance. The bar still fills at 10. Only one of Ante, Hunt, Feature Spin and TRIFECTA can be on.
 
 Buys: See No Evil (${config.betModes.bonus_see.cost}×), Hear No Evil (${config.betModes.bonus_hear.cost}×), Mystery Bonus (${config.betModes.bonus_mystery.cost}×: 50% See, 45% Hear, 5% Speak No Evil), Risky Mystery Bonus (${config.betModes.bonus_risky.cost}×: 50% nothing, 40% Hear, 10% Speak No Evil).
 

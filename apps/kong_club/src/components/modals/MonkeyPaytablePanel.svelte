@@ -36,6 +36,7 @@
 					modeRtpLine('hunt_3', 'Hunt Spins 3×'),
 					modeRtpLine('hunt_4', 'Hunt Spins 4×'),
 					modeRtpLine('hunt_5', 'Hunt Spins 5×'),
+					modeRtpLine('hunt_6', 'Hunt Spins 18×'),
 				]
 			: [],
 	);
