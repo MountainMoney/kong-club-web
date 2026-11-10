@@ -26,6 +26,7 @@
 		PREMIUM_LAND_BREATHE_PEAK,
 	} from '../game/premiumLandBreathe';
 	import { scaleFeatureMs } from '../game/winPresentationTempo';
+	import { darken } from '../game/ggUi/dim';
 	import type { ReelSymbol } from '../game/stateGame.svelte';
 
 	type Props = {
@@ -52,7 +53,8 @@
 		stateCoinFeatureCover.flipScaleX[cellCoverKey(props.reelIndex, homeRow)],
 	);
 	let connectScale = $state(1);
-	let linkAlpha = $state(1);
+	/** Cluster-win dim (Ryan: darken, not see-through). 1 = full brightness. */
+	let linkBrightness = $state(1);
 	let landBreathe = $state(1);
 	let landBreatheArmed = false;
 	let landBreatheRaf = 0;
@@ -100,7 +102,7 @@
 			Object.keys(stateClusterConnectMotion.byKey).length > 0;
 		if (isPadding || !beat) {
 			connectScale = 1;
-			linkAlpha = others ? 0.55 : 1;
+			linkBrightness = others ? 0.55 : 1;
 			return;
 		}
 
@@ -108,19 +110,19 @@
 		const tick = () => {
 			if (stateSpinSkip.forceSkip || beat.duration <= 0) {
 				connectScale = 1;
-				linkAlpha = 1;
+				linkBrightness = 1;
 				return;
 			}
 			const t = Math.min(1, (performance.now() - beat.startedAt) / beat.duration);
 			const eased = t * t * (3 - 2 * t);
-			linkAlpha = 0.72 + 0.28 * eased;
+			linkBrightness = 0.72 + 0.28 * eased;
 			connectScale = 1 + (CLUSTER_CONNECT_SCALE_PEAK - 1) * Math.sin(t * Math.PI);
 			if (t < 1) {
 				raf = requestAnimationFrame(tick);
 				return;
 			}
 			connectScale = 1;
-			linkAlpha = 1;
+			linkBrightness = 1;
 		};
 		tick();
 		return () => cancelAnimationFrame(raf);
@@ -181,7 +183,8 @@
 	y={props.reelSymbol.symbolY.current}
 	scaleX={(tileFlipX ?? 1) * shrinkScale.current * connectScale * landBreathe}
 	scaleY={shrinkScale.current * connectScale * landBreathe}
-	alpha={shrinkAlpha.current * coverAlpha * linkAlpha}
+	alpha={shrinkAlpha.current * coverAlpha}
+	tint={darken(linkBrightness)}
 	animating={symbolInfo.type === 'spine' &&
 		symbolInfo.assetKey !== 'coinMetal' &&
 		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}

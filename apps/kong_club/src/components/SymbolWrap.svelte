@@ -19,6 +19,8 @@
 		scaleY?: number;
 		rotation?: number;
 		alpha?: number;
+		/** Multiply tint (Pixi Container tint, inherited by children). Default white = no change. */
+		tint?: number;
 		children: Snippet;
 	};
 
@@ -52,6 +54,7 @@
 		rotation={props.rotation ?? 0}
 		scale={{ x: props.scaleX ?? props.scale ?? 1, y: props.scaleY ?? props.scale ?? 1 }}
 		alpha={props.alpha ?? 1}
+		tint={props.tint ?? 0xffffff}
 	>
 		{@render props.children()}
 	</Container>
