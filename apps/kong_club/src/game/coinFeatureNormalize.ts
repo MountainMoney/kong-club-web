@@ -5,7 +5,6 @@ import {
 	roundCoinFace,
 } from './coinFacePools';
 import { normalizeTileLevel, tileLevelToCoinSymbol } from './tileLevelVisual';
-import { stateGame } from './stateGame.svelte';
 import type { CoinFeatureActivation, CoinFeatureItem } from './typesBookEvent';
 import { capWinMultiplier } from './winCountTier';
 
@@ -342,10 +341,8 @@ export const ensurePrizesOnLitTiles = (
 ): CoinFeatureItem[] => {
 	if (!tileLevels?.length) return items;
 
-	const skipBronze = stateGame.sessionBonusTier === 3;
-	const sourceItems = skipBronze
-		? items.filter((item) => (item.tileLevel ?? 0) > 1 && item.symbol !== 'CB')
-		: items;
+	// Speak No Evil keeps bronze coins: math spawns and pays them there too (display only).
+	const sourceItems = items;
 
 	const occupied = new Set(
 		sourceItems
@@ -357,7 +354,7 @@ export const ensurePrizesOnLitTiles = (
 	tileLevels.forEach((reel, reelIndex) => {
 		reel.forEach((level, row) => {
 			const tileLevel = normalizeTileLevel(level);
-			if (tileLevel <= 0 || (skipBronze && tileLevel <= 1) || occupied.has(`${reelIndex}:${row}`))
+			if (tileLevel <= 0 || occupied.has(`${reelIndex}:${row}`))
 				return;
 			const symbol = tileLevelToCoinSymbol(tileLevel) ?? 'CB';
 			const face = activeCoinFaceValues()[symbol][0] ?? 1;

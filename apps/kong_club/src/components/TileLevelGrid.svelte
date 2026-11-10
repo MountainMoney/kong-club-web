@@ -328,11 +328,8 @@
 				const breathe = pulse > 0 ? 0.5 + 0.5 * Math.sin(pulsePhase * Math.PI * 2) : 0;
 				const x0 = x - HALF;
 				const y0 = y - HALF;
-				const flipKey = `${reelIndex}:${rowIndex}`;
-				const flipX = stateCoinFeatureCover.flipScaleX[flipKey];
-				const covered = stateCoinFeatureCover.keys.has(flipKey);
-				if (covered && flipX == null) continue;
-				if (flipX != null && flipX <= 0.02) continue;
+				// Ryan 2026-11-09: the tile stays on the board under its coin the whole
+				// coin game, and never squashes or flips.
 				if (pulse > 0 || bump > 0) {
 					const glowPad = 3 + breathe * 2 + bump * 2;
 					g.rect(x0 - glowPad, y0 - glowPad, CELL + glowPad * 2, CELL + glowPad * 2);
@@ -342,7 +339,7 @@
 					});
 				}
 				if (!peakPlate) {
-					drawPlaque(g, x0, y0, tier, flipX ?? 1, plaqueAlpha);
+					drawPlaque(g, x0, y0, tier, 1, plaqueAlpha);
 				} else {
 					g.rect(x0 + 1, y0 + 1, CELL - 2, CELL - 2);
 					g.stroke({
@@ -365,10 +362,6 @@
 			const incoming = normalizeTileLevels(
 				event.payload.tileLevels,
 				event.payload.tileMultipliers,
-			).map((reel) =>
-				reel.map((level) =>
-					stateGame.sessionBonusTier === 3 && level === 1 ? 0 : level,
-				),
 			);
 			const persist = stateGame.gameType === 'freegame';
 			const nextLevels = incoming.map((reel, reelIndex) =>
@@ -424,7 +417,7 @@
 				const key = cellKey(reel, row);
 				keys.push(key);
 				if ((tileLevels[reel]?.[row] ?? 0) <= 0) {
-					nextPending[key] = stateGame.sessionBonusTier === 3 ? 2 : 1;
+					nextPending[key] = 1;
 				}
 			}
 			pending = nextPending;
