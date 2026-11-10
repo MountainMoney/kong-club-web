@@ -7,6 +7,8 @@
 		reel: number; // 0 | 1 | 2 | 3 | 4 | 5;
 
 		row: number; // 1 | 2 | 3 | 4 | 5; // excluding the off top row and the off bottom row
+		/** Text shown instead of the amount (e.g. "+4 FS" on a mid-bonus retrigger). */
+		label?: string;
 
 	};
 
@@ -150,7 +152,7 @@
 
 			anchor={0.5}
 
-			text={bookEventAmountToWinCurrencyString(capBookAmount(props.win.amount))}
+			text={props.win.label ?? bookEventAmountToWinCurrencyString(capBookAmount(props.win.amount))}
 
 			style={amountStyle}
 

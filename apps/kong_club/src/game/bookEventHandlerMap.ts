@@ -232,6 +232,27 @@ const bookHasPendingBonusStart = (bookEvents: BookEvent[], fromEvent: BookEvent)
 	);
 };
 
+/** Spin total the counter showed just before `bookEvent` (last update / trigger total in the book). */
+const freeSpinTotalBefore = (bookEvents: BookEvent[], bookEvent: BookEvent): number => {
+	const index = bookEvents.indexOf(bookEvent);
+	for (let i = (index >= 0 ? index : bookEvents.length) - 1; i >= 0; i -= 1) {
+		const event = bookEvents[i]!;
+		if (event.type === 'updateFreeSpin') return event.total;
+		if (event.type === 'freeSpinTrigger' || event.type === 'freeSpinRetrigger') return event.totalFs;
+	}
+	return BONUS_SPINS_TOTAL;
+};
+
+/** Book row (1–5) / reel nearest the middle of the landed scatters, for the "+X FS" pop-up. */
+const scatterPopupCell = (positions: Position[]) => {
+	if (positions.length === 0) return { reel: 2, row: 3 };
+	const mean = (values: number[]) => values.reduce((sum, v) => sum + v, 0) / values.length;
+	return {
+		reel: Math.round(mean(positions.map((pos) => pos.reel))),
+		row: Math.min(5, Math.max(1, Math.round(mean(positions.map((pos) => pos.row))))),
+	};
+};
+
 const clusterWinFloaterPayload = (win: BookEventOfType<'winInfo'>['wins'][number]) => ({
 	amount: capBookAmount(win.win),
 	reel: win.meta.overlay.reel,
@@ -594,12 +615,39 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		});
 		bonusIntroPresentedThisRound = true;
 	},
-	freeSpinRetrigger: async (bookEvent: BookEventOfType<'freeSpinTrigger'>) => {
-		await presentScatterFreeSpinIntro({
-			totalFs: bookEvent.totalFs,
-			positions: bookEvent.positions,
-			animateSymbols,
+	freeSpinRetrigger: async (
+		bookEvent: BookEventOfType<'freeSpinRetrigger'>,
+		{ bookEvents }: BookEventContext,
+	) => {
+		if (stateGame.gameType !== 'freegame') {
+			// Not inside a bonus (never seen in books): keep the old entry presentation.
+			await presentScatterFreeSpinIntro({
+				totalFs: bookEvent.totalFs,
+				positions: bookEvent.positions,
+				animateSymbols,
+			});
+			return;
+		}
+		// Mid-bonus retrigger / upgrade (Ryan 2026-11-09, bug 5): no intro, no black screen,
+		// no tier or background change. Light the scatters, pop "+X FS" in the
+		// connection-win style, update the counter. The upgrade's mode label comes from
+		// `kongClubMode` (KongClubMechanics); sessionBonusTier is left as it is.
+		const added = Math.max(0, bookEvent.totalFs - freeSpinTotalBefore(bookEvents, bookEvent));
+		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
+		await animateSymbols({ positions: bookEvent.positions });
+		if (added > 0) {
+			void eventEmitter.broadcastAsync({
+				type: 'showClusterWinAmounts',
+				wins: [{ amount: 0, label: `+${added} FS`, ...scatterPopupCell(bookEvent.positions) }],
+			});
+		}
+		applyFreeSpinCounterState(undefined, bookEvent.totalFs);
+		eventEmitter.broadcast({
+			type: 'freeSpinCounterUpdate',
+			current: undefined,
+			total: bookEvent.totalFs,
 		});
+		await skippableDelay(scaleFeatureMs(CLUSTER_CONNECTION_ACK_MS, 120));
 	},
 	updateFreeSpin: async (bookEvent: BookEventOfType<'updateFreeSpin'>) => {
 		applyFreeSpinCounterState(bookEvent.amount, bookEvent.total);
