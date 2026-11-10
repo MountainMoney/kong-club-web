@@ -243,6 +243,17 @@ const freeSpinTotalBefore = (bookEvents: BookEvent[], bookEvent: BookEvent): num
 	return BONUS_SPINS_TOTAL;
 };
 
+/** Upgrade mode event (`upgrade_bonus_*`) in the same spin as `bookEvent`, if any. */
+const upgradeModeBefore = (bookEvents: BookEvent[], bookEvent: BookEvent) => {
+	const index = bookEvents.indexOf(bookEvent);
+	for (let i = (index >= 0 ? index : bookEvents.length) - 1; i >= 0; i -= 1) {
+		const event = bookEvents[i]!;
+		if (event.type === 'reveal') return undefined;
+		if (isModeStateBookEvent(event) && isBonusUpgradeState(event.state)) return event;
+	}
+	return undefined;
+};
+
 /** Book row (1–5) / reel nearest the middle of the landed scatters, for the "+X FS" pop-up. */
 const scatterPopupCell = (positions: Position[]) => {
 	if (positions.length === 0) return { reel: 2, row: 3 };
@@ -628,13 +639,18 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 			});
 			return;
 		}
-		// Mid-bonus retrigger / upgrade (Ryan 2026-11-09, bug 5): no intro, no black screen,
-		// no tier or background change. Light the scatters, pop "+X FS" in the
-		// connection-win style, update the counter. The upgrade's mode label comes from
-		// `kongClubMode` (KongClubMechanics); sessionBonusTier is left as it is.
+		// Mid-bonus retrigger / upgrade (Ryan 2026-11-09, bug 5): no intro, no black screen.
+		// Light the scatters, pop "+X FS" in the connection-win style, update the counter.
+		// The upgrade's mode label comes from `kongClubMode` (KongClubMechanics).
+		// Upgrade only (Ryan Q3 6:07 PM): the background switches to the new bonus's look
+		// (Background.svelte reads sessionBonusTier). A plain retrigger leaves the tier alone.
 		const added = Math.max(0, bookEvent.totalFs - freeSpinTotalBefore(bookEvents, bookEvent));
+		const upgrade = upgradeModeBefore(bookEvents, bookEvent);
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
 		await animateSymbols({ positions: bookEvent.positions });
+		if (upgrade) {
+			stateGame.sessionBonusTier = bonusTierFromModeState(upgrade.state);
+		}
 		if (added > 0) {
 			void eventEmitter.broadcastAsync({
 				type: 'showClusterWinAmounts',
