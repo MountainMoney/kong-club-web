@@ -22,8 +22,8 @@
 <stop offset="1" stop-color="#010101"/>
 </linearGradient>
 <linearGradient id="paint1_linear_0_19" x1="80" y1="3" x2="77.6319" y2="124.954" gradientUnits="userSpaceOnUse">
-<stop stop-color="#FFD201" stop-opacity="0.2"/>
-<stop offset="1" stop-color="#FFD201"/>
+<stop stop-color="#A8DA52" stop-opacity="0.2"/>
+<stop offset="1" stop-color="#A8DA52"/>
 </linearGradient>
 <linearGradient id="paint2_linear_0_19" x1="80.0025" y1="123" x2="80.0025" y2="3" gradientUnits="userSpaceOnUse">
 <stop stop-color="#101010"/>
@@ -34,8 +34,8 @@
 <stop offset="1" stop-color="white"/>
 </linearGradient>
 <linearGradient id="paint4_linear_0_19" x1="80" y1="3" x2="77.7089" y2="122.956" gradientUnits="userSpaceOnUse">
-<stop stop-color="#FFD201" stop-opacity="0"/>
-<stop offset="1" stop-color="#FFD201"/>
+<stop stop-color="#A8DA52" stop-opacity="0"/>
+<stop offset="1" stop-color="#A8DA52"/>
 </linearGradient>
 </defs>
 </svg>
