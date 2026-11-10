@@ -131,6 +131,20 @@
 	/** Coin spawn + number sweep — top-left → bottom-right. */
 	/** Matches the coin spine flip (`tongbi` / `yinbi` / `jinbi` are 0.533s). */
 	const COIN_FLIP_MS = 533;
+	/**
+	 * Coin entrance over a STILL rank tile (Ryan 2026-11-09: tiles never flip or squash,
+	 * on the opening reveal or on reruns). PLACEHOLDER until the animator's entrance is
+	 * ready: swap this one function. `p` runs 0 → 1 over COIN_FLIP_MS, so the face /
+	 * number timings keyed to that duration are unchanged.
+	 */
+	const coinEntrance = (p: number): { scale: number; alpha: number; showFaceArt: boolean } => {
+		if (p <= 0) return { scale: 0, alpha: 0, showFaceArt: false };
+		if (p >= 1) return { scale: 1, alpha: 1, showFaceArt: true };
+		// Simple pop: grow from 60% with a small overshoot (ease-out-back), fade in over the first 40%.
+		const u = p - 1;
+		const back = 1 + 2.2 * u * u * u + 1.2 * u * u;
+		return { scale: 0.6 + 0.4 * back, alpha: Math.min(1, p / 0.4), showFaceArt: true };
+	};
 	const WAVE_DIAG_MS = 150;
 	const NUMBER_WAVE_MS = 90;
 	const FACE_POP_MS = 340;
@@ -831,9 +845,9 @@
 			const flipElapsed = now - reveal.spawnAt;
 			const flipP = flipElapsed <= 0 ? 0 : Math.min(1, flipElapsed / flipDur);
 			const flipDone = flipP >= 1;
-			const showFaceArt = flipP > 0.5;
-			const openX = !showFaceArt ? 0 : flipDone ? 1 : Math.max(0.04, (flipP - 0.5) * 2);
-			let scale = 1;
+			const entrance = coinEntrance(flipP);
+			const showFaceArt = entrance.showFaceArt;
+			let scale = entrance.scale;
 			if (
 				flipDone &&
 				reveal.pulseAt > reveal.spawnAt &&
@@ -940,9 +954,9 @@
 				x: home.x,
 				y: home.y,
 				scale,
-				scaleX: openX,
+				scaleX: 1,
 				showFaceArt,
-				alpha: showFaceArt ? 1 : 0,
+				alpha: entrance.alpha,
 				labelScale,
 				labelAlpha,
 				eyeAlpha,
@@ -1004,20 +1018,15 @@
 			if (t < 1) animating = true;
 		}
 
-		const flipDur = Math.max(1, pacedMs(COIN_FLIP_MS));
-		const nextFlip: Record<string, number> = {};
 		const cover: { reel: number; row: number }[] = [];
 		for (const reveal of activeReveals) {
 			if (clearedKeys.includes(reveal.key)) continue;
-			const elapsed = now - reveal.spawnAt;
-			const flipP = elapsed <= 0 ? 0 : Math.min(1, elapsed / flipDur);
-			if (flipP > 0 && flipP <= 0.5 && reveal.clearAt == null && reveal.drainStart == null) {
-				nextFlip[`${reveal.reel}:${reveal.row}`] = Math.max(0, 1 - flipP * 2);
-			} else if (flipP > 0.5) {
-				cover.push({ reel: reveal.reel, row: reveal.row });
-			}
+			// The rank tile never squashes (no flipScaleX); the cell is covered once its coin starts.
+			if (now > reveal.spawnAt) cover.push({ reel: reveal.reel, row: reveal.row });
 		}
-		stateCoinFeatureCover.flipScaleX = nextFlip;
+		if (Object.keys(stateCoinFeatureCover.flipScaleX).length > 0) {
+			stateCoinFeatureCover.flipScaleX = {};
+		}
 		setCoinCellCover(cover);
 
 		motions = next;
