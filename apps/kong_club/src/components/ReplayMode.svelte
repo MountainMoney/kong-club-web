@@ -390,9 +390,9 @@
 	}
 
 	.replay-cta:disabled {
-		opacity: 0.55;
+		/* Darken, do not fade (Ryan, Nov 9 2026). */
 		cursor: wait;
-		filter: none;
+		filter: brightness(0.55);
 	}
 
 	.replay-cta-icon {

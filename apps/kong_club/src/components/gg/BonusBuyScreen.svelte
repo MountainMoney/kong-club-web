@@ -12,6 +12,7 @@
 	import { HUNT_LEVELS } from '../../game/stateHunt.svelte';
 	import { BONUS_BUY, BONUS_BUY_COLOR, UI_FONT_FAMILY } from '../../game/ggUi/constants';
 	import { bonusOffers, slotOf, stackedOffers, type BonusOffer } from '../../game/ggUi/offers';
+	import { darken } from '../../game/ggUi/dim';
 	import { createPress } from '../../game/ggUi/press.svelte';
 	import { autoplayBusy, changeBet, confirmBonusOffer } from '../../game/ggUi/actions';
 	import { buyBonusActionLabel } from '../../game/socialCopy';
@@ -195,7 +196,7 @@
 		y={S.chip.height / 2}
 		anchor={0.5}
 		scale={{ x: -by * BONUS_BUY.artScale * press.scale, y: BONUS_BUY.artScale * press.scale }}
-		alpha={disabled ? S.disabledAlpha : 1}
+		tint={darken(disabled ? S.disabledBrightness : 1)}
 		eventMode={disabled ? 'none' : 'static'}
 		cursor="pointer"
 		onpointerdown={press.down}

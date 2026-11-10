@@ -4,6 +4,7 @@
 
 	import { UI_BAR, UI_COLOR, UI_FONT_FAMILY, UI_POPUP } from '../../game/ggUi/constants';
 	import { drawPlate } from '../../game/ggUi/plate';
+	import { darken } from '../../game/ggUi/dim';
 	import { createPress } from '../../game/ggUi/press.svelte';
 	import { roundRectBand } from '../../game/ggUi/shapes';
 
@@ -24,7 +25,7 @@
 		radius = chip.radius,
 		border,
 		disabled = false,
-		disabledAlpha = UI_COLOR.disabledIconAlpha,
+		disabledBrightness = UI_COLOR.disabledIconBrightness,
 		onpress,
 	}: {
 		x: number;
@@ -44,7 +45,7 @@
 		radius?: number;
 		border?: number;
 		disabled?: boolean;
-		disabledAlpha?: number;
+		disabledBrightness?: number;
 		onpress?: () => void;
 	} = $props();
 
@@ -122,8 +123,7 @@
 				anchor={{ x: 0.5, y: 0.5 }}
 				scale={{ x: iconScale, y: iconScale }}
 				{rotation}
-				tint={ink}
-				alpha={disabled ? disabledAlpha : 1}
+				tint={disabled ? darken(disabledBrightness, ink) : ink}
 			/>
 		{:else if label}
 			<Text

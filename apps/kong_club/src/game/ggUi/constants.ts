@@ -164,8 +164,8 @@ export const UI_COLOR = {
 	accent: 0xffd201,
 	// Figma: 30:1363: a lit chip trades its highlight for an accent outline
 	activeBorderAlpha: 0.5,
-	// Figma: 45:219: a disabled chip only fades its icon
-	disabledIconAlpha: 0.5,
+	// Figma: 45:219: a disabled chip only dims its icon (darkened at full opacity, not faded)
+	disabledIconBrightness: 0.5,
 } as const;
 
 // Figma: UI Bonus Menu (30:2990), its confirm step (30:3873) and Mobile Bonus Menu (30:5021)
@@ -240,8 +240,8 @@ export const BONUS_BUY = {
 	outline: 3,
 	edge: 2,
 	// Figma: 45:311: a card the balance cannot cover
-	dimAlpha: 0.5,
-	pips: { width: 20, height: 24, pitch: 22, count: 5, dimAlpha: 0.2, slack: 8 },
+	dimBrightness: 0.5,
+	pips: { width: 20, height: 24, pitch: 22, count: 5, dimBrightness: 0.2, slack: 8 },
 	// Figma: Frame 2147258648 (30:634): Hunt Spins picks its level where the volatility label was
 	slider: {
 		height: 14,
@@ -252,7 +252,7 @@ export const BONUS_BUY = {
 	},
 	button: {
 		sink: 3,
-		activeAlpha: 0.5,
+		activeBrightness: 0.5,
 		activate: {
 			radius: 6,
 			border: 2,
@@ -282,7 +282,7 @@ export const BONUS_BUY = {
 		chip: { width: 68, height: 64 },
 		amountY: 16,
 		amountSize: 32,
-		disabledAlpha: 0.25,
+		disabledBrightness: 0.25,
 	},
 	// Below this stage scale the grid's type is unreadable: cards stack in a scrolling column or two.
 	mobile: {

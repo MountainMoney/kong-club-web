@@ -9,6 +9,7 @@
 		type BonusCardCut,
 	} from '../../game/ggUi/constants';
 	import { type BonusOffer, type CardCut } from '../../game/ggUi/offers';
+	import { darken } from '../../game/ggUi/dim';
 	import { createPress } from '../../game/ggUi/press.svelte';
 	import {
 		alphaGradient,
@@ -123,7 +124,7 @@
 	});
 </script>
 
-<Container {x} {y} alpha={dimmed ? B.dimAlpha : 1}>
+<Container {x} {y} tint={darken(dimmed ? B.dimBrightness : 1)}>
 	<Graphics
 		draw={(graphics) => {
 			for (const plate of plates) {
@@ -280,7 +281,7 @@
 				key="ggUiIconBolt"
 				width={B.pips.width}
 				height={B.pips.height}
-				alpha={index < boltLit ? 1 : B.pips.dimAlpha}
+				tint={darken(index < boltLit ? 1 : B.pips.dimBrightness)}
 			/>
 		</Container>
 	{/each}
@@ -307,7 +308,7 @@
 		y={centre.y}
 		pivot={centre}
 		scale={{ x: press.scale, y: press.scale }}
-		alpha={active ? B.button.activeAlpha : 1}
+		tint={darken(active ? B.button.activeBrightness : 1)}
 		onpointerdown={press.down}
 		onpointerup={() => {
 			press.disarm();
