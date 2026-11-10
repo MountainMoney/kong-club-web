@@ -1,6 +1,6 @@
 <script lang="ts">
 
-	import { Rectangle, SpineProvider, SpineTrack, Sprite } from 'pixi-svelte';
+	import { Container, Rectangle, SpineProvider, SpineTrack, Sprite } from 'pixi-svelte';
 
 	import { FadeContainer } from 'components-pixi';
 
@@ -108,6 +108,21 @@
 	const bonusBushKey = $derived(
 		look === 'sunny' ? 'sunnyJungleBush' : look === 'midnight' ? 'midnightJungleBush' : null,
 	);
+	/**
+	 * Mid-bonus upgrade (See -> Hear, Q3) swaps the look. Swapping the spine key remounts
+	 * the skeleton and restarts the sway from frame 0 (a visible jump). When all four bonus
+	 * spines are loaded, keep both looks mounted for the whole bonus and only toggle which
+	 * one is visible: both run on the shared ticker from the same mount, so the sway phase
+	 * carries straight across the tier switch.
+	 */
+	const bonusSpinesReady = $derived(
+		Boolean(
+			context.stateApp.loadedAssets?.sunnyJungleTrees &&
+				context.stateApp.loadedAssets?.midnightJungleTrees &&
+				context.stateApp.loadedAssets?.sunnyJungleBush &&
+				context.stateApp.loadedAssets?.midnightJungleBush,
+		),
+	);
 
 </script>
 
@@ -121,15 +136,38 @@
 	{#if altKeys}
 		<Sprite key={altKeys.sky} {...backgroundProps} />
 		<Sprite key={altKeys.back} {...backgroundProps} />
-		{#if bonusTreesKey && context.stateApp.loadedAssets?.[bonusTreesKey]}
-			<SpineProvider key={bonusTreesKey} {...treeLayout}>
-				<SpineTrack trackIndex={0} animationName="shu" loop />
-			</SpineProvider>
-		{/if}
-		{#if bonusBushKey && context.stateApp.loadedAssets?.[bonusBushKey]}
-			<SpineProvider key={bonusBushKey} {...bushLayout}>
-				<SpineTrack trackIndex={0} animationName="Shrubbery" loop />
-			</SpineProvider>
+		{#if bonusSpinesReady}
+			<Container visible={look === 'sunny'}>
+				<SpineProvider key="sunnyJungleTrees" {...treeLayout}>
+					<SpineTrack trackIndex={0} animationName="shu" loop />
+				</SpineProvider>
+			</Container>
+			<Container visible={look === 'midnight'}>
+				<SpineProvider key="midnightJungleTrees" {...treeLayout}>
+					<SpineTrack trackIndex={0} animationName="shu" loop />
+				</SpineProvider>
+			</Container>
+			<Container visible={look === 'sunny'}>
+				<SpineProvider key="sunnyJungleBush" {...bushLayout}>
+					<SpineTrack trackIndex={0} animationName="Shrubbery" loop />
+				</SpineProvider>
+			</Container>
+			<Container visible={look === 'midnight'}>
+				<SpineProvider key="midnightJungleBush" {...bushLayout}>
+					<SpineTrack trackIndex={0} animationName="Shrubbery" loop />
+				</SpineProvider>
+			</Container>
+		{:else}
+			{#if bonusTreesKey && context.stateApp.loadedAssets?.[bonusTreesKey]}
+				<SpineProvider key={bonusTreesKey} {...treeLayout}>
+					<SpineTrack trackIndex={0} animationName="shu" loop />
+				</SpineProvider>
+			{/if}
+			{#if bonusBushKey && context.stateApp.loadedAssets?.[bonusBushKey]}
+				<SpineProvider key={bonusBushKey} {...bushLayout}>
+					<SpineTrack trackIndex={0} animationName="Shrubbery" loop />
+				</SpineProvider>
+			{/if}
 		{/if}
 		<Sprite key={altKeys.stump} {...backgroundProps} />
 	{:else}
