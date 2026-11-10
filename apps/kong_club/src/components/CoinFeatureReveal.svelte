@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Container, Graphics, Sprite, Text } from 'pixi-svelte';
+	import { Container, Graphics, SpineProvider, SpineTrack, Sprite, Text } from 'pixi-svelte';
 	import { BOOK_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
 	import { stateBet } from 'state-shared';
 
@@ -195,6 +195,13 @@
 	let activeReveals = $state<ActiveReveal[]>([]);
 	/** Reveal keys whose disc has finished its single flip. Shine waits on this. */
 	let flipSettled = $state<Record<string, boolean>>({});
+	/**
+	 * Q7 (Ryan 2026-11-09): coins whose metal changed under a clover. They draw the new
+	 * metal's landed face at once (no second flip). Placeholder; the animator owns the effect.
+	 */
+	let metalHeld = $state<Record<string, true>>({});
+	/** Past the end of the 0.53 s coin flip, so a held disc shows its last (landed) frame. */
+	const COIN_FLIP_HOLD_S = 10;
 	/** Views that followed a reel leave. They must not snap onto the next symbol. */
 	const ridingKeys = new Set<string>();
 	const leaving = $derived(isHeldBoardDismissActive());
@@ -653,6 +660,7 @@
 		bolts = [];
 		boltMotions = {};
 		flipSettled = {};
+		metalHeld = {};
 		ridingKeys.clear();
 		collectTotal = 0;
 		showCollectTotal = false;
@@ -1579,6 +1587,7 @@
 			if (token !== runToken) return;
 			const hit = pairs[i]!.target;
 			const hitAt = performance.now();
+			const swappedKeys: string[] = [];
 			activeReveals = activeReveals.map((reveal) => {
 				if (reveal.reel !== hit.reel || reveal.row !== hit.row || !reveal.pending) {
 					return reveal;
@@ -1602,6 +1611,7 @@
 								Number(next.tileLevel ?? reveal.tileLevel ?? 1),
 							)
 						: null;
+				if (metal && metal.symbol !== displaySymbol(reveal)) swappedKeys.push(reveal.key);
 				return {
 					...reveal,
 					...next,
@@ -1626,6 +1636,9 @@
 					potShown: next.kind === 'collector' ? shown : reveal.potShown,
 				};
 			});
+			if (swappedKeys.length > 0) {
+				metalHeld = { ...metalHeld, ...Object.fromEntries(swappedKeys.map((key) => [key, true as const])) };
+			}
 			ensureRaf();
 		}
 
@@ -2107,6 +2120,23 @@
 	{/if}
 {/snippet}
 
+{#snippet heldCoinDisc(name: 'CB' | 'CS' | 'CG')}
+	{@const info = getSymbolInfo({ rawSymbol: { name }, state: 'static' })}
+	{#if info.type === 'spine'}
+		<SpineProvider key={info.assetKey} height={SYMBOL_SIZE * info.sizeRatios.height}>
+			<SpineTrack
+				trackIndex={0}
+				animationName={info.animationName}
+				loop={false}
+				trackTime={COIN_FLIP_HOLD_S}
+				timeScale={0}
+			/>
+		</SpineProvider>
+	{:else}
+		<SymbolSprite symbolInfo={info} />
+	{/if}
+{/snippet}
+
 {#snippet coinFaceNumber(label: string, symbol: string, fontSize: number, scale: number, alpha: number)}
 	<CoinFaceNumber
 		{label}
@@ -2166,9 +2196,13 @@
 				<Graphics draw={drawPowerPlaque(reveal.kind)} />
 			{:else}
 				<Container x={coinArtNudge.x} y={coinArtNudge.y} scale={coinArtNudge.scale}>
-					{@render coinDisc(displaySymbol(reveal), () => {
-						flipSettled = { ...flipSettled, [reveal.key]: true };
-					})}
+					{#if metalHeld[reveal.key]}
+						{@render heldCoinDisc(displaySymbol(reveal))}
+					{:else}
+						{@render coinDisc(displaySymbol(reveal), () => {
+							flipSettled = { ...flipSettled, [reveal.key]: true };
+						})}
+					{/if}
 					<CoinShine
 						live={flipSettled[reveal.key] === true && motion.alpha >= 0.98 && motion.scale >= 0.98}
 					/>
