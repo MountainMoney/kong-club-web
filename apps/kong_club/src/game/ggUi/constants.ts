@@ -24,6 +24,9 @@ export type BonusCardCut = {
 
 export const DESIGN = { width: 1920, height: 1080 } as const;
 
+// GG shaft-ui constants.ts: screen/bar transition length (UiBar fades over half of it when covered).
+export const TRANSITION_MS = 700;
+
 export const DESIGN_PORTRAIT = { width: 480, height: 812 } as const;
 
 // Figma: UI Basic (30:1171); the bar's box is 1280x164 at (320, 904)

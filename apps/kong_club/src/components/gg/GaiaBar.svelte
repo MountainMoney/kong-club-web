@@ -2,6 +2,7 @@
 	import { bookEventAmountToNormalisedAmount } from 'utils-shared/amount';
 	import { Container, Rectangle, Sprite, Text } from 'pixi-svelte';
 	import { Tween } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
 	import { stateBet, stateBetDerived, stateConfig, stateModal, stateUi } from 'state-shared';
 
 	import { getContext } from '../../game/context';
@@ -28,6 +29,7 @@
 		UI_BAR_PORTRAIT,
 		UI_COLOR,
 		UI_FONT_FAMILY,
+		TRANSITION_MS,
 	} from '../../game/ggUi/constants';
 	import {
 		changeBet,
@@ -193,7 +195,13 @@
 		},
 	});
 
-	const shown = $derived(hidden ? 0 : 1);
+	// GG shaft-ui UiBar 1:1: out of the way while something covers the screen, fading over
+	// TRANSITION_MS / 2 (350 ms) cubicOut both ways (was a hard 0/1 snap).
+	const uncovered = new Tween(1, { duration: TRANSITION_MS / 2, easing: cubicOut });
+	$effect(() => {
+		uncovered.set(hidden ? 0 : 1);
+	});
+	const shown = $derived(uncovered.current);
 </script>
 
 {#snippet readout(
