@@ -20,11 +20,12 @@
 	import { stateSpinSkip } from '../game/spinSkip.svelte';
 	import { isTurboSpinHeld } from '../game/spinSpeed.svelte';
 	import {
-		isPremiumSymbolName,
-		PREMIUM_LAND_ARM_ABOVE_PX,
-		PREMIUM_LAND_BREATHE_MS,
-		PREMIUM_LAND_BREATHE_PEAK,
-	} from '../game/premiumLandBreathe';
+		SYMBOL_LAND_A4_ARM_ABOVE_PX,
+		SYMBOL_LAND_A4_WINDOW_MS,
+		symbolLandA4Envelope,
+		symbolLandA4FootOffsetY,
+		symbolLandA4Scale,
+	} from '../game/symbolLandA4';
 	import { scaleFeatureMs } from '../game/winPresentationTempo';
 	import { darken } from '../game/ggUi/dim';
 	import type { ReelSymbol } from '../game/stateGame.svelte';
@@ -55,46 +56,53 @@
 	let connectScale = $state(1);
 	/** Cluster-win dim (Ryan: darken, not see-through). 1 = full brightness. */
 	let linkBrightness = $state(1);
-	let landBreathe = $state(1);
-	let landBreatheArmed = false;
-	let landBreatheRaf = 0;
+	let landScaleX = $state(1);
+	let landScaleY = $state(1);
+	let landFootY = $state(0);
+	let landSquashArmed = false;
+	let landSquashRaf = 0;
 
-	const stopLandBreathe = () => {
-		cancelAnimationFrame(landBreatheRaf);
-		landBreatheRaf = 0;
-		landBreathe = 1;
+	const resetLandSquash = () => {
+		landScaleX = 1;
+		landScaleY = 1;
+		landFootY = 0;
 	};
 
-	const startLandBreathe = () => {
-		stopLandBreathe();
-		if (
-			!isPremiumSymbolName(props.reelSymbol.rawSymbol.name) ||
-			stateSpinSkip.forceSkip ||
-			isTurboSpinHeld()
-		) {
+	const stopLandSquash = () => {
+		cancelAnimationFrame(landSquashRaf);
+		landSquashRaf = 0;
+		resetLandSquash();
+	};
+
+	const startLandSquash = () => {
+		stopLandSquash();
+		// Keep turbo / skip snappy; A4's 500 ms spring is the normal-speed land.
+		if (stateSpinSkip.forceSkip || isTurboSpinHeld()) {
 			return;
 		}
 		const start = performance.now();
-		const duration = scaleFeatureMs(PREMIUM_LAND_BREATHE_MS, 80);
 		const tick = () => {
 			if (stateSpinSkip.forceSkip) {
-				landBreathe = 1;
-				landBreatheRaf = 0;
+				resetLandSquash();
+				landSquashRaf = 0;
 				return;
 			}
-			const t = Math.min(1, (performance.now() - start) / duration);
-			landBreathe = 1 + PREMIUM_LAND_BREATHE_PEAK * Math.sin(t * Math.PI);
-			if (t < 1) {
-				landBreatheRaf = requestAnimationFrame(tick);
+			const tSec = (performance.now() - start) / 1000;
+			if (tSec >= SYMBOL_LAND_A4_WINDOW_MS / 1000) {
+				resetLandSquash();
+				landSquashRaf = 0;
 				return;
 			}
-			landBreathe = 1;
-			landBreatheRaf = 0;
+			const { sx, sy } = symbolLandA4Scale(symbolLandA4Envelope(tSec));
+			landScaleX = sx;
+			landScaleY = sy;
+			landFootY = symbolLandA4FootOffsetY(sy);
+			landSquashRaf = requestAnimationFrame(tick);
 		};
 		tick();
 	};
 
-	onMount(() => () => cancelAnimationFrame(landBreatheRaf));
+	onMount(() => () => cancelAnimationFrame(landSquashRaf));
 	$effect(() => {
 		const beat = stateClusterConnectMotion.byKey[`${props.reelIndex}:${homeRow}`];
 		const others =
@@ -130,19 +138,19 @@
 
 	$effect(() => {
 		if (isPadding) {
-			landBreatheArmed = false;
-			stopLandBreathe();
+			landSquashArmed = false;
+			stopLandSquash();
 			return;
 		}
 		const y = props.reelSymbol.symbolY.current;
-		if (y < homeY - PREMIUM_LAND_ARM_ABOVE_PX) {
-			landBreatheArmed = true;
-			stopLandBreathe();
+		if (y < homeY - SYMBOL_LAND_A4_ARM_ABOVE_PX) {
+			landSquashArmed = true;
+			stopLandSquash();
 			return;
 		}
-		if (!landBreatheArmed || y < homeY - 2) return;
-		landBreatheArmed = false;
-		startLandBreathe();
+		if (!landSquashArmed || y < homeY - 2) return;
+		landSquashArmed = false;
+		startLandSquash();
 	});
 
 	$effect(() => {
@@ -180,9 +188,9 @@
 {#if !isPadding}
 <SymbolWrap
 	x={getSymbolX(props.reelIndex)}
-	y={props.reelSymbol.symbolY.current}
-	scaleX={(tileFlipX ?? 1) * shrinkScale.current * connectScale * landBreathe}
-	scaleY={shrinkScale.current * connectScale * landBreathe}
+	y={props.reelSymbol.symbolY.current + landFootY}
+	scaleX={(tileFlipX ?? 1) * shrinkScale.current * connectScale * landScaleX}
+	scaleY={shrinkScale.current * connectScale * landScaleY}
 	alpha={shrinkAlpha.current * coverAlpha}
 	tint={darken(linkBrightness)}
 	animating={symbolInfo.type === 'spine' &&
