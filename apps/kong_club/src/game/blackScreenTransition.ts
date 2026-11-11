@@ -1,10 +1,7 @@
-import { waitForTimeout } from 'utils-shared/wait';
-
-import { bonusScreenAnimMs } from './bonusScreenWait';
 import { eventEmitter } from './eventEmitter';
 
+// GG scene curtain (ggTransitions GG_CURTAIN): close 520 ms, hold 90 ms, open 780 ms.
 export const BLACK_SCREEN_FADE_MS = 520;
-export const BLACK_SCREEN_HOLD_MS = 280;
 
 const waitPaintFrame = () =>
 	new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -33,7 +30,7 @@ export const playBlackScreenTransition = async (
 		await waitPaintFrame();
 	}
 	await duringBlack();
-	await waitForTimeout(bonusScreenAnimMs(BLACK_SCREEN_HOLD_MS));
+	// GG: no hold here; the curtain holds GG_CURTAIN.holdMs (90 ms) as it starts to open.
 	if (!options?.keepBlackUntilIntro) {
 		await fadeScreenFromBlack();
 	}
