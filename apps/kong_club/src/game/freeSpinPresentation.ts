@@ -174,7 +174,8 @@ export const presentScatterFreeSpinIntro = async ({
 			tier,
 		});
 		eventEmitter.broadcast({ type: 'freeSpinIntroSkip' });
-		eventEmitter.broadcast({ type: 'freeSpinIntroHide' });
+		// GG `c4e`: the bonus starts once the card is out and the curtain has opened.
+		await eventEmitter.broadcastAsync({ type: 'freeSpinIntroHide' });
 		stateGame.gameType = 'freegame';
 		eventEmitter.broadcast({ type: 'boardFrameGlowShow' });
 		eventEmitter.broadcast({ type: 'freeSpinCounterShow' });

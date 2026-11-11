@@ -12,9 +12,10 @@
 
 	import { MainContainer } from 'components-layout';
 	import { Container, Text } from 'pixi-svelte';
-	import { waitForResolve } from 'utils-shared/wait';
+	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 
 	import { getContext } from '../game/context';
+	import { GG_INTRO_CARD, ggEaseOutCubic } from '../game/ggTransitions';
 	import {
 		bonusIntroContentForTier,
 		bonusIntroSpinsLabel,
@@ -24,7 +25,6 @@
 	import {
 		BONUS_INTRO_DESC_SIZE,
 		BONUS_INTRO_DESC_WRAP,
-		BONUS_INTRO_FADE_MS,
 		BONUS_INTRO_GROUP_GAP,
 		BONUS_INTRO_IMAGE_SIZE,
 		BONUS_INTRO_SPINS_DESC_GAP,
@@ -56,6 +56,8 @@
 	const playfieldTween = new Tween(1);
 	const bgTween = new Tween(0);
 	const overlayTween = new Tween(0);
+	/** GG `Zg`: the continue prompt's own fade. */
+	const ctaTween = new Tween(0);
 	let introTweensSynced = false;
 
 	const main = $derived(context.stateLayoutDerived.mainLayout());
@@ -184,25 +186,49 @@
 	const assetsReadyUnderBlack = () =>
 		stateBonusIntro.active && stateBonusIntro.overlayAlpha <= 0.01;
 
+	/**
+	 * GG bonus intro card in (live GG build `s4e`, game.pretty.js 66999-67034; timings `Ya`):
+	 * backdrop dims in over dimInMs, content fades in over contentInMs after it, and the
+	 * continue prompt arrives at ctaMs over ctaInMs, all easeOutCubic.
+	 * KC deviation (darken, never see-through): GG dims its backdrop in while the curtain is
+	 * still closing, so the board shows through it for 220 ms. KC starts the dim once the
+	 * curtain is shut, which makes it a fade from dark to the bonus scene (board hidden).
+	 */
+	const playCardIn = async () => {
+		const dimMs = bonusScreenAnimMs(GG_INTRO_CARD.dimInMs);
+		overlayTween.set(0, { duration: 0 });
+		ctaTween.set(0, { duration: 0 });
+		void context.eventEmitter.broadcastAsync({
+			type: 'blackScreenCover',
+			alpha: 0,
+			durationMs: GG_INTRO_CARD.dimInMs,
+		});
+		const content = overlayTween.set(1, {
+			delay: dimMs,
+			duration: bonusScreenAnimMs(GG_INTRO_CARD.contentInMs),
+			easing: ggEaseOutCubic,
+		});
+		await waitForTimeout(bonusScreenAnimMs(GG_INTRO_CARD.ctaMs));
+		pressReady = true;
+		await Promise.all([
+			content,
+			ctaTween.set(1, { duration: bonusScreenAnimMs(GG_INTRO_CARD.ctaInMs), easing: ggEaseOutCubic }),
+		]);
+	};
+
 	const fadePresentationIn = async (tier: number) => {
 		stateBonusIntro.tier = tier;
-		const fadeInMs = bonusScreenAnimMs(BONUS_INTRO_FADE_MS);
 
 		if (assetsReadyUnderBlack()) {
 			playfieldTween.set(stateBonusIntro.playfieldAlpha, { duration: 0 });
 			bgTween.set(stateBonusIntro.backgroundBlend, { duration: 0 });
-			overlayTween.set(0, { duration: 0 });
-			await Promise.all([
-				overlayTween.set(1, { duration: fadeInMs }),
-				context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' }),
-			]);
+			await playCardIn();
 			return;
 		}
 
 		// Fallback (intro state not prepared under black, e.g. a late asset load):
-		// cover with black first (no-op if already black), hide the board under it (Q2),
-		// then reveal the card exactly like the normal path. Used to lift the black and
-		// fade the board to 0.32, showing it behind the card.
+		// cover with the curtain first (no-op if already shut), hide the board under it (Q2),
+		// then reveal the card exactly like the normal path.
 		await context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeIn' });
 		stateBonusIntro.active = true;
 		playfieldTween.set(BONUS_INTRO_PLAYFIELD_ALPHA, { duration: 0 });
@@ -212,24 +238,45 @@
 		stateBonusIntro.backgroundBlend = 0;
 		stateBonusIntro.overlayAlpha = 0;
 		introTweensSynced = true;
-
-		await Promise.all([
-			overlayTween.set(1, { duration: fadeInMs }),
-			context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' }),
-		]);
+		await playCardIn();
 	};
 
+	/**
+	 * GG bonus intro card out (live GG build `hoe` + `c4e`, game.pretty.js 66975-66984,
+	 * 67072-67077): content and prompt out over contentOutMs, then the backdrop dims out over
+	 * dimOutMs onto the shut curtain, which then holds and opens (GG_CURTAIN).
+	 * KC deviation (board stays hidden, never see-through): GG starts opening the curtain
+	 * while its backdrop is still fading, so the board ghosts in through it. KC lets the dim
+	 * finish first, shows the board under the full cover, then opens the curtain.
+	 */
 	const fadePresentationOut = async () => {
-		const fadeMs = bonusScreenAnimMs(BONUS_INTRO_FADE_MS * 0.5);
+		const outMs = bonusScreenAnimMs(GG_INTRO_CARD.contentOutMs);
 		await Promise.all([
-			overlayTween.set(0, { duration: fadeMs }),
-			playfieldTween.set(1, { duration: fadeMs }),
+			overlayTween.set(0, { duration: outMs, easing: ggEaseOutCubic }),
+			ctaTween.set(0, { duration: outMs, easing: ggEaseOutCubic }),
 		]);
+		await context.eventEmitter.broadcastAsync({
+			type: 'blackScreenCover',
+			alpha: 1,
+			durationMs: GG_INTRO_CARD.dimOutMs,
+		});
+		show = false;
+		playfieldTween.set(1, { duration: 0 });
+		stateBonusIntro.playfieldAlpha = 1;
 		resetBonusIntroPresentation();
+		await context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' });
 	};
 
 	const resetIntro = async () => {
-		await fadePresentationOut();
+		if (show) {
+			await fadePresentationOut();
+		} else {
+			// Not on screen (buy entry, error reset): just clear, no curtain moves.
+			overlayTween.set(0, { duration: 0 });
+			ctaTween.set(0, { duration: 0 });
+			playfieldTween.set(1, { duration: 0 });
+			resetBonusIntroPresentation();
+		}
 		show = false;
 		content = null;
 		spinsLabel = '';
@@ -256,7 +303,6 @@
 			spinsLabel = bonusIntroSpinsLabel(e.totalFreeSpins);
 			pressReady = false;
 			await fadePresentationIn(tier);
-			pressReady = true;
 			await waitForResolve((resolve) => (oncomplete = resolve));
 		},
 		spinSkipPressToContinue: () => {
@@ -270,11 +316,9 @@
 {#if show && content}
 	{#if fontReady}
 		<!-- GG foliage frame, mounted before the texts so it stays behind them. -->
-		<GgFoliage
-			variant="bonusIntro"
-			alpha={stateBonusIntro.overlayAlpha}
-			play={stateBonusIntro.overlayAlpha > 0.01}
-		/>
+		<!-- GG: the cinematic foliage rig sits at full alpha for the whole card (it is covered and
+		     uncovered with the backdrop), so it is not tied to the content fade. -->
+		<GgFoliage variant="bonusIntro" alpha={1} play={true} />
 		<MainContainer>
 			<Container
 				x={layout.x}
@@ -305,8 +349,8 @@
 		</MainContainer>
 	{/if}
 
-	{#if stateBonusIntro.overlayAlpha > 0.02 && pressReady}
-		<Container alpha={stateBonusIntro.overlayAlpha}>
+	{#if ctaTween.current > 0.02 && pressReady}
+		<Container alpha={ctaTween.current}>
 			<PressToContinue variant="intro" onpress={() => oncomplete()} />
 		</Container>
 	{/if}
