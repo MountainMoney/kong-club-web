@@ -143,11 +143,6 @@ export const presentScatterFreeSpinIntro = async ({
 }) => {
 	beginFsIntroBlock();
 	try {
-		stateGame.sessionBonusTier = tier === 3 ? 3 : tier === 1 ? 1 : 2;
-		if (tier === 3) {
-			clearLastTileLevels();
-			eventEmitter.broadcast({ type: 'monkeyTilesClear' });
-		}
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
 		// Leave the scatter-trigger board up. Shrinking it stuck every symbol at
 		// scale 0, so the bonus opened on empty wood. The first bonus spin falls
@@ -157,6 +152,13 @@ export const presentScatterFreeSpinIntro = async ({
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_superfreespin' });
 		await playBlackScreenTransition(
 			() => {
+				// Ryan Nov 10 (Q3 / polish group 2): the bonus look (and Speak's tile clear)
+				// swaps under black. It used to swap before the fade, in view.
+				stateGame.sessionBonusTier = tier === 3 ? 3 : tier === 1 ? 1 : 2;
+				if (tier === 3) {
+					clearLastTileLevels();
+					eventEmitter.broadcast({ type: 'monkeyTilesClear' });
+				}
 				prepareBonusEntryUnderBlack(tier);
 				eventEmitter.broadcast({ type: 'uiHide' });
 			},

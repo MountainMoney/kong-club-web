@@ -34,7 +34,7 @@
 	} from '../game/bonusIntroLayout';
 	import { getGameLayoutProfile } from '../game/responsiveProfile.svelte';
 	import {
-		BONUS_INTRO_PLAYFIELD_DIM,
+		BONUS_INTRO_PLAYFIELD_ALPHA,
 		resetBonusIntroPresentation,
 		stateBonusIntro,
 	} from '../game/bonusIntroPresentation.svelte';
@@ -199,20 +199,23 @@
 			return;
 		}
 
-		await context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' });
-
+		// Fallback (intro state not prepared under black, e.g. a late asset load):
+		// cover with black first (no-op if already black), hide the board under it (Q2),
+		// then reveal the card exactly like the normal path. Used to lift the black and
+		// fade the board to 0.32, showing it behind the card.
+		await context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeIn' });
 		stateBonusIntro.active = true;
-		playfieldTween.set(1, { duration: 0 });
+		playfieldTween.set(BONUS_INTRO_PLAYFIELD_ALPHA, { duration: 0 });
 		bgTween.set(0, { duration: 0 });
 		overlayTween.set(0, { duration: 0 });
-		stateBonusIntro.playfieldAlpha = 1;
+		stateBonusIntro.playfieldAlpha = BONUS_INTRO_PLAYFIELD_ALPHA;
 		stateBonusIntro.backgroundBlend = 0;
 		stateBonusIntro.overlayAlpha = 0;
+		introTweensSynced = true;
 
 		await Promise.all([
-			playfieldTween.set(BONUS_INTRO_PLAYFIELD_DIM, { duration: fadeInMs }),
-			bgTween.set(0, { duration: fadeInMs }),
 			overlayTween.set(1, { duration: fadeInMs }),
+			context.eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' }),
 		]);
 	};
 

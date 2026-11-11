@@ -20,6 +20,8 @@
 	const alphaTween = new Tween(0);
 
 	const fadeIn = async () => {
+		// Already black (e.g. intro fallback after a black transition): nothing to wait for.
+		if (alphaTween.current >= 0.999 && alphaTween.target >= 0.999) return;
 		await alphaTween.set(1, { duration: fadeMs });
 	};
 

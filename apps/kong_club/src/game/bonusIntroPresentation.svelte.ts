@@ -18,14 +18,14 @@ export const resetBonusIntroPresentation = () => {
 	stateBonusIntro.overlayAlpha = 0;
 };
 
-/** Same jungle, dimmed playfield — no super-bg swap. */
-export const BONUS_INTRO_PLAYFIELD_DIM = 0.32;
+/** Ryan Q2: the board stays hidden under the bonus intro card (every path). */
+export const BONUS_INTRO_PLAYFIELD_ALPHA = 0;
 
-/** Apply dimmed playfield while the screen is fully black. */
+/** Hide the playfield while the screen is fully black. */
 export const prepareBonusEntryUnderBlack = (tier: number) => {
 	stateBonusIntro.active = true;
 	stateBonusIntro.tier = tier;
 	stateBonusIntro.backgroundBlend = 0;
-	stateBonusIntro.playfieldAlpha = BONUS_INTRO_PLAYFIELD_DIM;
+	stateBonusIntro.playfieldAlpha = BONUS_INTRO_PLAYFIELD_ALPHA;
 	stateBonusIntro.overlayAlpha = 0;
 };
