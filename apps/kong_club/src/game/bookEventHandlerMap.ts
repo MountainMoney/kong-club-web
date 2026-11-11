@@ -54,7 +54,6 @@ import {
 } from './bonusSnapshotRestore';
 import { isReplayActive } from './replayMode.svelte';
 import {
-	beginBonusOutroTransitionCover,
 	releaseBonusOutroPlayfield,
 } from './bonusOutroPresentation.svelte';
 import {
@@ -702,14 +701,20 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 			releaseBonusOutroPlayfield();
 			return;
 		}
-		await eventEmitter.broadcastAsync({ type: 'freeSpinOutroFadeOut' });
-		eventEmitter.broadcast({ type: 'freeSpinOutroHide' });
+		// GG `l4e` (live GG build, game.pretty.js 67078-67083): as the total win screen exits,
+		// the scene curtain closes, the base game swaps in under it (KC background included),
+		// and the curtain opens while the screen's scrim lifts.
+		const screenOut = eventEmitter.broadcastAsync({ type: 'freeSpinOutroFadeOut' });
+		await eventEmitter.broadcastAsync({ type: 'blackScreenFadeIn' });
 		stateGame.gameType = 'basegame';
 		stateGame.sessionBonusTier = undefined;
-		beginBonusOutroTransitionCover();
 		resetActiveBetModeAfterBuyFeature();
 		await eventEmitter.broadcastAsync({ type: 'transition' });
 		releaseBonusOutroPlayfield();
+		const curtainOpen = eventEmitter.broadcastAsync({ type: 'blackScreenFadeOut' });
+		await screenOut;
+		eventEmitter.broadcast({ type: 'freeSpinOutroHide' });
+		await curtainOpen;
 		await eventEmitter.broadcastAsync({ type: 'uiShow' });
 		await eventEmitter.broadcastAsync({ type: 'drawerUnfold' });
 		eventEmitter.broadcast({ type: 'drawerButtonHide' });

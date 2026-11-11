@@ -13,24 +13,19 @@
 	import { DropShadowFilter } from 'pixi-filters';
 
 	import { MainContainer } from 'components-layout';
-	import { Container, Sprite, Text } from 'pixi-svelte';
+	import { Container, Rectangle, Sprite, Text } from 'pixi-svelte';
 	import { bookEventAmountToWinCurrencyString } from 'utils-shared/amount';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 
 	import { getContext } from '../game/context';
-	import {
-		BONUS_OUTRO_LABEL_BOUNCE_MS,
-		BONUS_OUTRO_LABEL_HOLD_MS,
-		BONUS_OUTRO_OVERLAY_FADE_MS,
-		BONUS_OUTRO_PLAYFIELD_FADE_MS,
-		bonusOutroLayoutForMain,
-	} from '../game/bonusOutroLayout';
+	import { BONUS_OUTRO_LABEL_BOUNCE_MS, bonusOutroLayoutForMain } from '../game/bonusOutroLayout';
+	import { zIndexes } from '../game/constants';
+	import { GG_TOTAL_WIN, ggEaseOutBack, ggEaseOutCubic } from '../game/ggTransitions';
 	import { bonusScreenAnimMs, bonusScreenAutoAdvanceMs } from '../game/bonusScreenWait';
 	import { isIntroTextureReady } from '../game/introAssets';
 	import { stateApp } from '../game/stateApp';
 	import { uiDisplaySize, type UiAssetKey } from '../game/uiAssetSizes';
 	import {
-		beginBonusOutroTransitionCover,
 		endBonusOutroSequence,
 		resetBonusOutroPresentation,
 		stateBonusOutro,
@@ -52,10 +47,17 @@
 	let onDismiss = $state(() => {});
 	let fontReady = $state(false);
 
-	const playfieldTween = new Tween(1);
 	const overlayTween = new Tween(0);
 	const labelScaleTween = new Tween(0);
 	const amountAlphaTween = new Tween(0);
+	/** GG `cf`: game layers darken by GG_TOTAL_WIN.scrim while the screen is up. */
+	const scrimTween = new Tween(0);
+	/** GG `to`: the counted amount. */
+	const countTween = new Tween(0);
+	/** GG continue prompt (`Tde`): in over continueInMs easeOutBack, out at half. */
+	const promptTween = new Tween(0);
+	/** 'in' while the label lands and the amount counts; 'waiting' once the prompt is up. */
+	let stage = $state<'in' | 'waiting'>('in');
 
 	const main = $derived(context.stateLayoutDerived.mainLayout());
 	const profile = $derived(getGameLayoutProfile());
@@ -116,45 +118,86 @@
 
 	$effect(() => {
 		if (!stateBonusOutro.active) return;
-		stateBonusOutro.playfieldAlpha = playfieldTween.current;
 		stateBonusOutro.overlayAlpha = overlayTween.current;
 	});
 
-	const fadePlayfieldOut = async () => {
-		if (stateBonusOutro.active && stateBonusOutro.playfieldAlpha <= 0.01) return;
-		stateBonusOutro.active = true;
-		playfieldTween.set(1, { duration: 0 });
-		overlayTween.set(0, { duration: 0 });
-		stateBonusOutro.playfieldAlpha = 1;
-		stateBonusOutro.overlayAlpha = 0;
-		await playfieldTween.set(0, { duration: bonusScreenAnimMs(BONUS_OUTRO_PLAYFIELD_FADE_MS) });
-	};
+	const canvas = $derived(context.stateLayoutDerived.canvasSizes());
+	const shownAmount = $derived(Math.min(amount, Math.round(countTween.current)));
 
-	const presentTotalWinLabel = async () => {
+	/**
+	 * GG total win screen in (live GG build `t4e` + `QNe`, game.pretty.js 66876-66931, 84575-84618):
+	 * scrim darkens the game over scrimInMs, the banner lands, the amount counts up from
+	 * countStartMs over countUpMs (easeOutCubic), and the prompt comes in once the banner is in
+	 * and the count is done. KC art: the KC TOTAL WIN label (with its own bounce) stands in for
+	 * GG's total-win spine banner.
+	 * KC deviation (darken, never see-through): the board is no longer faded out; it stays and
+	 * is darkened under a black overlay at GG's scrim strength (GG tints its symbols and HUD).
+	 */
+	const playScreenIn = async (winAmount: number) => {
+		stateBonusOutro.active = true;
+		stateBonusOutro.playfieldAlpha = 1;
+		amount = capBookAmount(winAmount);
+		stage = 'in';
 		labelScaleTween.set(0, { duration: 0 });
 		amountAlphaTween.set(0, { duration: 0 });
-		await overlayTween.set(1, { duration: bonusScreenAnimMs(BONUS_OUTRO_OVERLAY_FADE_MS) });
-		await labelScaleTween.set(1, {
+		countTween.set(0, { duration: 0 });
+		promptTween.set(0, { duration: 0 });
+		overlayTween.set(0, { duration: 0 });
+		const inMs = bonusScreenAnimMs(GG_TOTAL_WIN.scrimInMs);
+		scrimTween.set(1, { duration: inMs, easing: ggEaseOutCubic });
+		overlayTween.set(1, { duration: inMs, easing: ggEaseOutCubic });
+		const label = labelScaleTween.set(1, {
 			duration: bonusScreenAnimMs(BONUS_OUTRO_LABEL_BOUNCE_MS),
 			easing: backOut,
 		});
-		await waitForTimeout(bonusScreenAnimMs(BONUS_OUTRO_LABEL_HOLD_MS));
+		const startMs = bonusScreenAnimMs(GG_TOTAL_WIN.countStartMs);
+		amountAlphaTween.set(1, { delay: startMs, duration: inMs, easing: ggEaseOutCubic });
+		const count = countTween.set(amount, {
+			delay: startMs,
+			duration: bonusScreenAnimMs(GG_TOTAL_WIN.countUpMs),
+			easing: ggEaseOutCubic,
+		});
+		await Promise.race([Promise.all([label, count]), waitForResolve((resolve) => (onDismiss = resolve))]);
+		// A tap during the count finishes it at once (GG `e4e`).
+		countTween.set(amount, { duration: 0 });
+		labelScaleTween.set(1, { duration: 0 });
+		amountAlphaTween.set(1, { duration: 0 });
+		stage = 'waiting';
+		void promptTween.set(1, {
+			duration: bonusScreenAnimMs(GG_TOTAL_WIN.continueInMs),
+			easing: ggEaseOutBack,
+		});
 	};
 
-	const presentWinAmount = async (winAmount: number) => {
-		amount = capBookAmount(winAmount);
-		await amountAlphaTween.set(1, { duration: bonusScreenAnimMs(BONUS_OUTRO_OVERLAY_FADE_MS) });
-	};
-
-	const fadeOverlayOut = async () => {
-		if (stateBonusOutro.holdPlayfieldHidden) return;
-		await overlayTween.set(0, { duration: bonusScreenAnimMs(BONUS_OUTRO_OVERLAY_FADE_MS) });
-		beginBonusOutroTransitionCover();
+	/**
+	 * GG total win screen out (`ioe` / `$Ne` + `l4e`, game.pretty.js 66850-66853, 67078-67083):
+	 * the prompt drops out at half speed, the banner exits, and the scrim lifts
+	 * exitToScrimOutMs later over scrimOutMs. The caller closes the curtain at the same time
+	 * and swaps back to the base game under it.
+	 */
+	const playScreenOut = async () => {
+		void promptTween.set(0, {
+			duration: bonusScreenAnimMs(GG_TOTAL_WIN.continueInMs / 2),
+			easing: ggEaseOutBack,
+		});
+		void overlayTween.set(0, {
+			duration: bonusScreenAnimMs(GG_TOTAL_WIN.exitToScrimOutMs + 150),
+			easing: ggEaseOutCubic,
+		});
+		await waitForTimeout(bonusScreenAnimMs(GG_TOTAL_WIN.exitToScrimOutMs));
+		await scrimTween.set(0, {
+			duration: bonusScreenAnimMs(GG_TOTAL_WIN.scrimOutMs),
+			easing: ggEaseOutCubic,
+		});
 	};
 
 	const resetOutro = () => {
 		show = false;
 		amount = 0;
+		stage = 'in';
+		scrimTween.set(0, { duration: 0 });
+		promptTween.set(0, { duration: 0 });
+		countTween.set(0, { duration: 0 });
 		onDismiss = () => {};
 		endBonusOutroSequence();
 		resetBonusOutroPresentation();
@@ -175,10 +218,7 @@
 		freeSpinOutroCountUp: async (emitterEvent) => {
 			if (!tryBeginBonusOutroSequence()) return;
 			try {
-				await fadePlayfieldOut();
-				await presentTotalWinLabel();
-				await presentWinAmount(emitterEvent.amount);
-
+				await playScreenIn(emitterEvent.amount);
 				await Promise.race([
 					waitForResolve((resolve) => (onDismiss = resolve)),
 					waitForTimeout(bonusScreenAutoAdvanceMs()),
@@ -188,7 +228,7 @@
 				throw error;
 			}
 		},
-		freeSpinOutroFadeOut: fadeOverlayOut,
+		freeSpinOutroFadeOut: playScreenOut,
 		winSkip: () => onDismiss(),
 		spinSkipPressToContinue: () => {
 			if (show) onDismiss();
@@ -197,8 +237,22 @@
 </script>
 
 {#if show}
+	{#if scrimTween.current > 0.001}
+		<!-- GG scrim as a KC darken: under the curtain and the panel, over the game and UI. -->
+		<Rectangle
+			x={0}
+			y={0}
+			width={canvas.width}
+			height={canvas.height}
+			backgroundColor={0x000000}
+			alpha={GG_TOTAL_WIN.scrim * scrimTween.current}
+			zIndex={zIndexes.blackScreen - 1}
+			eventMode="none"
+		/>
+	{/if}
 	{#if fontReady}
-		<MainContainer zIndex={30}>
+		<!-- GG draws the total win screen above its scene curtain, so the banner exit plays over it. -->
+		<MainContainer zIndex={zIndexes.blackScreen + 1}>
 			<Container
 				x={layout.x}
 				y={layout.y}
@@ -230,7 +284,7 @@
 					x={0}
 					y={layout.amountY}
 					alpha={amountAlphaTween.current}
-					text={bookEventAmountToWinCurrencyString(amount)}
+					text={bookEventAmountToWinCurrencyString(shownAmount)}
 					style={amountStyle}
 					resolution={textRes}
 				/>
@@ -238,7 +292,9 @@
 		</MainContainer>
 	{/if}
 
-	{#if stateBonusOutro.overlayAlpha > 0.02}
-		<PressToContinue variant="intro" onpress={() => onDismiss()} />
+	{#if stage === 'waiting' && promptTween.current > 0.02}
+		<Container zIndex={zIndexes.blackScreen + 1} alpha={Math.min(1, promptTween.current)}>
+			<PressToContinue variant="intro" onpress={() => onDismiss()} />
+		</Container>
 	{/if}
 {/if}
