@@ -33,6 +33,7 @@ import {
 	presentScatterFreeSpinIntro,
 } from './freeSpinPresentation';
 import { bonusTierFromModeState } from './bonusIntroContent';
+import { playBlackScreenTransition } from './blackScreenTransition';
 import { isBonusUpgradeState, isSpeakBonusState } from './bonusState';
 import { applyFreeSpinCounterState } from './bonusSnapshotRestore';
 import {
@@ -638,18 +639,16 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 			});
 			return;
 		}
-		// Mid-bonus retrigger / upgrade (Ryan 2026-11-09, bug 5): no intro, no black screen.
+		// Mid-bonus retrigger / upgrade (Ryan 2026-11-09, bug 5): no intro card.
 		// Light the scatters, pop "+X FS" in the connection-win style, update the counter.
 		// The upgrade's mode label comes from `kongClubMode` (KongClubMechanics).
 		// Upgrade only (Ryan Q3 6:07 PM): the background switches to the new bonus's look
-		// (Background.svelte reads sessionBonusTier). A plain retrigger leaves the tier alone.
+		// (Background.svelte reads sessionBonusTier), under the GG curtain (Nov 10 8:18 PM).
+		// A plain retrigger leaves the tier alone and has no curtain.
 		const added = Math.max(0, bookEvent.totalFs - freeSpinTotalBefore(bookEvents, bookEvent));
 		const upgrade = upgradeModeBefore(bookEvents, bookEvent);
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
 		await animateSymbols({ positions: bookEvent.positions });
-		if (upgrade) {
-			stateGame.sessionBonusTier = bonusTierFromModeState(upgrade.state);
-		}
 		if (added > 0) {
 			void eventEmitter.broadcastAsync({
 				type: 'showClusterWinAmounts',
@@ -663,6 +662,16 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 			total: bookEvent.totalFs,
 		});
 		await skippableDelay(scaleFeatureMs(CLUSTER_CONNECTION_ACK_MS, 120));
+		if (upgrade) {
+			// Ryan Nov 10 8:18 PM: the upgrade's background switch happens under the GG scene
+			// curtain (close 520 easeInQuad, hold 90, open 780 easeOutCubic; BlackScreenFade /
+			// GG_CURTAIN), after the "+X FS" pop has shown. Spins resume once it has opened.
+			// Upgrades only: a plain retrigger still has no curtain.
+			const tier = bonusTierFromModeState(upgrade.state);
+			await playBlackScreenTransition(() => {
+				stateGame.sessionBonusTier = tier;
+			});
+		}
 	},
 	updateFreeSpin: async (bookEvent: BookEventOfType<'updateFreeSpin'>) => {
 		applyFreeSpinCounterState(bookEvent.amount, bookEvent.total);
