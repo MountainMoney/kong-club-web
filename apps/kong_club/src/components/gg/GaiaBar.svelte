@@ -51,8 +51,11 @@
 	const context = getContext();
 	const canvasSizes = () => context.stateLayoutDerived.canvasSizes();
 
+	/** `uiHide` / `uiShow` from the book flow (bonus entry/exit, max win). Ryan Nov 10. */
+	let hiddenByEvent = $state(false);
 	const hidden = $derived(
-		stateModal.modal?.name === 'buyBonus' ||
+		hiddenByEvent ||
+			stateModal.modal?.name === 'buyBonus' ||
 			stateBonusIntro.overlayAlpha > 0.15 ||
 			stateBonusOutro.overlayAlpha > 0.15 ||
 			stateBonusOutro.holdPlayfieldHidden,
@@ -175,6 +178,20 @@
 		onSpinPress();
 		if (autoArmed) popup = null;
 	};
+
+	// The book flow broadcasts uiHide/uiShow, but nothing listened. Safety net: an idle
+	// base game never keeps a stale hide.
+	$effect(() => {
+		if (idle && !inBonus) hiddenByEvent = false;
+	});
+	context.eventEmitter.subscribeOnMount({
+		uiHide: () => {
+			hiddenByEvent = true;
+		},
+		uiShow: () => {
+			hiddenByEvent = false;
+		},
+	});
 
 	const shown = $derived(hidden ? 0 : 1);
 </script>
